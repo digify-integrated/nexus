@@ -5,6 +5,7 @@
     $('.loader-wrapper').fadeOut('slow', function () {
         $(this).remove();
     });
+    
     // tap top
     $('.tap-top').on('click', function () {
         $("html, body").animate({
@@ -50,23 +51,20 @@
       }
 
     /*----------------------------------------
-     passward show hide
+     password show hide
      ----------------------------------------*/
     $('.show-hide').show();
     $('.show-hide span').addClass('show');
 
     $('.show-hide span').on('click', function () {
-        if ($(this).hasClass('show')) {
-            $('input[name="login[password]"]').attr('type', 'text');
+        const passwordInput = $('input[name="password"]');
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
             $(this).removeClass('show');
         } else {
-            $('input[name="login[password]"]').attr('type', 'password');
+            passwordInput.attr('type', 'password');
             $(this).addClass('show');
         }
-    });
-    $('form button[type="submit"]').on('click', function () {
-        $('.show-hide span').addClass('show');
-        $('.show-hide').parent().find('input[name="login[password]"]').attr('type', 'password');
     });
 
     /*=====================
