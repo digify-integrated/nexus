@@ -43,10 +43,10 @@ define('ENCRYPTION_KEY', 'DmXUT96VLxqENzLZks4M');
 
 define('DEFAULT_AVATAR_IMAGE', './assets/images/default/default-avatar.png');
 define('DEFAULT_BG_IMAGE', './assets/images/default/default-bg.jpg');
-define('DEFAULT_LOGIN_LOGO_IMAGE', './assets/images/default/default-login-logo.png');
+define('DEFAULT_LOGIN_LOGO_IMAGE', './assets/images/default/default-login-logo.svg');
 define('DEFAULT_MENU_LOGO_IMAGE', './assets/images/default/default-menu-logo.png');
 define('DEFAULT_MODULE_ICON_IMAGE', './assets/images/default/default-module-icon.svg');
-define('DEFAULT_FAVICON_IMAGE', './assets/images/default/default-favicon.png');
+define('DEFAULT_FAVICON_IMAGE', './assets/images/default/default-favicon.svg');
 define('DEFAULT_COMPANY_LOGO_IMAGE', './assets/images/default/default-company-logo.png');
 define('DEFAULT_PLACEHOLDER_IMAGE', './assets/images/default/default-image-placeholder.png');
 
