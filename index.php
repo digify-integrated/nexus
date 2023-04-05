@@ -23,7 +23,7 @@
             <div class="auth-sidecontent">
                 <img src="<?php echo $login_background; ?>" alt="images" class="img-fluid img-auth-side">
             </div>
-            <form class="auth-form" id="signin-form" method="post" action="#">
+            <form class="auth-form" id="signin-form" method="post" action="#" data-validate>
                 <div class="card my-5">
                     <div class="card-body">
                         <div class="text-center">
@@ -31,10 +31,10 @@
                         </div>
                         <h4 class="text-center f-w-500 mb-3">Login with your email</h4>
                         <div class="form-group mb-3">
-                            <input type="text" class="form-control" id="email" name="email" placeholder="Email Address">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" data-bouncer-message="The domain portion of the email address is invalid (the portion after the @)." required>
                         </div>
                         <div class="form-group mb-3">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                         </div>
                         <div class="d-flex mt-1 justify-content-between align-items-center">
                             <div class="form-check">
@@ -55,6 +55,9 @@
         include_once('views/_required_js.html'); 
         include_once('views/_customizer.php'); 
     ?>
+
+    <script src="./assets/js/plugins/bouncer.min.js"></script>
+    <script src="./assets/js/pages/index.js"></script>
 </body>
 
 </html>
