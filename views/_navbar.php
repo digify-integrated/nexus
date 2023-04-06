@@ -11,8 +11,8 @@
                             <img src="./assets/images/default/default-avatar.png" alt="user-image" class="user-avtar wid-45 rounded-circle" />
                         </div>
                         <div class="flex-grow-1 ms-3 me-2">
-                            <h6 class="mb-0">Lawrence Agulto</h6>
-                            <small>Administrator</small>
+                            <h6 class="mb-0"><?php echo $file_as; ?></h6>
+                            <small>Status: <?php echo $user_status; ?></small>
                         </div>
                         <a class="btn btn-icon btn-link-secondary avtar" data-bs-toggle="collapse" href="#pc_sidebar_userlink">
                         <svg class="pc-icon">
@@ -29,10 +29,6 @@
                             <a href="#!">
                                 <i class="ti ti-settings"></i>
                                 <span>Settings</span>
-                            </a>
-                            <a href="#!">
-                                <i class="ti ti-lock"></i>
-                                <span>Lock Screen</span>
                             </a>
                             <a href="logout.php?logout">
                                 <i class="ti ti-power"></i>

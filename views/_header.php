@@ -85,8 +85,8 @@
                                         <img src="./assets/images/default/default-avatar.png" alt="user-image" class="user-avtar wid-35" />
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h6 class="mb-1">Lawrence Agulto</h6>
-                                        <span>ldagulto@encorefinancials.com</span>
+                                        <h6 class="mb-1"><?php echo $file_as; ?></h6>
+                                        <span><?php echo $email; ?></span>
                                     </div>
                                 </div>
                                 <hr class="border-secondary border-opacity-50" />

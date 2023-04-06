@@ -205,68 +205,50 @@ class Api{
     # Returns    : String
     #
     # -------------------------------------------------------------
-    public function authenticate($username, $password){
+    public function authenticate($email, $password){
         if ($this->databaseConnection()) {
-            $system_date = date('Y-m-d');
-            $system_date_time = date('Y-m-d H:i:s');
-
-            $check_user_account_exist = $this->check_user_account_exist($username);
+            $check_user_exist = $this->check_user_exist(null, $email);
            
-            if($check_user_account_exist > 0){
-                $user_account_details = $this->get_user_account_details($username);
-                $user_status = $user_account_details[0]['USER_STATUS'];
-                $login_attemp = $user_account_details[0]['FAILED_LOGIN'];
-                $password_expiry_date = $user_account_details[0]['PASSWORD_EXPIRY_DATE'];
-                $transaction_log_id = $user_account_details[0]['TRANSACTION_LOG_ID'];
+            if($check_user_exist > 0){
+                $user_details = $this->get_user_details(null, $email);
+                $user_status = $user_details[0]['USER_STATUS'];
+                $login_attempt = $user_details[0]['FAILED_LOGIN'];
+                $password_expiry_date = $user_details[0]['PASSWORD_EXPIRY_DATE'];
 
                 if($user_status == 'Active'){
-                    if($login_attemp < 5){
-                        $decrypted_password = $this->decrypt_data($user_account_details[0]['PASSWORD']);
+                    if($login_attempt < 5){
+                        $decrypted_password = $this->decrypt_data($user_details[0]['PASSWORD']);
                         
                         if($decrypted_password === $password){
-                            if(strtotime($system_date) > strtotime($password_expiry_date)){
+                            if(strtotime(date('Y-m-d')) > strtotime($password_expiry_date)){
                                 return 'Password Expired';
                             }
                             else{
-                                $update_login_attempt = $this->update_login_attempt($username, 0, null);
+                                $update_user_login_attempt = $this->update_user_login_attempt(null, $email, 0, null);
 
-                                if($update_login_attempt){
-                                    $update_user_last_connection = $this->update_user_last_connection($username);
+                                if($update_user_login_attempt){
+                                    $update_user_last_connection = $this->update_user_last_connection(null, $email);
 
                                     if($update_user_last_connection){
-                                        $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Log In', 'User ' . $username . ' logged in.');
-                                        
-                                        if($insert_transaction_log){
-                                            return 'Authenticated';
-                                        }
-                                        else{
-                                            return $insert_transaction_log;
-                                        }
+                                        return 'Authenticated';
                                     }
                                     else{
                                         return $update_user_last_connection;
                                     }
                                 }
                                 else{
-                                    return $update_login_attempt;
+                                    return $update_user_login_attempt;
                                 }
                             }
                         }
                         else{
-                            $update_login_attempt = $this->update_login_attempt($username, ($login_attemp + 1), $system_date_time);
+                            $update_user_login_attempt = $this->update_user_login_attempt(null, $email, ($login_attempt + 1), date('Y-m-d H:i:s'));
 
-                            if($update_login_attempt){
-                                $insert_transaction_log = $this->insert_transaction_log($transaction_log_id, $username, 'Attempt Log In', 'User ' . $username . ' attempted to log in.');
-                                        
-                                if($insert_transaction_log){
-                                    return 'Incorrect';
-                                }
-                                else{
-                                    return $insert_transaction_log;
-                                }
+                            if($update_user_login_attempt){
+                                return 'Incorrect';
                             }
                             else{
-                                return $update_login_attempt;
+                                return $update_user_login_attempt;
                             }
                         }
                     }
@@ -277,6 +259,7 @@ class Api{
                 else{
                     return 'Inactive';
                 }
+
             }
             else{
                 return 'Incorrect';
@@ -348,21 +331,22 @@ class Api{
     
     # -------------------------------------------------------------
     #
-    # Name       : check_user_account_exist
+    # Name       : check_user_exist
     # Purpose    : Checks if the user exists.
     #
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function check_user_account_exist($username){
+    public function check_user_exist($p_user_id, $p_email_address){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL check_user_account_exist(:username)');
-            $sql->bindValue(':username', $username);
+            $sql = $this->db_connection->prepare('CALL check_user_exist(:p_user_id, :p_email_address)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email_address', $p_email_address);
 
             if($sql->execute()){
                 $row = $sql->fetch();
 
-                return (int) $row['TOTAL'];
+                return (int) $row['total'];
             }
             else{
                 return $stmt->errorInfo()[2];
@@ -379,27 +363,21 @@ class Api{
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function check_password_history_exist($username, $password){
+    public function check_password_history_exist($p_user_id, $p_email, $p_password){
         if ($this->databaseConnection()) {
             $total = 0;
 
-            $sql = $this->db_connection->prepare('SELECT PASSWORD FROM global_password_history WHERE USERNAME = :username');
-            $sql->bindValue(':username', $username);
+            $get_user_password_history_details = $this->get_user_password_history_details($p_user_id, $p_email);
 
-            if($sql->execute()){
-                while($row = $sql->fetch()){
-                    $password_history = $this->decrypt_data($row['PASSWORD']);
+            for($i = 0; $i < count($get_user_password_history_details); $i++) {
+                $password_history = $this->decrypt_data($get_user_password_history_details[$i]['PASSWORD']);
                     
-                    if($password_history === $password){
-                        $total = $total + 1;
-                    }
+                if($password_history === $p_password){
+                    $total = $total + 1;
                 }
-                
-                return (int) $total;
             }
-            else{
-                return $stmt->errorInfo()[2];
-            }
+
+            return (int) $total;
         }
     }
     # -------------------------------------------------------------
@@ -410,18 +388,19 @@ class Api{
     
     # -------------------------------------------------------------
     #
-    # Name       : update_login_attempt
+    # Name       : update_user_login_attempt
     # Purpose    : Updates the login attempt of the user.
     #
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_login_attempt($username, $login_attemp, $last_failed_attempt_date){
-        if ($this->databaseConnection()) {            
-            $sql = $this->db_connection->prepare('CALL update_login_attempt(:username, :login_attemp, :last_failed_attempt_date)');
-            $sql->bindValue(':username', $username);
-            $sql->bindValue(':login_attemp', $login_attemp);
-            $sql->bindValue(':last_failed_attempt_date', $last_failed_attempt_date);
+    public function update_user_login_attempt($p_user_id, $p_email_address, $p_login_attempt, $p_last_failed_attempt_date){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_user_login_attempt(:p_user_id, :p_email_address, :p_login_attempt, :p_last_failed_attempt_date)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email_address', $p_email_address);
+            $sql->bindValue(':p_login_attempt', $p_login_attempt);
+            $sql->bindValue(':p_last_failed_attempt_date', $p_last_failed_attempt_date);
 
             if($sql->execute()){
                 return true;
@@ -441,11 +420,38 @@ class Api{
     # Returns    : Number/String
     #
     # -------------------------------------------------------------
-    public function update_user_last_connection($username){
+    public function update_user_last_connection($p_user_id, $p_email){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL update_user_last_connection(:username, :system_date)');
-            $sql->bindValue(':username', $username);
+            $sql = $this->db_connection->prepare('CALL update_user_last_connection(:p_user_id, :p_email, :system_date)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email', $p_email);
             $sql->bindValue(':system_date', date('Y-m-d H:i:s'));
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_user_password
+    # Purpose    : Updates the user password.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function update_user_password($p_user_id, $p_email, $p_password, $p_password_expiry_date){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_user_password(:p_user_id, :p_email, :p_password, :p_password_expiry_date)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email', $p_email);
+            $sql->bindValue(':p_password', $p_password);
+            $sql->bindValue(':p_password_expiry_date', $p_password_expiry_date);
 
             if($sql->execute()){
                 return true;
@@ -460,6 +466,31 @@ class Api{
     # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_password_history
+    # Purpose    : Inserts the user password history.
+    #
+    # Returns    : Number/String
+    #
+    # -------------------------------------------------------------
+    public function insert_password_history($p_user_id, $p_email, $p_password){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_password_history(:p_user_id, :p_email, :p_password)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email', $p_email);
+            $sql->bindValue(':p_password', $p_password);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
     
     # -------------------------------------------------------------
     #   Delete methods
@@ -471,30 +502,64 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : get_user_account_details
-    # Purpose    : Gets the user account details.
+    # Name       : get_user_details
+    # Purpose    : Gets the user details.
     #
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function get_user_account_details($username){
+    public function get_user_details($p_user_id, $p_email_address){
         if ($this->databaseConnection()) {
             $response = array();
 
-            $sql = $this->db_connection->prepare('CALL get_user_account_details(:username)');
-            $sql->bindValue(':username', $username);
+            $sql = $this->db_connection->prepare('CALL get_user_details(:p_user_id, :p_email_address)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email_address', $p_email_address);
 
             if($sql->execute()){
                 while($row = $sql->fetch()){
                     $response[] = array(
-                        'PASSWORD' => $row['PASSWORD'],
-                        'FILE_AS' => $row['FILE_AS'],
-                        'USER_STATUS' => $row['USER_STATUS'],
-                        'PASSWORD_EXPIRY_DATE' => $row['PASSWORD_EXPIRY_DATE'],
-                        'FAILED_LOGIN' => $row['FAILED_LOGIN'],
-                        'LAST_FAILED_LOGIN' => $row['LAST_FAILED_LOGIN'],
-                        'LAST_CONNECTION_DATE' => $row['LAST_CONNECTION_DATE'],
-                        'TRANSACTION_LOG_ID' => $row['TRANSACTION_LOG_ID']
+                        'USER_ID' => $row['user_id'],
+                        'EMAIL_ADDRESS' => $row['email_address'],
+                        'PASSWORD' => $row['password'],
+                        'FILE_AS' => $row['file_as'],
+                        'USER_STATUS' => $row['user_status'],
+                        'PASSWORD_EXPIRY_DATE' => $row['password_expiry_date'],
+                        'FAILED_LOGIN' => $row['failed_login'],
+                        'LAST_FAILED_LOGIN' => $row['last_failed_login'],
+                        'LAST_CONNECTION_DATE' => $row['last_connection_date']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_user_password_history_details
+    # Purpose    : Gets the user password history details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_user_password_history_details($p_user_id, $p_email_address){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_user_password_history_details(:p_user_id, :p_email_address)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email_address', $p_email_address);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'PASSWORD' => $row['password']
                     );
                 }
 
@@ -581,6 +646,27 @@ class Api{
                 return $stmt->errorInfo()[2];
             }
         }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_user_status
+    # Purpose    : Returns the status, badge.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_user_status($user_status){
+        $status = ($user_status === 'Active') ? 'Active' : 'Deactivated';
+        $button_class = ($user_status === 'Active') ? 'bg-success' : 'bg-danger';
+
+        $response[] = array(
+            'STATUS' => $status,
+            'BADGE' => '<span class="badge ' . $button_class . '">' . $status . '</span>'
+        );
+
+        return $response;
     }
     # -------------------------------------------------------------
 
@@ -732,17 +818,17 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : check_user_account_status
+    # Name       : check_user_status
     # Purpose    : Checks the user account status. 
     #
     # Returns    : Date
     #
     # -------------------------------------------------------------
-    public function check_user_account_status($username){
+    public function check_user_status($p_user_id, $p_email_address){
         if ($this->databaseConnection()) {
-            $user_account_details = $this->get_user_account_details($username);
-            $user_status = $user_account_details[0]['USER_STATUS'];
-            $failed_login = $user_account_details[0]['FAILED_LOGIN'];
+            $user_details = $this->get_user_details($p_user_id, $p_email_address);
+            $user_status = $user_details[0]['USER_STATUS'];
+            $failed_login = $user_details[0]['FAILED_LOGIN'];
 
             return ($user_status == 'Active' && $failed_login < 5) ? true : false;
         }

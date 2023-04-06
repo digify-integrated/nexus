@@ -24065,6 +24065,7 @@ select[data-multiselectsplitter-secondselect-selector].dataTable-input {
 
 .error-message {
   color: #dc2626;
+  font-size: 12px;
 }
 
 .flatpickr-input[readonly] {

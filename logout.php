@@ -1,35 +1,23 @@
 <?php
 session_start();
 
-require('config/config.php');
-require('classes/api.php');
-$api = new Api;
-
-if (!isset($_SESSION['logged_in'])) {
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] != 1) {
     header('Location: index.php');
     exit();
 }
 
 if (isset($_GET['logout'])) {
-    $username = $_SESSION['username'];
-    $user_account_details = $api->get_user_account_details($username);
-    $transaction_log_id = $user_account_details[0]['TRANSACTION_LOG_ID'];
+    session_destroy();
+    session_unset();
 
-    $insert_transaction_log = $api->insert_transaction_log($transaction_log_id, $username, 'Log Out', 'User ' . $username . ' logged out.');
-                                        
-    if($insert_transaction_log){
-        session_destroy();
-        session_unset();
+    setcookie('remember_me', '', time() - 3600, '/');
+    unset($_COOKIE['remember_me']); 
 
-        header('Location: index.php');
-        exit();
-    }
-    else{
-        header('Location: apps.php');
-    }
+    header('Location: dashboard.php');
+    exit();
 }
 else{
-    header('Location: apps.php');
+    header('Location: dashboard.php');
 }
  
 ?>

@@ -12,7 +12,7 @@
 <html lang="en">
 <head>
     <?php include_once('views/_title.php'); ?>
-    <?php include_once('views/_required_css.html'); ?>
+    <?php include_once('views/_required_css.php'); ?>
 </head>
 
 <body>
@@ -30,7 +30,7 @@
                             <a href="#"><img src="<?php echo $login_logo; ?>" alt="img"></a>
                         </div>
                         <div class="d-flex justify-content-between align-items-end mb-4">
-                        <h3 class="mb-0"><b>Forgot Password</b></h3>
+                            <h3 class="mb-0"><b>Forgot Password</b></h3>
                             <a href="index.php" class="link-primary">Back to Login</a>
                         </div>
                         <div class="form-group mb-3">

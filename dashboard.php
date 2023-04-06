@@ -1,5 +1,5 @@
 <?php
-    #require('session.php');
+    require('session.php');
     require('config/config.php');
     require('classes/api.php');
 
@@ -7,12 +7,13 @@
     $page_title = 'Apps';
 
     require('views/_interface_settings.php');
+    require('views/_user_account_details.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php include_once('views/_title.php'); ?>
-    <?php include_once('views/_required_css.html'); ?>
+    <?php include_once('views/_required_css.php'); ?>
 </head>
 
 <body>
