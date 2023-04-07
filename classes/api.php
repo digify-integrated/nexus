@@ -391,7 +391,7 @@ class Api{
     # Name       : update_user_login_attempt
     # Purpose    : Updates the login attempt of the user.
     #
-    # Returns    : Number/String
+    # Returns    : Bool/String
     #
     # -------------------------------------------------------------
     public function update_user_login_attempt($p_user_id, $p_email_address, $p_login_attempt, $p_last_failed_attempt_date){
@@ -417,7 +417,7 @@ class Api{
     # Name       : update_user_last_connection
     # Purpose    : Updates the last user connection date.
     #
-    # Returns    : Number/String
+    # Returns    : Bool/String
     #
     # -------------------------------------------------------------
     public function update_user_last_connection($p_user_id, $p_email){
@@ -442,7 +442,7 @@ class Api{
     # Name       : update_user_password
     # Purpose    : Updates the user password.
     #
-    # Returns    : Number/String
+    # Returns    : Bool/String
     #
     # -------------------------------------------------------------
     public function update_user_password($p_user_id, $p_email, $p_password, $p_password_expiry_date){
@@ -464,6 +464,33 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_user_ui_customization_setting
+    # Purpose    : Updates the user ui customization setting.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function update_user_ui_customization_setting($p_user_id, $p_email, $p_type, $p_bool_value, $p_character_value){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_user_password(:p_user_id, :p_email, :p_type, :p_bool_value, :p_character_value)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email', $p_email);
+            $sql->bindValue(':p_type', $p_type);
+            $sql->bindValue(':p_bool_value', $p_bool_value);
+            $sql->bindValue(':p_character_value', $p_character_value);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
 
@@ -472,7 +499,7 @@ class Api{
     # Name       : insert_password_history
     # Purpose    : Inserts the user password history.
     #
-    # Returns    : Number/String
+    # Returns    : Bool/String
     #
     # -------------------------------------------------------------
     public function insert_password_history($p_user_id, $p_email, $p_password){
@@ -481,6 +508,30 @@ class Api{
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_email', $p_email);
             $sql->bindValue(':p_password', $p_password);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_user_ui_customization_setting
+    # Purpose    : Inserts the users ui customization setting.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function insert_user_ui_customization_setting($p_user_id, $p_email){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_user_ui_customization_setting(:p_user_id, :p_email)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email', $p_email);
 
             if($sql->execute()){
                 return true;
@@ -560,6 +611,46 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'PASSWORD' => $row['password']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_ui_customization_setting_details
+    # Purpose    : Gets the ui customization setting details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_ui_customization_setting_details($p_user_id, $p_email_address){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_ui_customization_setting_details(:p_user_id, :p_email_address)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email_address', $p_email_address);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'UI_CUSTOMIZATION_SETTING_ID' => $row['ui_customization_setting_id'],
+                        'USER_ID' => $row['user_id'],
+                        'EMAIL_ADDRESS' => $row['email_address'],
+                        'THEME_CONTRAST' => $row['theme_contrast'],
+                        'CAPTION_SHOW' => $row['caption_show'],
+                        'PRESET_THEME' => $row['preset_theme'],
+                        'DARK_LAYOUT' => $row['dark_layout'],
+                        'RTL_LAYOUT' => $row['rtl_layout'],
+                        'BOX_CONTAINER' => $row['box_container']
                     );
                 }
 
