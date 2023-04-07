@@ -13,6 +13,7 @@
 <head>
     <?php include_once('views/_title.php'); ?>
     <?php include_once('views/_required_css.php'); ?>
+    <link rel="stylesheet" href="./assets/css/uikit.css">
 </head>
 
 <body>
@@ -52,7 +53,7 @@
         </div>
     </div>
     <?php 
-        include_once('views/_required_js.html');
+        include_once('views/_required_js.php');
     ?>
     <script src="./assets/js/pages/index.js?v=<?php echo rand(); ?>"></script>
 </body>

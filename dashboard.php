@@ -4,7 +4,7 @@
     require('classes/api.php');
 
     $api = new Api;
-    $page_title = 'Apps';
+    $page_title = 'Dashboard';
 
     require('views/_interface_settings.php');
     require('views/_user_account_details.php');
@@ -21,11 +21,13 @@
         include_once('views/_preloader.html'); 
         include_once('views/_navbar.php'); 
         include_once('views/_header.php'); 
+        include_once('views/_announcement.php'); 
     ?>
+    
     
 
     <?php 
-        include_once('views/_required_js.html'); 
+        include_once('views/_required_js.php'); 
         include_once('views/_customizer.php'); 
     ?>
 </body>

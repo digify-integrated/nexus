@@ -17,37 +17,6 @@
 
         <div class="ms-auto">
             <ul class="list-unstyled">
-                <li class="dropdown pc-h-item">
-                    <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false" >
-                        <svg class="pc-icon"><use xlink:href="#custom-sun-1"></use></svg>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
-                        <a href="#!" class="dropdown-item" onclick="layout_change('dark')">
-                            <svg class="pc-icon"><use xlink:href="#custom-moon"></use></svg>
-                            <span>Dark</span>
-                        </a>
-                        <a href="#!" class="dropdown-item" onclick="layout_change('light')">
-                            <svg class="pc-icon"><use xlink:href="#custom-sun-1"></use></svg>
-                            <span>Light</span>
-                        </a>
-                        <a href="#!" class="dropdown-item" onclick="layout_change_default()">
-                            <svg class="pc-icon"><use xlink:href="#custom-setting-2"></use></svg>
-                            <span>Default</span>
-                        </a>
-                    </div>
-                </li>
-                <li class="dropdown pc-h-item">
-                    <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                        <svg class="pc-icon"><use xlink:href="#custom-setting-2"></use></svg>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
-                        <a href="#!" class="dropdown-item"><i class="ti ti-user"></i><span>My Account</span></a>
-                        <a href="#!" class="dropdown-item"><i class="ti ti-settings"></i><span>Settings</span></a>
-                        <a href="#!" class="dropdown-item"><i class="ti ti-headset"></i><span>Support</span></a>
-                        <a href="#!" class="dropdown-item"><i class="ti ti-lock"></i><span>Lock Screen</span></a>
-                        <a href="#!" class="dropdown-item"><i class="ti ti-power"></i><span>Logout</span></a>
-                    </div>
-                </li>
                 <li class="pc-h-item">
                     <a href="#" class="pc-head-link me-0" data-bs-toggle="offcanvas" data-bs-target="#announcement" aria-controls="announcement">
                         <svg class="pc-icon"><use xlink:href="#custom-flash"></use></svg>
@@ -60,13 +29,13 @@
                     <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown">
                         <div class="dropdown-header d-flex align-items-center justify-content-between">
                             <h5 class="m-0">Notifications</h5>
-                            <a href="#!" class="btn btn-link btn-sm">Mark all read</a>
+                            <a href="JavaScript:void(0);" class="btn btn-link btn-sm">Mark all read</a>
                         </div>
                         <div class="dropdown-body text-wrap header-notification-scroll position-relative" style="max-height: calc(100vh - 215px)">
                          
                         </div>
                         <div class="text-center py-2">
-                            <a href="#!" class="link-danger">Clear all Notifications</a>
+                            <a href="JavaScript:void(0);" class="link-danger">Clear all Notifications</a>
                         </div>
                     </div>
                 </li>

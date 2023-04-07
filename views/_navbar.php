@@ -22,11 +22,11 @@
                     </div>
                     <div class="collapse pc-user-links" id="pc_sidebar_userlink">
                         <div class="pt-3">
-                            <a href="#!">
+                            <a href="JavaScript:void(0);">
                                 <i class="ti ti-user"></i>
                                 <span>My Account</span>
                             </a>
-                            <a href="#!">
+                            <a href="JavaScript:void(0);">
                                 <i class="ti ti-settings"></i>
                                 <span>Settings</span>
                             </a>
@@ -43,6 +43,35 @@
                     <li class="pc-item pc-caption">
                         <label>Navigation</label>
                         <i class="ti ti-dashboard"></i>
+                    </li>
+                    <li class="pc-item">
+                        <a href="dashboard.php" class="pc-link">
+                            <span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-status-up"></use>
+                                </svg>
+                            </span>
+                            <span class="pc-mtext">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="pc-item pc-caption">
+                        <label>Administration</label>
+                        <i class="ti ti-dashboard"></i>
+                    </li>
+                    <li class="pc-item pc-hasmenu">
+                        <a href="JavaScript:void(0);" class="pc-link">
+                            <span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-row-vertical"></use>
+                                </svg>
+                            </span>
+                            <span class="pc-mtext">User Interface</span>
+                            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                        </a>
+                        <ul class="pc-submenu">
+                            <li class="pc-item"><a class="pc-link" href="menu-groups.php">Menu Groups</a></li>
+                            <li class="pc-item"><a class="pc-link" href="menu-item.php">Menu Item</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>

@@ -1,3 +1,15 @@
+CREATE TABLE audit_log (
+  audit_log_id int(50) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+  table_name varchar(255) NOT NULL,
+  field_name varchar(255) NOT NULL,
+  old_value text NOT NULL,
+  new_value text NOT NULL,
+  changed_by varchar(255) NOT NULL,
+  changed_at datetime NOT NULL
+);
+
+CREATE INDEX audit_log_index_audit_log_id ON audit_log(audit_log_id);
+
 /* Users Table */
 CREATE TABLE users (
     user_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -17,7 +29,8 @@ CREATE INDEX users_index_user_status ON users(user_status);
 CREATE INDEX users_index_password_expiry_date ON users(password_expiry_date);
 CREATE INDEX users_index_last_connection_date ON users(last_connection_date);
 
-INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login) VALUES ('admin@encorefinancials.com', '68aff5412f35ed76', 'Administrator', 'Active', '2022-12-30', 0);
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login) VALUES ('admin@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0);
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login) VALUES ('ldagulto@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0);
 
 CREATE PROCEDURE check_user_exist(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
 BEGIN

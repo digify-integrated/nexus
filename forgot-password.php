@@ -47,7 +47,7 @@
         </div>
     </div>
     <?php 
-        include_once('views/_required_js.html'); 
+        include_once('views/_required_js.php'); 
         include_once('views/_customizer.php'); 
     ?>
 </body>

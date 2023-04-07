@@ -302,66 +302,10 @@ for (var t = 0; t < vb.length; t++) {
 // =======================================================
 // =======================================================
 
-document.addEventListener('DOMContentLoaded', function () {
-  if (theme_contrast == 'true') {
-    layout_sidebar_change('fill');
-  } else {
-    layout_sidebar_change('false');
-  }
-  if (caption_show == 'true') {
-    layout_caption_change('true');
-  } else {
-    layout_caption_change('false');
-  }
-  if (preset_theme != "") {
-    preset_change(preset_theme);
-  }
-  if (rtl_layout == 'true') {
-    layout_rtl_change('true');
-  } else {
-    layout_rtl_change('false');
-  }
-  if(dark_layout == "default"){
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        dark_layout = 'true';
-    }else{
-        dark_layout = 'false';
-    }
-  }
-  if (dark_layout == 'true') {
-    layout_change('dark');
-  } else {
-    layout_change('light');
-  }
-  if (box_container == 'true') {
-    change_box_container('true');
-  } else {
-    change_box_container('false');
-  }
-  var layout_reset = document.querySelector('#layoutreset');
-  if (layout_reset) {
-    layout_reset.addEventListener('click', function (e) {
-      location.reload();
-    });
-  }
-});
+var rtl_flag = false;
+var dark_flag = false;
+
 // ----------    new setup start   ------------
-function layout_change_default(){
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      dark_layout = 'dark';
-  }else{
-      dark_layout = 'light';
-  }
-  layout_change(dark_layout);
-  var btn_control = document.querySelector('.theme-layout .btn[data-value="default"]');
-  if (btn_control) {
-    btn_control.classList.add('active');
-  }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-    dark_layout = event.matches ? "dark" : "light";
-    layout_change(dark_layout);
-  });
-}
 // preset color
 document.addEventListener('DOMContentLoaded', function () {
   var if_exist = document.querySelectorAll('.preset-color');
@@ -474,9 +418,6 @@ function layout_change(layout) {
       document.querySelector('.theme-layout .btn.active').classList.remove('active');
       document.querySelector(".theme-layout .btn[data-value='false']").classList.add('active');
     }
-
-    saveCustomization('dark_layout', 'true');
-    sessionStorage.setItem('dark_layout', 'true');
   } else {
     dark_flag = false;
     if (control) {
@@ -491,10 +432,7 @@ function layout_change(layout) {
     if (control) {
       document.querySelector('.theme-layout .btn.active').classList.remove('active');
       document.querySelector(".theme-layout .btn[data-value='true']").classList.add('active');
-    
     }
-    saveCustomization('dark_layout', 'false');
-    sessionStorage.setItem('dark_layout', 'false');
   }
 }
 function change_box_container(value) {
