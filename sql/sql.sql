@@ -121,12 +121,12 @@ CREATE TABLE ui_customization_setting (
     ui_customization_setting_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     user_id INT(10) UNSIGNED NOT NULL,
     email_address VARCHAR(100) NOT NULL,
-    theme_contrast TINYINT(1) NOT NULL,
-    caption_show TINYINT(1) NOT NULL,
-    preset_theme VARCHAR(15) NOT NULL,
-    dark_layout TINYINT(1) NOT NULL,
-    rtl_layout TINYINT(1) NOT NULL,
-    box_container TINYINT(1) NOT NULL
+    theme_contrast VARCHAR(15),
+    caption_show VARCHAR(15),
+    preset_theme VARCHAR(15),
+    dark_layout VARCHAR(15),
+    rtl_layout VARCHAR(15),
+    box_container VARCHAR(15)
 );
 
 ALTER TABLE ui_customization_setting
@@ -139,37 +139,61 @@ CREATE INDEX ui_customization_setting_index_ui_customization_setting_id ON ui_cu
 CREATE INDEX ui_customization_setting_index_user_id ON ui_customization_setting(user_id);
 CREATE INDEX ui_customization_setting_index_email_address ON ui_customization_setting(email_address);
 
-CREATE PROCEDURE insert_user_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
+CREATE PROCEDURE check_ui_customization_setting_exist(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
 BEGIN
-	INSERT INTO ui_customization_setting (user_id, email_address, theme_contrast, caption_show, preset_theme, dark_layout, rtl_layout, box_container) 
-	VALUES(p_user_id, p_email_address, 0, 1, "preset-1", 0, 0, 0);
+    SELECT COUNT(*) AS total
+    FROM ui_customization_setting
+    WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
 END //
 
-CREATE PROCEDURE update_user_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100), IN p_type VARCHAR(30), IN p_bool_value TINYINT(1), IN p_character_value VARCHAR(15))
+CREATE PROCEDURE insert_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100), IN p_type VARCHAR(30), IN p_customization_value VARCHAR(15))
+BEGIN
+	IF p_type = 'theme_contrast' THEN
+        INSERT INTO ui_customization_setting (user_id, email_address, theme_contrast) 
+	    VALUES(p_user_id, p_email_address, p_customization_value);
+    ELSEIF p_type = 'caption_show' THEN
+        INSERT INTO ui_customization_setting (user_id, email_address, caption_show) 
+	    VALUES(p_user_id, p_email_address, p_customization_value);
+    ELSEIF p_type = 'preset_theme' THEN
+        INSERT INTO ui_customization_setting (user_id, email_address, preset_theme) 
+	    VALUES(p_user_id, p_email_address, p_customization_value);
+    ELSEIF p_type = 'dark_layout' THEN
+        INSERT INTO ui_customization_setting (user_id, email_address, dark_layout) 
+	    VALUES(p_user_id, p_email_address, p_customization_value);
+    ELSEIF p_type = 'rtl_layout' THEN
+        INSERT INTO ui_customization_setting (user_id, email_address, rtl_layout) 
+	    VALUES(p_user_id, p_email_address, p_customization_value);
+    ELSE
+        INSERT INTO ui_customization_setting (user_id, email_address, box_container) 
+	    VALUES(p_user_id, p_email_address, p_customization_value);
+    END IF;
+END //
+
+CREATE PROCEDURE update_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100), IN p_type VARCHAR(30), IN p_customization_value VARCHAR(15))
 BEGIN
 	IF p_type = 'theme_contrast' THEN
         UPDATE ui_customization_setting
-        SET theme_contrast = p_bool_value
+        SET theme_contrast = p_customization_value
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'caption_show' THEN
         UPDATE ui_customization_setting
-        SET caption_show = p_bool_value
+        SET caption_show = p_customization_value
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'preset_theme' THEN
         UPDATE ui_customization_setting
-        SET preset_theme = p_character_value
+        SET preset_theme = p_customization_value
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'dark_layout' THEN
         UPDATE ui_customization_setting
-        SET dark_layout = p_bool_value
+        SET dark_layout = p_customization_value
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'rtl_layout' THEN
         UPDATE ui_customization_setting
-        SET rtl_layout = p_bool_value
+        SET rtl_layout = p_customization_value
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSE
         UPDATE ui_customization_setting
-        SET box_container = p_bool_value
+        SET box_container = p_customization_value
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     END IF;
 END //

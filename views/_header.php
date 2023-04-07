@@ -86,7 +86,7 @@
                                     </div>
                                     <div class="flex-grow-1 ms-3">
                                         <h6 class="mb-1"><?php echo $file_as; ?></h6>
-                                        <span><?php echo $email; ?></span>
+                                        <span id="email_account"><?php echo $email; ?></span>
                                     </div>
                                 </div>
                                 <hr class="border-secondary border-opacity-50" />

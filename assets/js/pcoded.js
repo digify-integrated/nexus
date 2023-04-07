@@ -302,9 +302,6 @@ for (var t = 0; t < vb.length; t++) {
 // =======================================================
 // =======================================================
 
-var rtl_flag = false;
-var dark_flag = false;
-
 document.addEventListener('DOMContentLoaded', function () {
   if (theme_contrast == 'true') {
     layout_sidebar_change('fill');
@@ -477,6 +474,9 @@ function layout_change(layout) {
       document.querySelector('.theme-layout .btn.active').classList.remove('active');
       document.querySelector(".theme-layout .btn[data-value='false']").classList.add('active');
     }
+
+    saveCustomization('dark_layout', 'true');
+    sessionStorage.setItem('dark_layout', 'true');
   } else {
     dark_flag = false;
     if (control) {
@@ -491,7 +491,10 @@ function layout_change(layout) {
     if (control) {
       document.querySelector('.theme-layout .btn.active').classList.remove('active');
       document.querySelector(".theme-layout .btn[data-value='true']").classList.add('active');
+    
     }
+    saveCustomization('dark_layout', 'false');
+    sessionStorage.setItem('dark_layout', 'false');
   }
 }
 function change_box_container(value) {

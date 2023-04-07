@@ -12,7 +12,6 @@
 <html lang="en">
 <head>
     <?php include_once('views/_title.php'); ?>
-    <link rel="stylesheet" href="./assets/css/plugins/notifier.css">
     <?php include_once('views/_required_css.php'); ?>
 </head>
 
@@ -55,10 +54,6 @@
     <?php 
         include_once('views/_required_js.html');
     ?>
-
-    <script src="./assets/js/system.js?v=<?php echo rand(); ?>"></script>
-    <script src="./assets/js/plugins/bouncer.min.js"></script>
-    <script src="./assets/js/plugins/notifier.js"></script>
     <script src="./assets/js/pages/index.js?v=<?php echo rand(); ?>"></script>
 </body>
 

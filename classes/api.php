@@ -381,6 +381,32 @@ class Api{
         }
     }
     # -------------------------------------------------------------
+    
+    # -------------------------------------------------------------
+    #
+    # Name       : check_ui_customization_setting_exist
+    # Purpose    : Checks if the ui customization setting exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_ui_customization_setting_exist($p_user_id, $p_email_address){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_ui_customization_setting_exist(:p_user_id, :p_email_address)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email_address', $p_email_address);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['total'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #   Update methods
@@ -465,20 +491,19 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : update_user_ui_customization_setting
-    # Purpose    : Updates the user ui customization setting.
+    # Name       : update_ui_customization_setting
+    # Purpose    : Updates the ui customization setting.
     #
     # Returns    : Bool/String
     #
     # -------------------------------------------------------------
-    public function update_user_ui_customization_setting($p_user_id, $p_email, $p_type, $p_bool_value, $p_character_value){
+    public function update_ui_customization_setting($p_user_id, $p_email, $p_type, $p_customization_value){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL update_user_password(:p_user_id, :p_email, :p_type, :p_bool_value, :p_character_value)');
+            $sql = $this->db_connection->prepare('CALL update_ui_customization_setting(:p_user_id, :p_email, :p_type, :p_customization_value)');
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_email', $p_email);
             $sql->bindValue(':p_type', $p_type);
-            $sql->bindValue(':p_bool_value', $p_bool_value);
-            $sql->bindValue(':p_character_value', $p_character_value);
+            $sql->bindValue(':p_customization_value', $p_customization_value);
 
             if($sql->execute()){
                 return true;
@@ -532,6 +557,32 @@ class Api{
             $sql = $this->db_connection->prepare('CALL insert_user_ui_customization_setting(:p_user_id, :p_email)');
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_email', $p_email);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_ui_customization_setting
+    # Purpose    : Inserts the ui customization setting.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function insert_ui_customization_setting($p_user_id, $p_email, $p_type, $p_customization_value){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_ui_customization_setting(:p_user_id, :p_email, :p_type, :p_customization_value)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_email', $p_email);
+            $sql->bindValue(':p_type', $p_type);
+            $sql->bindValue(':p_customization_value', $p_customization_value);
 
             if($sql->execute()){
                 return true;

@@ -3,6 +3,12 @@
 
     $(function() {
         checkNotification();
+
+        if ($('#email_account').length) {
+            const email_account = $('#email_account').text();
+            getCustomization(email_account);
+        }
+        
     });
 })(jQuery);
 
@@ -67,4 +73,48 @@ function checkNotification(){
 
         showNotification(notificationTitle, notificationMessage, notificationType);
     }
+}
+
+function saveCustomization(type, customization_value){
+    const email = $('#email_account').text();
+    const transaction = 'submit user ui customization setting';
+
+    $.ajax({
+        type: 'POST',
+        url: 'controller.php',
+        data: {transaction : transaction, email : email, type : type, customization_value : customization_value},
+        dataType: 'TEXT',
+        success: function (response) {
+            switch (response) {
+                case 'Updated':
+                    showNotification('Update UI Settings Success', 'The UI settings has been updated successfully.', 'success');
+                    break;
+                case 'Not Found':
+                    showNotification('Update UI Settings Error', 'Your user account does not exist.', 'danger');
+                    break;
+                default:
+                    showNotification('Update UI Settings Error', response, 'danger');
+                    break;
+            }
+        }
+    });
+}
+
+function getCustomization(email){
+    const transaction = 'ui customization settings details';
+
+    $.ajax({
+        url: 'controller.php',
+        method: 'POST',
+        dataType: 'JSON',
+        data: {email : email, transaction : transaction},
+        success: function(response) {
+            sessionStorage.setItem('theme_contrast', response[0].THEME_CONTRAST);
+            sessionStorage.setItem('caption_show', response[0].CAPTION_SHOW);
+            sessionStorage.setItem('preset_theme', response[0].PRESET_THEME);
+            sessionStorage.setItem('dark_layout', response[0].DARK_LAYOUT);
+            sessionStorage.setItem('rtl_layout', response[0].RTL_LAYOUT);
+            sessionStorage.setItem('box_container', response[0].BOX_CONTAINER);
+        }
+    });
 }
