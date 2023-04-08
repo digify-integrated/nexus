@@ -1,16 +1,14 @@
 CREATE TABLE audit_log (
   audit_log_id int(50) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
   table_name varchar(255) NOT NULL,
-  field_name varchar(255) NOT NULL,
-  old_value text NOT NULL,
-  new_value text NOT NULL,
+  reference_id int(10) NOT NULL,
+  log TEXT NOT NULL,
   changed_by varchar(255) NOT NULL,
   changed_at datetime NOT NULL
 );
 
 CREATE INDEX audit_log_index_audit_log_id ON audit_log(audit_log_id);
 
-/* Users Table */
 CREATE TABLE users (
     user_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     email_address VARCHAR(100) UNIQUE NOT NULL,
@@ -20,8 +18,79 @@ CREATE TABLE users (
     password_expiry_date DATE NOT NULL,
     failed_login TINYINT(1) NOT NULL DEFAULT 0,
     last_failed_login DATETIME DEFAULT NULL,
-    last_connection_date DATETIME DEFAULT NULL
+    last_connection_date DATETIME DEFAULT NULL,
+    last_log_by INT(10) NOT NULL
 );
+
+CREATE TRIGGER users_trigger_update
+AFTER UPDATE ON users
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.user_status <> OLD.user_status THEN
+        SET audit_log = CONCAT(audit_log, "user_status: ", OLD.user_status, " -> ", NEW.user_status, "<br/>");
+    END IF;
+
+    IF NEW.password_expiry_date <> OLD.password_expiry_date THEN
+        SET audit_log = CONCAT(audit_log, "password_expiry_date: ", OLD.password_expiry_date, " -> ", NEW.password_expiry_date, "<br/>");
+    END IF;
+
+    IF NEW.failed_login <> OLD.failed_login THEN
+        SET audit_log = CONCAT(audit_log, "failed_login: ", OLD.failed_login, " -> ", NEW.failed_login, "<br/>");
+    END IF;
+
+    IF NEW.last_failed_login <> OLD.last_failed_login THEN
+        SET audit_log = CONCAT(audit_log, "last_failed_login: ", OLD.last_failed_login, " -> ", NEW.last_failed_login, "<br/>");
+    END IF;
+
+    IF NEW.last_connection_date <> OLD.last_connection_date THEN
+        SET audit_log = CONCAT(audit_log, "last_connection_date: ", OLD.last_connection_date, " -> ", NEW.last_connection_date, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('users', NEW.user_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER users_trigger_insert
+AFTER INSERT ON users
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'User created.';
+
+    IF NEW.email_address <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>email_address: ", NEW.email_address);
+    END IF;
+
+    IF NEW.file_as <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>file_as: ", NEW.file_as);
+    END IF;
+
+    IF NEW.user_status <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>user_status: ", NEW.user_status);
+    END IF;
+
+    IF NEW.password_expiry_date <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>password_expiry_date: ", NEW.password_expiry_date);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('users', NEW.user_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE TRIGGER users_trigger_delete
+BEFORE DELETE ON users
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    SET audit_log = CONCAT(audit_log, "The user '", OLD.user_id, "' has been deleted.");
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('users', OLD.user_id, audit_log, OLD.last_log_by, NOW());
+END //
 
 CREATE INDEX users_index_user_id ON users(user_id);
 CREATE INDEX users_index_email_address ON users(email_address);
@@ -29,8 +98,9 @@ CREATE INDEX users_index_user_status ON users(user_status);
 CREATE INDEX users_index_password_expiry_date ON users(password_expiry_date);
 CREATE INDEX users_index_last_connection_date ON users(last_connection_date);
 
-INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login) VALUES ('admin@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0);
-INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login) VALUES ('ldagulto@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0);
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('admin@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('ldagulto@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('lmicayas@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
 
 CREATE PROCEDURE check_user_exist(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
 BEGIN
