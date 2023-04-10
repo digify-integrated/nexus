@@ -497,13 +497,14 @@ class Api{
     # Returns    : Bool/String
     #
     # -------------------------------------------------------------
-    public function update_ui_customization_setting($p_user_id, $p_email, $p_type, $p_customization_value){
+    public function update_ui_customization_setting($p_user_id, $p_email, $p_type, $p_customization_value, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL update_ui_customization_setting(:p_user_id, :p_email, :p_type, :p_customization_value)');
+            $sql = $this->db_connection->prepare('CALL update_ui_customization_setting(:p_user_id, :p_email, :p_type, :p_customization_value, :p_last_log_by)');
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_email', $p_email);
             $sql->bindValue(':p_type', $p_type);
             $sql->bindValue(':p_customization_value', $p_customization_value);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
 
             if($sql->execute()){
                 return true;
@@ -576,13 +577,14 @@ class Api{
     # Returns    : Bool/String
     #
     # -------------------------------------------------------------
-    public function insert_ui_customization_setting($p_user_id, $p_email, $p_type, $p_customization_value){
+    public function insert_ui_customization_setting($p_user_id, $p_email, $p_type, $p_customization_value, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL insert_ui_customization_setting(:p_user_id, :p_email, :p_type, :p_customization_value)');
+            $sql = $this->db_connection->prepare('CALL insert_ui_customization_setting(:p_user_id, :p_email, :p_type, :p_customization_value, :p_last_log_by)');
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_email', $p_email);
             $sql->bindValue(':p_type', $p_type);
             $sql->bindValue(':p_customization_value', $p_customization_value);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
 
             if($sql->execute()){
                 return true;
@@ -629,7 +631,8 @@ class Api{
                         'PASSWORD_EXPIRY_DATE' => $row['password_expiry_date'],
                         'FAILED_LOGIN' => $row['failed_login'],
                         'LAST_FAILED_LOGIN' => $row['last_failed_login'],
-                        'LAST_CONNECTION_DATE' => $row['last_connection_date']
+                        'LAST_CONNECTION_DATE' => $row['last_connection_date'],
+                        'LAST_LOG_BY' => $row['last_log_by']
                     );
                 }
 
@@ -701,7 +704,8 @@ class Api{
                         'PRESET_THEME' => $row['preset_theme'],
                         'DARK_LAYOUT' => $row['dark_layout'],
                         'RTL_LAYOUT' => $row['rtl_layout'],
-                        'BOX_CONTAINER' => $row['box_container']
+                        'BOX_CONTAINER' => $row['box_container'],
+                        'LAST_LOG_BY' => $row['last_log_by']
                     );
                 }
 
@@ -763,33 +767,6 @@ class Api{
         return $defaultImages[$type] ?? DEFAULT_PLACEHOLDER_IMAGE;
     }
     # -------------------------------------------------------------
-    
-    # -------------------------------------------------------------
-    #
-    # Name       : get_access_rights_count
-    # Purpose    : Gets the roles' access right count based on access type.
-    #
-    # Returns    : String
-    #
-    # -------------------------------------------------------------
-    public function get_access_rights_count($role_id, $access_right_id, $access_type){
-        if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL get_access_rights_count(:role_id, :access_right_id, :access_type)');
-            $sql->bindValue(':role_id', $role_id);
-            $sql->bindValue(':access_right_id', $access_right_id);
-            $sql->bindValue(':access_type', $access_type);
-
-            if($sql->execute()){
-                $row = $sql->fetch();
-
-                return (int) $row['TOTAL'];
-            }
-            else{
-                return $stmt->errorInfo()[2];
-            }
-        }
-    }
-    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #
@@ -814,133 +791,6 @@ class Api{
 
     # -------------------------------------------------------------
     #   Check methods
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    #
-    # Name       : check_modal_scrollable
-    # Purpose    : Check if the modal to be generated
-    #              is scrollable or not.
-    #
-    # Returns    : String
-    #
-    # -------------------------------------------------------------
-    public function check_modal_scrollable($scrollable){
-        return $scrollable ? 'modal-dialog-scrollable' : null;
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    #
-    # Name       : check_modal_size
-    # Purpose    : Check the size of the modal.
-    #
-    # Returns    : String
-    #
-    # -------------------------------------------------------------
-    public function check_modal_size($size){
-        $sizes = ['SM' => 'modal-sm', 'LG' => 'modal-lg', 'XL' => 'modal-xl'];
-
-        return $sizes[$size] ?? null;
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    #
-    # Name       : check_number
-    # Purpose    : Checks the number if empty or 0 
-    #              return 0 or return number given.
-    #
-    # Returns    : Number
-    #
-    # -------------------------------------------------------------
-    public function check_number($number){
-        return is_numeric($number) && $number > 0 && !empty($number) ? $number : '0';
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    #
-    # Name       : check_date
-    # Purpose    : Checks the date with different format
-    #
-    # Returns    : Date
-    #
-    # -------------------------------------------------------------
-    public function check_date($type, $date, $time, $format, $modify, $system_date, $current_time){
-        if($type == 'default'){
-            if(!empty($date)){
-                return $this->format_date($format, $date, $modify);
-            }
-            else{
-                return $system_date;
-            }
-        }
-        else if($type == 'empty'){
-            if(!empty($date)){
-                return $this->format_date($format, $date, $modify);
-            }
-            else{
-                return null;
-            }
-        }
-        else if($type == 'attendance empty'){
-            if(!empty($date) && $date != ' '){
-                return $this->format_date($format, $date, $modify);
-            }
-            else{
-                return null;
-            }
-        }
-        else if($type == 'summary'){
-            if(!empty($date)){
-                return $this->format_date($format, $date, $modify);
-            }
-            else{
-                return '--';
-            }
-        }
-        else if($type == 'na'){
-            if(!empty($date)){
-                return $this->format_date($format, $date, $modify);
-            }
-            else{
-                return 'N/A';
-            }
-        }
-        else if($type == 'complete'){
-            if(!empty($date)){
-                return $this->format_date($format, $date, $modify) . ' ' . $time;
-            }
-            else{
-                return 'N/A';
-            }
-        }
-        else if($type == 'encoded'){
-            if(!empty($date)){
-                return $this->format_date($format, $date, $modify) . ' ' . $time;
-            }
-            else{
-                return 'N/A';
-            }
-        }
-        else if($type == 'date time'){
-            if(!empty($date)){
-                return $this->format_date($format, $date, $modify) . ' ' . $time;
-            }
-            else{
-                return 'N/A';
-            }
-        }
-        else if($type == 'default time'){
-            if(!empty($date)){
-                return $time;
-            }
-            else{
-                return $current_time;
-            }
-        }
-    }
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -973,6 +823,33 @@ class Api{
             $failed_login = $user_details[0]['FAILED_LOGIN'];
 
             return ($user_status == 'Active' && $failed_login < 5) ? true : false;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_menu_access_rights
+    # Purpose    : Checks the menu access rights of the role based on type.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_menu_access_rights($p_user_id, $p_menu_id, $p_access_type){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_menu_access_rights(:p_user_id, :p_menu_id, :p_access_type)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_menu_id', $p_menu_id);
+            $sql->bindValue(':p_access_type', $p_access_type);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['TOTAL'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
         }
     }
     # -------------------------------------------------------------

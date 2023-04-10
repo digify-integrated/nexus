@@ -94,6 +94,9 @@ function saveCustomization(type, customization_value){
                 case 'Not Found':
                     showNotification('Update UI Settings Error', 'Your user account does not exist.', 'danger');
                     break;
+                case 'Not Found':
+                    window.location = '404.php';
+                    break;
                 default:
                     showNotification('Update UI Settings Error', response, 'danger');
                     break;

@@ -1,3 +1,4 @@
+/* Audit log table */
 CREATE TABLE audit_log (
   audit_log_id int(50) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
   table_name varchar(255) NOT NULL,
@@ -9,6 +10,7 @@ CREATE TABLE audit_log (
 
 CREATE INDEX audit_log_index_audit_log_id ON audit_log(audit_log_id);
 
+/* Users table */
 CREATE TABLE users (
     user_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     email_address VARCHAR(100) UNIQUE NOT NULL,
@@ -22,6 +24,16 @@ CREATE TABLE users (
     last_log_by INT(10) NOT NULL
 );
 
+CREATE INDEX users_index_user_id ON users(user_id);
+CREATE INDEX users_index_email_address ON users(email_address);
+CREATE INDEX users_index_user_status ON users(user_status);
+CREATE INDEX users_index_password_expiry_date ON users(password_expiry_date);
+CREATE INDEX users_index_last_connection_date ON users(last_connection_date);
+
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('admin@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('ldagulto@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
+INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('lmicayas@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
+
 CREATE TRIGGER users_trigger_update
 AFTER UPDATE ON users
 FOR EACH ROW
@@ -29,23 +41,23 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT '';
 
     IF NEW.user_status <> OLD.user_status THEN
-        SET audit_log = CONCAT(audit_log, "user_status: ", OLD.user_status, " -> ", NEW.user_status, "<br/>");
+        SET audit_log = CONCAT(audit_log, "user status: ", OLD.user_status, " -> ", NEW.user_status, "<br/>");
     END IF;
 
     IF NEW.password_expiry_date <> OLD.password_expiry_date THEN
-        SET audit_log = CONCAT(audit_log, "password_expiry_date: ", OLD.password_expiry_date, " -> ", NEW.password_expiry_date, "<br/>");
+        SET audit_log = CONCAT(audit_log, "password expiry date: ", OLD.password_expiry_date, " -> ", NEW.password_expiry_date, "<br/>");
     END IF;
 
     IF NEW.failed_login <> OLD.failed_login THEN
-        SET audit_log = CONCAT(audit_log, "failed_login: ", OLD.failed_login, " -> ", NEW.failed_login, "<br/>");
+        SET audit_log = CONCAT(audit_log, "failed login: ", OLD.failed_login, " -> ", NEW.failed_login, "<br/>");
     END IF;
 
     IF NEW.last_failed_login <> OLD.last_failed_login THEN
-        SET audit_log = CONCAT(audit_log, "last_failed_login: ", OLD.last_failed_login, " -> ", NEW.last_failed_login, "<br/>");
+        SET audit_log = CONCAT(audit_log, "last failed login: ", OLD.last_failed_login, " -> ", NEW.last_failed_login, "<br/>");
     END IF;
 
     IF NEW.last_connection_date <> OLD.last_connection_date THEN
-        SET audit_log = CONCAT(audit_log, "last_connection_date: ", OLD.last_connection_date, " -> ", NEW.last_connection_date, "<br/>");
+        SET audit_log = CONCAT(audit_log, "last connection date: ", OLD.last_connection_date, " -> ", NEW.last_connection_date, "<br/>");
     END IF;
     
     IF LENGTH(audit_log) > 0 THEN
@@ -58,22 +70,22 @@ CREATE TRIGGER users_trigger_insert
 AFTER INSERT ON users
 FOR EACH ROW
 BEGIN
-    DECLARE audit_log TEXT DEFAULT 'User created.';
+    DECLARE audit_log TEXT DEFAULT 'User created. <br/>';
 
     IF NEW.email_address <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>email_address: ", NEW.email_address);
+        SET audit_log = CONCAT(audit_log, "<br/>email address: ", NEW.email_address);
     END IF;
 
     IF NEW.file_as <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>file_as: ", NEW.file_as);
+        SET audit_log = CONCAT(audit_log, "<br/>file as: ", NEW.file_as);
     END IF;
 
     IF NEW.user_status <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>user_status: ", NEW.user_status);
+        SET audit_log = CONCAT(audit_log, "<br/>user status: ", NEW.user_status);
     END IF;
 
     IF NEW.password_expiry_date <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>password_expiry_date: ", NEW.password_expiry_date);
+        SET audit_log = CONCAT(audit_log, "<br/>password expiry date: ", NEW.password_expiry_date);
     END IF;
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
@@ -92,16 +104,6 @@ BEGIN
     VALUES ('users', OLD.user_id, audit_log, OLD.last_log_by, NOW());
 END //
 
-CREATE INDEX users_index_user_id ON users(user_id);
-CREATE INDEX users_index_email_address ON users(email_address);
-CREATE INDEX users_index_user_status ON users(user_status);
-CREATE INDEX users_index_password_expiry_date ON users(password_expiry_date);
-CREATE INDEX users_index_last_connection_date ON users(last_connection_date);
-
-INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('admin@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
-INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('ldagulto@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
-INSERT INTO users (email_address, password, file_as, user_status, password_expiry_date, failed_login, last_log_by) VALUES ('lmicayas@encorefinancials.com', 'W5hvx4P278F8q50uZe2YFif%2ByRDeSeNaainzl5K9%2BQM%3D', 'Administrator', 'Active', '2022-12-30', 0, 1);
-
 CREATE PROCEDURE check_user_exist(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
 BEGIN
     SELECT COUNT(*) AS total
@@ -111,7 +113,7 @@ END //
 
 CREATE PROCEDURE get_user_details(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
 BEGIN
-	SELECT user_id, email_address, password, file_as, user_status, password_expiry_date, failed_login, last_failed_login, last_connection_date 
+	SELECT user_id, email_address, password, file_as, user_status, password_expiry_date, failed_login, last_failed_login, last_connection_date, last_log_by
 	FROM users 
 	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
 END //
@@ -169,6 +171,7 @@ BEGIN
 	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
 END //
 
+/* Password history table */
 CREATE TABLE password_history (
     password_history_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     user_id INT(10) UNSIGNED NOT NULL,
@@ -200,6 +203,7 @@ BEGIN
 	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
 END //
 
+/* UI customization setting table */
 CREATE TABLE ui_customization_setting (
     ui_customization_setting_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     user_id INT(10) UNSIGNED NOT NULL,
@@ -209,7 +213,8 @@ CREATE TABLE ui_customization_setting (
     preset_theme VARCHAR(15),
     dark_layout VARCHAR(15),
     rtl_layout VARCHAR(15),
-    box_container VARCHAR(15)
+    box_container VARCHAR(15),
+    last_log_by INT(10) NOT NULL
 );
 
 ALTER TABLE ui_customization_setting
@@ -222,6 +227,76 @@ CREATE INDEX ui_customization_setting_index_ui_customization_setting_id ON ui_cu
 CREATE INDEX ui_customization_setting_index_user_id ON ui_customization_setting(user_id);
 CREATE INDEX ui_customization_setting_index_email_address ON ui_customization_setting(email_address);
 
+CREATE TRIGGER ui_customization_setting_trigger_update
+AFTER UPDATE ON ui_customization_setting
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.theme_contrast <> OLD.theme_contrast THEN
+        SET audit_log = CONCAT(audit_log, "theme contrast: ", OLD.theme_contrast, " -> ", NEW.theme_contrast, "<br/>");
+    END IF;
+
+    IF NEW.caption_show <> OLD.caption_show THEN
+        SET audit_log = CONCAT(audit_log, "caption show: ", OLD.caption_show, " -> ", NEW.caption_show, "<br/>");
+    END IF;
+
+    IF NEW.preset_theme <> OLD.preset_theme THEN
+        SET audit_log = CONCAT(audit_log, "preset theme: ", OLD.preset_theme, " -> ", NEW.preset_theme, "<br/>");
+    END IF;
+
+    IF NEW.dark_layout <> OLD.dark_layout THEN
+        SET audit_log = CONCAT(audit_log, "dark layout: ", OLD.dark_layout, " -> ", NEW.dark_layout, "<br/>");
+    END IF;
+
+    IF NEW.rtl_layout <> OLD.rtl_layout THEN
+        SET audit_log = CONCAT(audit_log, "rtl layout: ", OLD.rtl_layout, " -> ", NEW.rtl_layout, "<br/>");
+    END IF;
+
+    IF NEW.box_container <> OLD.box_container THEN
+        SET audit_log = CONCAT(audit_log, "box container: ", OLD.box_container, " -> ", NEW.box_container , "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('ui_customization_setting', NEW.ui_customization_setting_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER ui_customization_setting_trigger_insert
+AFTER INSERT ON ui_customization_setting
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'UI Customization created. <br/>';
+
+    IF NEW.theme_contrast <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>theme contrast: ", NEW.theme_contrast);
+    END IF;
+
+    IF NEW.caption_show <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>caption show: ", NEW.caption_show);
+    END IF;
+
+    IF NEW.preset_theme <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>preset theme: ", NEW.preset_theme);
+    END IF;
+
+    IF NEW.dark_layout <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>dark layout: ", NEW.dark_layout);
+    END IF;
+
+    IF NEW.rtl_layout <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>rtl layout: ", NEW.rtl_layout);
+    END IF;
+
+    IF NEW.box_container <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>box container: ", NEW.box_container);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('ui_customization_setting', NEW.ui_customization_setting_id, audit_log, NEW.last_log_by, NOW());
+END //
+
 CREATE PROCEDURE check_ui_customization_setting_exist(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
 BEGIN
     SELECT COUNT(*) AS total
@@ -229,61 +304,300 @@ BEGIN
     WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
 END //
 
-CREATE PROCEDURE insert_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100), IN p_type VARCHAR(30), IN p_customization_value VARCHAR(15))
+CREATE PROCEDURE insert_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100), IN p_type VARCHAR(30), IN p_customization_value VARCHAR(15), IN p_last_log_by INT(10))
 BEGIN
 	IF p_type = 'theme_contrast' THEN
-        INSERT INTO ui_customization_setting (user_id, email_address, theme_contrast) 
-	    VALUES(p_user_id, p_email_address, p_customization_value);
+        INSERT INTO ui_customization_setting (user_id, email_address, theme_contrast, last_log_by) 
+	    VALUES(p_user_id, p_email_address, p_customization_value, p_last_log_by);
     ELSEIF p_type = 'caption_show' THEN
-        INSERT INTO ui_customization_setting (user_id, email_address, caption_show) 
-	    VALUES(p_user_id, p_email_address, p_customization_value);
+        INSERT INTO ui_customization_setting (user_id, email_address, caption_show, last_log_by) 
+	    VALUES(p_user_id, p_email_address, p_customization_value, p_last_log_by);
     ELSEIF p_type = 'preset_theme' THEN
-        INSERT INTO ui_customization_setting (user_id, email_address, preset_theme) 
-	    VALUES(p_user_id, p_email_address, p_customization_value);
+        INSERT INTO ui_customization_setting (user_id, email_address, preset_theme, last_log_by) 
+	    VALUES(p_user_id, p_email_address, p_customization_value, p_last_log_by);
     ELSEIF p_type = 'dark_layout' THEN
-        INSERT INTO ui_customization_setting (user_id, email_address, dark_layout) 
-	    VALUES(p_user_id, p_email_address, p_customization_value);
+        INSERT INTO ui_customization_setting (user_id, email_address, dark_layout, last_log_by) 
+	    VALUES(p_user_id, p_email_address, p_customization_value, p_last_log_by);
     ELSEIF p_type = 'rtl_layout' THEN
-        INSERT INTO ui_customization_setting (user_id, email_address, rtl_layout) 
-	    VALUES(p_user_id, p_email_address, p_customization_value);
+        INSERT INTO ui_customization_setting (user_id, email_address, rtl_layout, last_log_by) 
+	    VALUES(p_user_id, p_email_address, p_customization_value, p_last_log_by);
     ELSE
-        INSERT INTO ui_customization_setting (user_id, email_address, box_container) 
-	    VALUES(p_user_id, p_email_address, p_customization_value);
+        INSERT INTO ui_customization_setting (user_id, email_address, box_container, last_log_by) 
+	    VALUES(p_user_id, p_email_address, p_customization_value, p_last_log_by);
     END IF;
 END //
 
-CREATE PROCEDURE update_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100), IN p_type VARCHAR(30), IN p_customization_value VARCHAR(15))
+CREATE PROCEDURE update_ui_customization_setting(IN p_user_id INT(10), IN p_email_address VARCHAR(100), IN p_type VARCHAR(30), IN p_customization_value VARCHAR(15), IN p_last_log_by INT(10))
 BEGIN
 	IF p_type = 'theme_contrast' THEN
         UPDATE ui_customization_setting
-        SET theme_contrast = p_customization_value
+        SET theme_contrast = p_customization_value,
+        last_log_by = p_last_log_by
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'caption_show' THEN
         UPDATE ui_customization_setting
-        SET caption_show = p_customization_value
+        SET caption_show = p_customization_value,
+        last_log_by = p_last_log_by
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'preset_theme' THEN
         UPDATE ui_customization_setting
-        SET preset_theme = p_customization_value
+        SET preset_theme = p_customization_value,
+        last_log_by = p_last_log_by
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'dark_layout' THEN
         UPDATE ui_customization_setting
-        SET dark_layout = p_customization_value
+        SET dark_layout = p_customization_value,
+        last_log_by = p_last_log_by
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSEIF p_type = 'rtl_layout' THEN
         UPDATE ui_customization_setting
-        SET rtl_layout = p_customization_value
+        SET rtl_layout = p_customization_value,
+        last_log_by = p_last_log_by
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     ELSE
         UPDATE ui_customization_setting
-        SET box_container = p_customization_value
+        SET box_container = p_customization_value,
+        last_log_by = p_last_log_by
        	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
     END IF;
 END //
 
 CREATE PROCEDURE get_ui_customization_setting_details(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
 BEGIN
-    SELECT ui_customization_setting_id, user_id, email_address, theme_contrast, caption_show, preset_theme, dark_layout, rtl_layout, box_container
+    SELECT ui_customization_setting_id, user_id, email_address, theme_contrast, caption_show, preset_theme, dark_layout, rtl_layout, box_container, last_log_by
 	FROM ui_customization_setting 
 	WHERE user_id = p_user_id OR email_address = BINARY p_email_address;
 END //
+
+/* Role table */
+CREATE TABLE role(
+	role_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	role_name VARCHAR(100) NOT NULL,
+	role_description VARCHAR(200) NOT NULL,
+	assignable TINYINT(1) NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX role_index_role_id ON role(role_id);
+
+INSERT INTO role (role_name, role_description, assignable, last_log_by) VALUES ('Administrator', 'Administrator', '1', '1');
+
+CREATE TRIGGER role_trigger_update
+AFTER UPDATE ON role
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.role_name <> OLD.role_name THEN
+        SET audit_log = CONCAT(audit_log, "role name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
+    END IF;
+
+    IF NEW.role_description <> OLD.role_description THEN
+        SET audit_log = CONCAT(audit_log, "role description: ", OLD.role_description, " -> ", NEW.role_description, "<br/>");
+    END IF;
+
+    IF NEW.assignable <> OLD.assignable THEN
+        SET audit_log = CONCAT(audit_log, "assignable: ", OLD.assignable, " -> ", NEW.assignable, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('role', NEW.role_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER role_trigger_insert
+AFTER INSERT ON role
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Role created. <br/>';
+
+    IF NEW.role_name <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>role name: ", NEW.role_name);
+    END IF;
+
+    IF NEW.role_description <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>role description: ", NEW.role_description);
+    END IF;
+
+    IF NEW.assignable <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>assignable: ", NEW.assignable);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('role', NEW.role_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE TRIGGER role_trigger_delete
+BEFORE DELETE ON role
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    SET audit_log = CONCAT(audit_log, "The role '", OLD.role_id, "' has been deleted.");
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('role', OLD.role_id, audit_log, OLD.last_log_by, NOW());
+END //
+
+/* Role users table */
+CREATE TABLE role_users(
+	role_id VARCHAR(50) NOT NULL,
+	user_id INT(10) NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX role_users_index_role_id ON role_users(role_id);
+CREATE INDEX role_users_index_user_id ON role_users(user_id);
+
+INSERT INTO role_users (role_id, user_id, last_log_by) VALUES ('1', '1', '1');
+
+/* Menu groups table */
+CREATE TABLE menu_groups (
+    menu_group_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    menu_group_name VARCHAR(100) NOT NULL,
+    order_sequence TINYINT(10) NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX menu_groups_index_menu_group_id ON menu_groups(menu_group_id);
+
+INSERT INTO menu_groups (menu_group_name, order_sequence, last_log_by) VALUES ('Administration', '1', '1');
+
+CREATE TRIGGER menu_groups_trigger_update
+AFTER UPDATE ON menu_groups
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.menu_group_name <> OLD.menu_group_name THEN
+        SET audit_log = CONCAT(audit_log, "menu group name: ", OLD.menu_group_name, " -> ", NEW.menu_group_name, "<br/>");
+    END IF;
+
+    IF NEW.order_sequence <> OLD.order_sequence THEN
+        SET audit_log = CONCAT(audit_log, "order sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('menu_groups', NEW.menu_group_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER menu_groups_trigger_insert
+AFTER INSERT ON menu_groups
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Menu group created. <br/>';
+
+    IF NEW.menu_group_name <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>menu group name: ", NEW.menu_group_name);
+    END IF;
+
+    IF NEW.order_sequence <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>order sequence: ", NEW.order_sequence);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('menu_groups', NEW.menu_group_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE TRIGGER menu_groups_trigger_delete
+BEFORE DELETE ON menu_groups
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    SET audit_log = CONCAT(audit_log, "The menu group '", OLD.menu_group_id, "' has been deleted.");
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('menu_groups', OLD.menu_group_id, audit_log, OLD.last_log_by, NOW());
+END //
+
+/* Menu table */
+CREATE TABLE menu(
+	menu_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	menu_name VARCHAR(100) NOT NULL,
+	menu_group_id INT(10) UNSIGNED NOT NULL,
+    order_sequence TINYINT(10) NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX menu_groups_index_menu_id ON menu(menu_id);
+
+INSERT INTO menu (menu_name, menu_group_id, order_sequence, last_log_by) VALUES ('Menu Group', '1', '1', '1');
+INSERT INTO menu (menu_name, menu_group_id, order_sequence, last_log_by) VALUES ('Menu Item', '1', '2', '1');
+
+ALTER TABLE menu
+ADD FOREIGN KEY (menu_group_id) REFERENCES menu_groups(menu_group_id);
+
+CREATE TRIGGER menu_trigger_update
+AFTER UPDATE ON menu
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.menu_name <> OLD.menu_name THEN
+        SET audit_log = CONCAT(audit_log, "menu name: ", OLD.menu_name, " -> ", NEW.menu_name, "<br/>");
+    END IF;
+
+    IF NEW.menu_group_id <> OLD.menu_group_id THEN
+        SET audit_log = CONCAT(audit_log, "menu group id: ", OLD.menu_group_id, " -> ", NEW.menu_group_id, "<br/>");
+    END IF;
+
+    IF NEW.order_sequence <> OLD.order_sequence THEN
+        SET audit_log = CONCAT(audit_log, "order sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('menu', NEW.menu_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER menu_trigger_insert
+AFTER INSERT ON menu
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Menu created. <br/>';
+
+    IF NEW.menu_name <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>menu name: ", NEW.menu_name);
+    END IF;
+
+    IF NEW.menu_group_id <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>menu group id: ", NEW.menu_group_id);
+    END IF;
+
+    IF NEW.order_sequence <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>order sequence: ", NEW.order_sequence);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('menu', NEW.menu_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE TRIGGER menu_trigger_delete
+BEFORE DELETE ON menu
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    SET audit_log = CONCAT(audit_log, "The menu '", OLD.menu_id, "' has been deleted.");
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('menu', OLD.menu_id, audit_log, OLD.last_log_by, NOW());
+END //
+
+/* Menu access right table */
+CREATE TABLE menu_access_right(
+	menu_id INT(10) NOT NULL,
+	role_id INT(10) UNSIGNED NOT NULL,
+	read_access TINYINT(1) NOT NULL,
+    write_access TINYINT(1) NOT NULL,
+    create_access TINYINT(1) NOT NULL,
+    delete_access TINYINT(1) NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+INSERT INTO menu_access_right (menu_id, role_id, read_access, write_access, create_access, delete_access, last_log_by) VALUES ('1', '1', '1', '1', '1', '1', '1');

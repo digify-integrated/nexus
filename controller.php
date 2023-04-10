@@ -117,36 +117,44 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         case 'submit user ui customization setting':
             if(isset($_POST['email']) && !empty($_POST['email']) && isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['customization_value'])){
                 $email = htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8');
-                $type = htmlspecialchars($_POST['type'], ENT_QUOTES, 'UTF-8');
-                $customization_value = htmlspecialchars($_POST['customization_value'], ENT_QUOTES, 'UTF-8');
 
                 $check_user_exist = $api->check_user_exist(null, $email);
      
                 if($check_user_exist){
-                    $user_details = $api->get_user_details(null, $email);
-                    $user_id = $user_details[0]['USER_ID'];
+                    $check_user_status = $api->check_user_status(null, $email);
+    
+                    if($check_user_status){
+                        $type = htmlspecialchars($_POST['type'], ENT_QUOTES, 'UTF-8');
+                        $customization_value = htmlspecialchars($_POST['customization_value'], ENT_QUOTES, 'UTF-8');
 
-                    $check_ui_customization_setting_exist = $api->check_ui_customization_setting_exist($user_id, $email);
-     
-                    if($check_ui_customization_setting_exist > 0){
-                        $update_ui_customization_setting = $api->update_ui_customization_setting($user_id, $email, $type, $customization_value);
-            
-                        if($update_ui_customization_setting){
-                            echo 'Updated';
+                        $user_details = $api->get_user_details(null, $email);
+                        $user_id = $user_details[0]['USER_ID'];
+
+                        $check_ui_customization_setting_exist = $api->check_ui_customization_setting_exist($user_id, $email);
+        
+                        if($check_ui_customization_setting_exist > 0){
+                            $update_ui_customization_setting = $api->update_ui_customization_setting($user_id, $email, $type, $customization_value, $user_id);
+                
+                            if($update_ui_customization_setting){
+                                echo 'Updated';
+                            }
+                            else{
+                                echo $update_ui_customization_setting;
+                            }
                         }
                         else{
-                            echo $update_ui_customization_setting;
+                            $insert_ui_customization_setting = $api->insert_ui_customization_setting($user_id, $email, $type, $customization_value, $user_id);
+                
+                            if($insert_ui_customization_setting){
+                                echo 'Updated';
+                            }
+                            else{
+                                echo $insert_ui_customization_setting;
+                            }
                         }
                     }
                     else{
-                        $insert_ui_customization_setting = $api->insert_ui_customization_setting($user_id, $email, $type, $customization_value);
-            
-                        if($insert_ui_customization_setting){
-                            echo 'Updated';
-                        }
-                        else{
-                            echo $insert_ui_customization_setting;
-                        }
+                        echo 'Inactive User';
                     }
                 }
                 else{

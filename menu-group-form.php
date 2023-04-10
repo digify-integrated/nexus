@@ -6,8 +6,18 @@
     $api = new Api;
     $page_title = 'Menu Groups';
 
-    require('views/_interface_settings.php');
-    require('views/_user_account_details.php');
+    $check_user_status = $api->check_user_status($email);
+
+    if($check_user_status){
+        $page_details = $api->get_page_details(16);
+        $module_id = $page_details[0]['MODULE_ID'];
+        $page_title = $page_details[0]['PAGE_NAME'];
+    
+        $menu_read_access_right = $api->check_menu_access_rights($email, 16, 'read');
+    }
+    else{
+      header('location: logout.php?logout');
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,12 +44,14 @@
                 <ul class="breadcrumb">
                   <li class="breadcrumb-item"><a href="dashboard.php">Home</a></li>
                   <li class="breadcrumb-item"><a href="javascript: void(0)">User Interface</a></li>
-                  <li class="breadcrumb-item" aria-current="page">Menu Groups</li>
+                  <li class="breadcrumb-item"><a href="menu-groups.php">Menu Groups</a></li>
+                  <li class="breadcrumb-item" aria-current="page">Menu Group Form</li>
+                  <li class="breadcrumb-item">1</li>
                 </ul>
               </div>
               <div class="col-md-12">
                 <div class="page-header-title">
-                  <h2 class="mb-0">Menu Groups</h2>
+                  <h2 class="mb-0">Menu Group Form</h2>
                 </div>
               </div>
             </div>
@@ -53,7 +65,7 @@
                 <div class="card-header">
                   <div class="row align-items-center">
                     <div class="col-sm-6">
-                      <h5>Menu Groups List</h5>
+                      <h5>Menu Groups Form</h5>
                     </div>
                     <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
                     <div class="btn-group">
