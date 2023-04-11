@@ -6,16 +6,6 @@ class Api{
 
     public $response = array();
 
-    const TIME_UNITS = [
-        'y' => 'year',
-        'm' => 'month',
-        'w' => 'week',
-        'd' => 'day',
-        'h' => 'hour',
-        'i' => 'minute',
-        's' => 'second'
-    ];
-
     # -------------------------------------------------------------
     #   Custom methods
     # -------------------------------------------------------------
@@ -276,27 +266,32 @@ class Api{
     # Returns    : String
     #
     # -------------------------------------------------------------
-    public function time_elapsed_string($datetime, $full = false, $units = TIME_UNITS) {
-        $ago = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $datetime);
-        
-        if ($ago === false) {
-            return 'Invalid datetime format';
-        }
+    public function time_elapsed_string($datetime) {
+        $timestamp = strtotime($datetime);
+        $current_timestamp = time();
     
-        $now = new DateTimeImmutable();
-        $diff = $now->diff($ago);
+        $diff_seconds = $current_timestamp - $timestamp;
     
-        $elaped_time = [];
-        
-        foreach ($units as $unit => $label) {
-            if ($diff->$unit) {
-                $elaped_time[] = sprintf('%d %s%s', $diff->$unit, $label, $diff->$unit > 1 ? 's' : '');
-                if (!$full) {
-                    break;
-                }
+        $intervals = array(
+            31536000 => 'year',
+            2592000 => 'month',
+            604800 => 'week',
+            86400 => 'day',
+            3600 => 'hour',
+            60 => 'minute',
+            1 => 'second'
+        );
+    
+        $elapsed_time = '';
+        foreach ($intervals as $seconds => $label) {
+            $count = floor($diff_seconds / $seconds);
+            if ($count > 0) {
+                $elapsed_time = $count . ' ' . $label . ($count == 1 ? '' : 's') . ' ago';
+                break;
             }
         }
-        return $elaped_time ? implode(', ', $elaped_time) . ' ago' : 'just now';
+    
+        return $elapsed_time;
     }
     # -------------------------------------------------------------
 
@@ -835,8 +830,11 @@ class Api{
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function check_menu_access_rights($p_user_id, $p_menu_id, $p_access_type){
+    public function check_menu_access_rights($p_email_address, $p_menu_id, $p_access_type){
         if ($this->databaseConnection()) {
+            $user_details = $this->get_user_details(null, $p_email_address);
+            $p_user_id = $user_details[0]['USER_ID'];
+
             $sql = $this->db_connection->prepare('CALL check_menu_access_rights(:p_user_id, :p_menu_id, :p_access_type)');
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_menu_id', $p_menu_id);
@@ -875,6 +873,68 @@ class Api{
         }) . uniqid('', true);
 
         return $key;        
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_file_name
+    # Purpose    : generates random file name.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_log_notes($p_table_name, $p_reference_id) {
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('SELECT log, changed_by, changed_at FROM audit_log WHERE table_name = :p_table_name AND reference_id = :p_reference_id ORDER BY changed_at DESC');
+            $sql->bindValue(':p_table_name', $p_table_name);
+            $sql->bindValue(':p_reference_id', $p_reference_id);
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+
+                if($count > 0){
+                    $log_notes = '';
+
+                    while($row = $sql->fetch()){
+                        $log = $row['log'];
+                        $changed_by = $row['changed_by'];
+                        $time_elapsed = $this->time_elapsed_string($row['changed_at']);
+
+                        $user_details = $this->get_user_details($changed_by, null);
+                        $file_as = $user_details[0]['FILE_AS'];
+
+                        $log_notes .= '<div class="comment-block">
+                                        <div class="comment">
+                                            <div class="media align-items-start">
+                                                <div class="chat-avtar flex-shrink-0">
+                                                    <img class="rounded-circle img-fluid wid-40" src="./assets/images/default/default-avatar.png" alt="User image" />
+                                                </div>
+                                                <div class="media-body ms-3">
+                                                    <h5 class="mb-0">'. $file_as .'</h5>
+                                                    <span class="text-sm text-muted">'. $time_elapsed .'</span>
+                                                </div>
+                                            </div>
+                                            <div class="comment-content">
+                                                <p class="mb-2 mt-3">'. $log .'</p>
+                                            </div>
+                                        </div>
+                                    </div>';
+
+                    }
+
+                    $log_notes .= '</ul>';
+                }
+                else{
+                    $log_notes = '<p>No log notes found.</p>';
+                }
+               
+                return $log_notes;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
     }
     # -------------------------------------------------------------
 

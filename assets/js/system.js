@@ -4,13 +4,16 @@
     $(function() {
         checkNotification();
         uiCustomization();
+        loadUISettings();
 
         if ($('#email_account').length) {
             const email_account = $('#email_account').text();
             getCustomization(email_account);
         }
 
-        loadUISettings();
+        if($('.log-notes-scroll').length){
+            new SimpleBar(document.querySelector('.log-notes-scroll'));
+        }
     });
 })(jQuery);
 

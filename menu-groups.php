@@ -1,13 +1,27 @@
 <?php
-    require('session.php');
-    require('config/config.php');
-    require('classes/api.php');
+require('session.php');
+require('config/config.php');
+require('classes/api.php');
 
-    $api = new Api;
-    $page_title = 'Menu Groups';
+$api = new Api;
+$page_title = 'Menu Groups';
 
+$check_user_status = $api->check_user_status(null, $email);
+    
+if($check_user_status){    
+  $menu_read_access_right = $api->check_menu_access_rights($email, 1, 'read');
+          
+  if($menu_read_access_right > 0){            
     require('views/_interface_settings.php');
     require('views/_user_account_details.php');
+  }
+  else{
+    header('location: 404.php');
+  }
+}
+else{
+  header('location: logout.php?logout');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,16 +70,16 @@
                       <h5>Menu Groups List</h5>
                     </div>
                     <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
-                    <div class="btn-group">
-                      <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        Action
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li><button class="dropdown-item" type="button">Action</button></li>
-                        <li><button class="dropdown-item" type="button">Another action</button></li>
-                        <li><button class="dropdown-item" type="button">Something else here</button></li>
-                      </ul>
-                    </div>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                          Action
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li><button class="dropdown-item" type="button">Action</button></li>
+                          <li><button class="dropdown-item" type="button">Another action</button></li>
+                          <li><button class="dropdown-item" type="button">Something else here</button></li>
+                        </ul>
+                      </div>
                       <a href="menu-group-form.php" class="btn btn-success">Create</a>
                     </div>
                   </div>

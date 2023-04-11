@@ -9,6 +9,8 @@ CREATE TABLE audit_log (
 );
 
 CREATE INDEX audit_log_index_audit_log_id ON audit_log(audit_log_id);
+CREATE INDEX audit_log_index_table_name ON audit_log(table_name);
+CREATE INDEX audit_log_index_reference_id ON audit_log(reference_id);
 
 /* Users table */
 CREATE TABLE users (
@@ -442,7 +444,7 @@ END //
 
 /* Role users table */
 CREATE TABLE role_users(
-	role_id VARCHAR(50) NOT NULL,
+	role_id INT(10) NOT NULL,
 	user_id INT(10) NOT NULL,
     last_log_by INT(10) NOT NULL
 );
@@ -601,3 +603,24 @@ CREATE TABLE menu_access_right(
 );
 
 INSERT INTO menu_access_right (menu_id, role_id, read_access, write_access, create_access, delete_access, last_log_by) VALUES ('1', '1', '1', '1', '1', '1', '1');
+
+CREATE PROCEDURE check_menu_access_rights(IN p_user_id INT(10), IN p_menu_id INT(10), IN p_access_type VARCHAR(10))
+BEGIN
+	IF p_access_type = 'read' THEN
+        SELECT COUNT(role_id) AS TOTAL
+        FROM role_users
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where read_access = '1');
+    ELSEIF p_access_type = 'write' THEN
+        SELECT COUNT(role_id) AS TOTAL
+        FROM role_users
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where write_access = '1');
+    ELSEIF p_access_type = 'create' THEN
+        SELECT COUNT(role_id) AS TOTAL
+        FROM role_users
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where create_access = '1');
+    ELSE
+        SELECT COUNT(role_id) AS TOTAL
+        FROM role_users
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where delete_access = '1');
+    END IF;
+END //
