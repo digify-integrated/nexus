@@ -86,22 +86,24 @@ else{
                 </div>
               </div>
               <div class="card-body">
-                <table id="menu-groups-table" class="table table-striped table-hover table-bordered nowrap">
-                  <thead>
-                    <tr>
-                      <th class="all">
-                        <div class="form-check">
-                          <input class="form-check-input" id="datatable-checkbox" type="checkbox">
-                        </div>
-                      </th>
-                      <th>#</th>
-                      <th>Menu Group</th>
-                      <th>Order Sequence</th>
-                      <th>View</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
+                <div class="table-responsive dt-responsive">
+                  <table id="menu-groups-table" class="table table-striped table-hover table-bordered nowrap w-100">
+                    <thead>
+                      <tr>
+                        <th class="all">
+                          <div class="form-check">
+                            <input class="form-check-input" id="datatable-checkbox" type="checkbox">
+                          </div>
+                        </th>
+                        <th>#</th>
+                        <th>Menu Group</th>
+                        <th>Order Sequence</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>

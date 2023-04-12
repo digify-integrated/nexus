@@ -14,8 +14,62 @@
         if($('.log-notes-scroll').length){
             new SimpleBar(document.querySelector('.log-notes-scroll'));
         }
+
+        if($('#edit-form').length){
+            $(document).on('click','#edit-form',function() {
+                $('.form-details').addClass('d-none');
+                $('.form-edit').removeClass('d-none');
+            });
+        }
+
+        if($('#discard-update').length){
+            $(document).on('click','#discard-update',() => {
+                Swal.fire({
+                    title: 'Discard Changes Confirmation',
+                    text: 'Are you sure you want to discard the changes made to this item? The changes will be lost permanently once discarded.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Discard',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                      confirmButton: 'btn btn-danger mt-2',
+                      cancelButton: 'btn btn-secondary ms-2 mt-2'
+                    },
+                    buttonsStyling: false
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      resetForm();
+                    }
+                  });
+            });
+        }
     });
 })(jQuery);
+
+function resetForm(){
+    $('.form-details').removeClass('d-none');
+    $('.form-edit').addClass('d-none');
+}
+
+function discardCreate(windows_location){
+    Swal.fire({
+        title: 'Discard Changes Confirmation',
+        text: 'Are you sure you want to discard the changes you have made? Any unsaved changes will be lost permanently.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Discard',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            confirmButton: 'btn btn-danger mt-2',
+            cancelButton: 'btn btn-secondary ms-2 mt-2'
+        },
+        buttonsStyling: false
+    }).then(function(result) {
+        if (result.value) {
+            window.location = windows_location;
+        }
+    });
+}
 
 function disableFormSubmitButton(buttonId) {
     try {

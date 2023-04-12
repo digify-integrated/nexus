@@ -878,8 +878,8 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : generate_file_name
-    # Purpose    : generates random file name.
+    # Name       : generate_log_notes
+    # Purpose    : generates log notes block.
     #
     # Returns    : String
     #
@@ -894,7 +894,21 @@ class Api{
                 $count = $sql->rowCount();
 
                 if($count > 0){
-                    $log_notes = '';
+                    $log_notes = '<div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div id="sticky-action" class="sticky-action">
+                                                <div class="card-header">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-sm-6">
+                                                            <h5>Log Notes</h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="log-notes-scroll" style="height: 415px; position: relative;">
+                                                <div class="card-body p-b-0">
+                                                    <div class="comment-block">';
 
                     while($row = $sql->fetch()){
                         $log = $row['log'];
@@ -904,8 +918,7 @@ class Api{
                         $user_details = $this->get_user_details($changed_by, null);
                         $file_as = $user_details[0]['FILE_AS'];
 
-                        $log_notes .= '<div class="comment-block">
-                                        <div class="comment">
+                        $log_notes .= '<div class="comment">
                                             <div class="media align-items-start">
                                                 <div class="chat-avtar flex-shrink-0">
                                                     <img class="rounded-circle img-fluid wid-40" src="./assets/images/default/default-avatar.png" alt="User image" />
@@ -916,17 +929,21 @@ class Api{
                                                 </div>
                                             </div>
                                             <div class="comment-content">
-                                                <p class="mb-2 mt-3">'. $log .'</p>
+                                                <p class="mb-2 mt-3">
+                                                    '. $log .'
+                                                </p>
                                             </div>
-                                        </div>
-                                    </div>';
+                                        </div>';
 
                     }
 
-                    $log_notes .= '</ul>';
+                    $log_notes .= '         </div>
+                                        </div>
+                                    </div>
+                                </div>';
                 }
                 else{
-                    $log_notes = '<p>No log notes found.</p>';
+                    $log_notes = null;
                 }
                
                 return $log_notes;
@@ -935,6 +952,178 @@ class Api{
                 return $sql->errorInfo()[2];
             }
         }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_form
+    # Purpose    : generates form based on type.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_form($form_type, $reference_id, $email) {
+        $form = '';
+
+        switch ($form_type){
+            case 'menu groups form':
+                $menu_group_create_access_right = $this->check_menu_access_rights($email, 1, 'create');
+                $menu_group_write_access_right = $this->check_menu_access_rights($email, 1, 'write');
+
+                if(empty($reference_id) && $menu_group_create_access_right > 0){
+                    $form_fields = '<div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="menu_group" name="menu_group">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                            <div class="row mb-3">
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="number" class="form-control" id="order_sequence" name="order_sequence">
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                else if(!empty($reference_id) && $menu_group_write_access_right > 0){
+                    $form_fields = '<div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="menu_group_label"></label>
+                                                <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
+                                                <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence">
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                else{
+                    $form_fields = '<div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="menu_group_label"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                
+                $form .= '<form id="menu-group-form" method="post" action="#">
+                            <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
+                            <div class="row">
+                                '. $form_fields .'
+                            </div>
+                        </form>';
+            break;
+        }
+
+        return $form;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_form
+    # Purpose    : generates form based on type.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_form_shortcuts($form_type, $reference_id, $email) {
+        $form = '';
+
+        switch ($form_type){
+            case 'menu groups form':
+                $menu_group_create_access_right = $this->check_menu_access_rights($email, 1, 'create');
+                $menu_group_write_access_right = $this->check_menu_access_rights($email, 1, 'write');
+
+                if(empty($reference_id) && $menu_group_create_access_right > 0){
+                    $form_fields = '<div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="menu_group" name="menu_group">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                            <div class="row mb-3">
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="number" class="form-control" id="order_sequence" name="order_sequence">
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                else if(!empty($reference_id) && $menu_group_write_access_right > 0){
+                    $form_fields = '<div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="menu_group_label"></label>
+                                                <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
+                                                <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence">
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                else{
+                    $form_fields = '<div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="menu_group_label"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <div class="col-sm-9">
+                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                
+                $form .= '<form id="menu-group-form" method="post" action="#">
+                            <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
+                            <div class="row">
+                                '. $form_fields .'
+                            </div>
+                        </form>';
+            break;
+        }
+
+        return $form;
     }
     # -------------------------------------------------------------
 

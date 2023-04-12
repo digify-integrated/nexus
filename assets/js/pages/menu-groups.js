@@ -20,7 +20,7 @@ function initialized_menu_groups_table(datatable_name, buttons = false, show_all
         { 'data' : 'MENU_GROUP_ID' },
         { 'data' : 'MENU_GROUP_NAME' },
         { 'data' : 'ORDER_SEQUENCE' },
-        { 'data' : 'VIEW' }
+        { 'data' : 'ACTION' }
     ];
 
     const column_definition = [
