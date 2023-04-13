@@ -894,8 +894,7 @@ class Api{
                 $count = $sql->rowCount();
 
                 if($count > 0){
-                    $log_notes = '<div class="row">
-                                    <div class="col-lg-12">
+                    $log_notes = '<div class="col-lg-12">
                                         <div class="card">
                                             <div id="sticky-action" class="sticky-action">
                                                 <div class="card-header">
@@ -939,8 +938,7 @@ class Api{
 
                     $log_notes .= '         </div>
                                         </div>
-                                    </div>
-                                </div>';
+                                    </div>';
                 }
                 else{
                     $log_notes = null;

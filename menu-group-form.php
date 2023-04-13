@@ -92,12 +92,12 @@ else{
                     <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
                       <?php
                         if (!empty($menu_group_id)) {
-                          $dropdown = '<div class="btn-group m-r-5 ">
-                                          <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Action
-                                          </button>
-                                          <ul class="dropdown-menu dropdown-menu-end">';
-                                          
+                            $dropdown = '<div class="btn-group m-r-5 ">
+                                              <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Action
+                                              </button>
+                                              <ul class="dropdown-menu dropdown-menu-end">';
+                                              
                           if ($menu_group_create_access_right > 0) {
                             $dropdown .= '<li><button class="dropdown-item" type="button">Create Menu Group</button></li>';
                           }
@@ -111,15 +111,15 @@ else{
 
                           echo $dropdown;
                         }
-                        
+                            
                         if (empty($menu_group_id) && $menu_group_create_access_right > 0) {
                           echo '<button type="submit" form="menu-group-form" class="btn btn-success form-edit" id="submit-data">Save</button>
-                                  <button type="button" id="discard-create" class="btn btn-outline-danger form-edit">Discard</button>';
+                                <button type="button" id="discard-create" class="btn btn-outline-danger form-edit">Discard</button>';
                         } 
                         else if (!empty($menu_group_id) && $menu_group_write_access_right > 0) {
                           echo '<button type="submit" class="btn btn-info form-details" id="edit-form">Edit</button>
-                                  <button type="submit" form="menu-group-form" class="btn btn-success form-edit d-none" id="submit-data">Save</button>
-                                  <button type="button" id="discard-update" class="btn btn-outline-danger form-edit d-none">Discard</button>';
+                                <button type="submit" form="menu-group-form" class="btn btn-success form-edit d-none" id="submit-data">Save</button>
+                                <button type="button" id="discard-update" class="btn btn-outline-danger form-edit d-none">Discard</button>';
                         }
                       ?>
                     </div>
@@ -127,59 +127,53 @@ else{
                 </div>
               </div>
               <div class="card-body">
-                <div class="row">
-                  <div class="col-md-12">
-                    <?php 
-                      echo $api->generate_form('menu groups form', $menu_group_id, $email);
-                    ?>
-                  </div>
-                </div>
+                <?php echo $api->generate_form('menu groups form', $menu_group_id, $email); ?>
               </div>
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="card">
-              <div id="sticky-action" class="sticky-action">
-                <div class="card-header">
-                  <div class="row align-items-center">
-                    <div class="col-sm-6">
-                      <h5>Menu Item</h5>
-                    </div>
-                    <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="table-responsive dt-responsive">
-                      <table id="menu-item-table" class="table table-striped table-hover table-bordered nowrap w-100">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Menu Item</th>
-                            <th>Order Sequence</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody></tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <?php
-            if(!empty($menu_group_id)){
-              echo $api->generate_log_notes('menu_groups', $menu_group_id);
+
+          <?php
+          if(!empty($menu_group_id)){
+            if($menu_item_create_access_right > 0){
+              $menu_item_create = '<button type="button" class="btn btn-success" id="create-menu-item-">Create</button>';
             }
+
+            echo '<div class="col-lg-12">
+                    <div class="card">
+                      <div id="sticky-action" class="sticky-action">
+                        <div class="card-header">
+                          <div class="row align-items-center">
+                            <div class="col-sm-6">
+                              <h5>Menu Groups Form</h5>
+                            </div>
+                            <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+                              '. $menu_item_create .'
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <table id="menu-item-table" class="table table-striped table-hover table-bordered nowrap w-100">
+                          <thead>
+                            <tr>
+                              <th>#</th>
+                              <th>Menu Item</th>
+                              <th>Order Sequence</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>';
+          }
+
+          if(!empty($menu_group_id)){
+            echo $api->generate_log_notes('menu_groups', $menu_group_id);
+          }
         ?>
+        </div>
       </div>
     </section>
 
