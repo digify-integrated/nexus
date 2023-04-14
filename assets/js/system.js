@@ -5,6 +5,7 @@
         checkNotification();
         uiCustomization();
         loadUISettings();
+        intializeMaxLength();
 
         if ($('#email_account').length) {
             const email_account = $('#email_account').text();
@@ -45,6 +46,28 @@
         }
     });
 })(jQuery);
+
+function displayDetails(transaction){
+    switch (transaction) {
+        case 'menu groups details':
+            const menu_group_id = $('#menu-group-id').text();
+            
+            $.ajax({
+                url: 'controller.php',
+                method: 'POST',
+                dataType: 'JSON',
+                data: {menu_group_id : menu_group_id, transaction : transaction},
+                success: function(response) {
+                    $('#menu_group').val(response[0].MENU_GROUP_NAME);
+                    $('#order_sequence').val(response[0].ORDER_SEQUENCE);
+                    
+                    $('#menu_group_label').text(response[0].MENU_GROUP_NAME);
+                    $('#order_sequence_label').text(response[0].ORDER_SEQUENCE);
+                }
+            });
+            break;
+    }
+}
 
 function resetForm(){
     $('.form-details').removeClass('d-none');
@@ -453,4 +476,12 @@ function readjustDatatableColumn() {
     };
   
     $('a[data-bs-toggle="tab"], a[data-bs-toggle="pill"], #System-Modal').on('shown.bs.tab shown.bs.modal', adjustDataTable);
+}
+
+function intializeMaxLength(){
+    $('[maxlength]').maxlength({
+        alwaysShow: true,
+        warningClass: "badge rounded-pill bg-primary",
+        limitReachedClass: "badge rounded-pill bg-danger",
+    });
 }

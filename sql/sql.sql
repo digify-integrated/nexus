@@ -516,6 +516,35 @@ BEGIN
     VALUES ('menu_groups', OLD.menu_group_id, audit_log, OLD.last_log_by, NOW());
 END //
 
+CREATE PROCEDURE check_menu_groups_exist(IN p_menu_group_id INT(10))
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM menu_groups
+    WHERE menu_group_id = p_menu_group_id;
+END //
+
+CREATE PROCEDURE insert_menu_groups(IN p_menu_group_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
+BEGIN
+    INSERT INTO menu_groups (menu_group_name, order_sequence, last_log_by) 
+	VALUES(p_menu_group_name, p_order_sequence, p_last_log_by);
+END //
+
+CREATE PROCEDURE update_menu_groups(IN p_menu_group_id INT(10), IN p_menu_group_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
+BEGIN
+	UPDATE menu_groups
+        SET menu_group_name = p_menu_group_name,
+        order_sequence = p_order_sequence,
+        last_log_by = p_last_log_by
+       	WHERE menu_group_id = p_menu_group_id;
+END //
+
+CREATE PROCEDURE get_menu_groups_details(IN p_menu_group_id INT(10))
+BEGIN
+    SELECT menu_group_name, order_sequence, last_log_by
+	FROM menu_groups 
+	WHERE menu_group_id = p_menu_group_id;
+END //
+
 /* Menu table */
 CREATE TABLE menu(
 	menu_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,

@@ -153,17 +153,19 @@ else{
                         </div>
                       </div>
                       <div class="card-body">
-                        <table id="menu-item-table" class="table table-striped table-hover table-bordered nowrap w-100">
-                          <thead>
-                            <tr>
-                              <th>#</th>
-                              <th>Menu Item</th>
-                              <th>Order Sequence</th>
-                              <th>Action</th>
-                            </tr>
-                          </thead>
-                          <tbody></tbody>
-                        </table>
+                        <div class="dt-responsive table-responsive">
+                          <table id="menu-item-table" class="table table-striped table-hover table-bordered nowrap w-100 dataTable">
+                            <thead>
+                              <tr>
+                                <th>#</th>
+                                <th>Menu Item</th>
+                                <th>Order Sequence</th>
+                                <th>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody></tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>';
@@ -182,6 +184,7 @@ else{
         include_once('views/_required_js.php'); 
         include_once('views/_customizer.php'); 
     ?>
+    <script src="./assets/js/plugins/bootstrap-maxlength.min.js"></script>
     <script src="./assets/js/plugins/jquery.dataTables.min.js"></script>
     <script src="./assets/js/plugins/dataTables.bootstrap5.min.js"></script>
     <script src="./assets/js/plugins/sweetalert2.all.min.js"></script>

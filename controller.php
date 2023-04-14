@@ -258,6 +258,21 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 echo json_encode($response);
             }
         break;
+
+        case 'menu groups details':
+            if(isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])){
+                $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
+
+                $menu_groups_details = $api->get_menu_groups_details($menu_group_id);
+    
+                $response[] = array(
+                    'MENU_GROUP_NAME' => $menu_groups_details[0]['MENU_GROUP_NAME'],
+                    'ORDER_SEQUENCE' => $menu_groups_details[0]['ORDER_SEQUENCE']
+                );
+    
+                echo json_encode($response);
+            }
+        break;
     }
 }
 

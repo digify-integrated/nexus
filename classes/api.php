@@ -402,6 +402,31 @@ class Api{
         }
     }
     # -------------------------------------------------------------
+    
+    # -------------------------------------------------------------
+    #
+    # Name       : check_menu_groups_exist
+    # Purpose    : Checks if the menu groups exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_menu_groups_exist($p_menu_group_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_menu_groups_exist(:p_menu_group_id)');
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['total'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #   Update methods
@@ -512,6 +537,32 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_menu_groups
+    # Purpose    : Updates the menu groups.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function update_menu_groups($p_menu_group_id, $p_menu_group_name, $p_order_sequence, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_ui_customization_setting(:p_menu_group_id, :p_menu_group_name, :p_order_sequence, :p_last_log_by)');
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+            $sql->bindValue(':p_menu_group_name', $p_menu_group_name);
+            $sql->bindValue(':p_order_sequence', $p_order_sequence);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
 
@@ -579,6 +630,31 @@ class Api{
             $sql->bindValue(':p_email', $p_email);
             $sql->bindValue(':p_type', $p_type);
             $sql->bindValue(':p_customization_value', $p_customization_value);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_menu_groups
+    # Purpose    : Inserts the menu group.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function insert_menu_groups($p_menu_group_name, $p_order_sequence, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_menu_groups(:p_menu_group_name, :p_order_sequence, :p_last_log_by)');
+            $sql->bindValue(':p_menu_group_name', $p_menu_group_name);
+            $sql->bindValue(':p_order_sequence', $p_order_sequence);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
 
             if($sql->execute()){
@@ -700,6 +776,39 @@ class Api{
                         'DARK_LAYOUT' => $row['dark_layout'],
                         'RTL_LAYOUT' => $row['rtl_layout'],
                         'BOX_CONTAINER' => $row['box_container'],
+                        'LAST_LOG_BY' => $row['last_log_by']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_menu_groups_details
+    # Purpose    : Gets the menu groups details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_menu_groups_details($p_menu_group_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_menu_groups_details(:p_menu_group_id)');
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'MENU_GROUP_NAME' => $row['menu_group_name'],
+                        'ORDER_SEQUENCE' => $row['order_sequence'],
                         'LAST_LOG_BY' => $row['last_log_by']
                     );
                 }
@@ -974,7 +1083,7 @@ class Api{
                                         <div class="row mb-3">
                                             <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
                                             <div class="col-sm-9">
-                                                <input type="text" class="form-control" id="menu_group" name="menu_group">
+                                                <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
                                             </div>
                                         </div>
                                     </div>
@@ -982,7 +1091,7 @@ class Api{
                                             <div class="row mb-3">
                                             <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
                                             <div class="col-sm-9">
-                                                <input type="number" class="form-control" id="order_sequence" name="order_sequence">
+                                                <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0" required>
                                             </div>
                                         </div>
                                     </div>';
@@ -990,19 +1099,19 @@ class Api{
                 else if(!empty($reference_id) && $menu_group_write_access_right > 0){
                     $form_fields = '<div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
                                             <div class="col-sm-9">
                                                 <label class="col-form-label form-details" id="menu_group_label"></label>
-                                                <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group">
+                                                <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
                                             <div class="col-sm-9">
                                                 <label class="col-form-label form-details" id="order_sequence_label"></label>
-                                                <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence">
+                                                <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence" min="0" required>
                                             </div>
                                         </div>
                                     </div>';
@@ -1010,7 +1119,7 @@ class Api{
                 else{
                     $form_fields = '<div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
                                             <div class="col-sm-9">
                                                 <label class="col-form-label form-details" id="menu_group_label"></label>
                                             </div>
@@ -1018,7 +1127,7 @@ class Api{
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
                                             <div class="col-sm-9">
                                                 <label class="col-form-label form-details" id="order_sequence_label"></label>
                                             </div>
@@ -1026,93 +1135,7 @@ class Api{
                                     </div>';
                 }
                 
-                $form .= '<form id="menu-group-form" method="post" action="#">
-                            <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
-                            <div class="row">
-                                '. $form_fields .'
-                            </div>
-                        </form>';
-            break;
-        }
-
-        return $form;
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
-    #
-    # Name       : generate_form
-    # Purpose    : generates form based on type.
-    #
-    # Returns    : String
-    #
-    # -------------------------------------------------------------
-    public function generate_form_shortcuts($form_type, $reference_id, $email) {
-        $form = '';
-
-        switch ($form_type){
-            case 'menu groups form':
-                $menu_group_create_access_right = $this->check_menu_access_rights($email, 1, 'create');
-                $menu_group_write_access_right = $this->check_menu_access_rights($email, 1, 'write');
-
-                if(empty($reference_id) && $menu_group_create_access_right > 0){
-                    $form_fields = '<div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" class="form-control" id="menu_group" name="menu_group">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                            <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="number" class="form-control" id="order_sequence" name="order_sequence">
-                                            </div>
-                                        </div>
-                                    </div>';
-                }
-                else if(!empty($reference_id) && $menu_group_write_access_right > 0){
-                    $form_fields = '<div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="menu_group_label"></label>
-                                                <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
-                                                <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence">
-                                            </div>
-                                        </div>
-                                    </div>';
-                }
-                else{
-                    $form_fields = '<div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="menu_group_label"></label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
-                                            </div>
-                                        </div>
-                                    </div>';
-                }
-                
-                $form .= '<form id="menu-group-form" method="post" action="#">
+                $form .= '<form id="menu-group-form" method="post" action="#" menu-group-form-validate>
                             <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
                             <div class="row">
                                 '. $form_fields .'

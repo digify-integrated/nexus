@@ -2,11 +2,13 @@
     'use strict';
 
     $(function() {
+        initializeForm();
+
         if($('#menu-group-id').length){
-            //display_details('menu group details');
+            displayDetails('menu groups details');
 
             if($('#menu-item-table').length){
-                initialize_menu_item_table('#menu-item-table');
+                initializeMenuItemTable('#menu-item-table');
             }
         }
         
@@ -16,7 +18,7 @@
     });
 })(jQuery);
 
-function initialize_menu_item_table(datatable_name, buttons = false, show_all = false){    
+function initializeMenuItemTable(datatable_name, buttons = false, show_all = false){
     const menu_group_id = $('#menu-group-id').text();
     const email_account = $('#email_account').text();
     const type = 'menu item table';
@@ -48,12 +50,6 @@ function initialize_menu_item_table(datatable_name, buttons = false, show_all = 
         },
         'order': [[ 0, 'asc' ]],
         'columns' : column,
-        'scrollY': false,
-        'scrollX': true,
-        'scrollCollapse': true,
-        'fnDrawCallback': function( oSettings ) {
-            readjustDatatableColumn();
-        },
         'columnDefs': column_definition,
         'lengthMenu': length_menu,
         'language': {
@@ -72,4 +68,36 @@ function initialize_menu_item_table(datatable_name, buttons = false, show_all = 
     destroyDatatable(datatable_name);
 
     $(datatable_name).dataTable(settings);
+}
+
+function initializeForm(){
+    const bouncer = new Bouncer('[menu-group-form-validate]', {
+        disableSubmit: true
+    });
+      
+    document.addEventListener('bouncerFormInvalid', function (event) {
+        window.scrollTo(0, event.detail.errors[0].offsetTop);
+    }, false);
+      
+    document.addEventListener('bouncerFormValid', function () {
+        const form = document.querySelector('[menu-group-form-validate]');
+        const formData = new FormData(form);
+        const transaction = 'authenticate';
+      
+        $.ajax({
+          type: 'POST',
+          url: 'controller.php',
+          data: $(form).serialize() + '&transaction=' + transaction,
+          dataType: 'JSON',
+          beforeSend: function() {
+            disableFormSubmitButton('submit-data');
+        },
+        success: function (response) {
+           
+        },
+        complete: function() {
+            enableFormSubmitButton('submit-data', 'Save');
+        }
+        });
+    }, false);
 }
