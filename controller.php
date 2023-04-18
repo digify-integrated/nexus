@@ -61,7 +61,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     
                 $check_user_exist = $api->check_user_exist(null, $email);
      
-                if($check_user_exist){
+                if($check_user_exist === 1){
                     $user_details = $api->get_user_details(null, $email);
                     $user_id = $user_details[0]['USER_ID'];
 
@@ -120,7 +120,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                 $check_user_exist = $api->check_user_exist(null, $email);
      
-                if($check_user_exist){
+                if($check_user_exist === 1){
                     $check_user_status = $api->check_user_status(null, $email);
     
                     if($check_user_status){
@@ -160,6 +160,73 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 else{
                     echo 'Not Found';
                 }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Submit menu group
+        case 'submit menu group':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && isset($_POST['menu_group']) && !empty($_POST['menu_group']) && isset($_POST['order_sequence'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $user_details = $api->get_user_details(null, $email_account);
+                        $user_id = $user_details[0]['USER_ID'];
+
+                        $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
+                        $menu_group = htmlspecialchars($_POST['menu_group'], ENT_QUOTES, 'UTF-8');
+                        $order_sequence = htmlspecialchars($_POST['order_sequence'], ENT_QUOTES, 'UTF-8');
+
+                        $check_menu_groups_exist = $api->check_menu_groups_exist($menu_group_id);
+        
+                        if($check_menu_groups_exist > 0){
+                            $update_menu_groups = $api->update_menu_groups($menu_group_id, $menu_group, $order_sequence, $user_id);
+                
+                            if($update_menu_groups){
+                                $response[] = array(
+                                    'RESPONSE' => 'Updated'
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $update_menu_groups
+                                );
+                            }
+                        }
+                        else{
+                            $insert_menu_groups = $api->insert_menu_groups($menu_group, $order_sequence, $user_id);
+                
+                            if($insert_menu_groups[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Inserted',
+                                    'MENU_GROUP_ID' => $insert_menu_groups[0]['MENU_GROUP_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $insert_menu_groups
+                                );
+                            }
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'Not Found'
+                    );
+                }
+
+                echo json_encode($response);
             }
         break;
         # -------------------------------------------------------------

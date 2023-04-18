@@ -12,7 +12,6 @@ if($check_user_status){
   $menu_group_read_access_right = $api->check_menu_access_rights($email, 1, 'read');
       
   if($menu_group_read_access_right > 0){
-
     if(isset($_GET['id']) && !empty($_GET['id'])){
       $id = $_GET['id'];
       $menu_group_id = $api->decrypt_data($id);
@@ -99,7 +98,7 @@ else{
                                               <ul class="dropdown-menu dropdown-menu-end">';
                                               
                           if ($menu_group_create_access_right > 0) {
-                            $dropdown .= '<li><button class="dropdown-item" type="button">Create Menu Group</button></li>';
+                            $dropdown .= '<li><a class="dropdown-item" href="menu-group-form.php">Create Menu Group</a></li>';
                           }
 
                           if ($menu_group_delete_access_right > 0) {

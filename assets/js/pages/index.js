@@ -10,7 +10,6 @@ document.addEventListener('bouncerFormInvalid', function (event) {
 
 document.addEventListener('bouncerFormValid', function () {
   const form = document.querySelector('[signin-form-validate]');
-  const formData = new FormData(form);
   const transaction = 'authenticate';
 
   $.ajax({

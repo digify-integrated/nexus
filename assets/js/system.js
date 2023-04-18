@@ -171,9 +171,7 @@ function saveCustomization(type, customization_value){
                 case 'Updated':
                     showNotification('Update UI Settings Success', 'The UI settings has been updated successfully.', 'success');
                     break;
-                case 'Not Found':
-                    showNotification('Update UI Settings Error', 'Your user account does not exist.', 'danger');
-                    break;
+                case 'Inactive User':
                 case 'Not Found':
                     window.location = '404.php';
                     break;

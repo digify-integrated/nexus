@@ -199,7 +199,7 @@ class Api{
         if ($this->databaseConnection()) {
             $check_user_exist = $this->check_user_exist(null, $email);
            
-            if($check_user_exist > 0){
+            if($check_user_exist === 1){
                 $user_details = $this->get_user_details(null, $email);
                 $user_status = $user_details[0]['USER_STATUS'];
                 $login_attempt = $user_details[0]['FAILED_LOGIN'];
@@ -546,7 +546,7 @@ class Api{
     # -------------------------------------------------------------
     public function update_menu_groups($p_menu_group_id, $p_menu_group_name, $p_order_sequence, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL update_ui_customization_setting(:p_menu_group_id, :p_menu_group_name, :p_order_sequence, :p_last_log_by)');
+            $sql = $this->db_connection->prepare('CALL update_menu_groups(:p_menu_group_id, :p_menu_group_name, :p_order_sequence, :p_last_log_by)');
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
             $sql->bindValue(':p_menu_group_name', $p_menu_group_name);
             $sql->bindValue(':p_order_sequence', $p_order_sequence);
@@ -652,19 +652,30 @@ class Api{
     # -------------------------------------------------------------
     public function insert_menu_groups($p_menu_group_name, $p_order_sequence, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL insert_menu_groups(:p_menu_group_name, :p_order_sequence, :p_last_log_by)');
+            $sql = $this->db_connection->prepare('CALL insert_menu_groups(:p_menu_group_name, :p_order_sequence, :p_last_log_by, @p_menu_group_id)');
             $sql->bindValue(':p_menu_group_name', $p_menu_group_name);
             $sql->bindValue(':p_order_sequence', $p_order_sequence);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
-
+    
             if($sql->execute()){
-                return true;
+                $result = $this->db_connection->query("SELECT @p_menu_group_id AS menu_group_id");
+                $menu_group_id = $result->fetch(PDO::FETCH_ASSOC)['menu_group_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'MENU_GROUP_ID' => $this->encrypt_data($menu_group_id)
+                );
             }
             else{
-                return $stmt->errorInfo()[2];
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
             }
+
+            return $response;
         }
     }
+    
     # -------------------------------------------------------------
     
     # -------------------------------------------------------------
@@ -1024,7 +1035,7 @@ class Api{
                         $time_elapsed = $this->time_elapsed_string($row['changed_at']);
 
                         $user_details = $this->get_user_details($changed_by, null);
-                        $file_as = $user_details[0]['FILE_AS'];
+                        $file_as = $user_details[0]['FILE_AS'] ?? null;
 
                         $log_notes .= '<div class="comment">
                                             <div class="media align-items-start">
@@ -1037,7 +1048,7 @@ class Api{
                                                 </div>
                                             </div>
                                             <div class="comment-content">
-                                                <p class="mb-2 mt-3">
+                                                <p class="mb-0">
                                                     '. $log .'
                                                 </p>
                                             </div>
@@ -1083,6 +1094,7 @@ class Api{
                                         <div class="row mb-3">
                                             <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
                                             <div class="col-sm-9">
+                                                <input type="hidden" id="menu_group_id" name="menu_group_id">
                                                 <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
                                             </div>
                                         </div>
@@ -1102,6 +1114,7 @@ class Api{
                                             <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
                                             <div class="col-sm-9">
                                                 <label class="col-form-label form-details" id="menu_group_label"></label>
+                                                <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
                                                 <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
                                             </div>
                                         </div>

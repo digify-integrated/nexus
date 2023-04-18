@@ -25,7 +25,6 @@ document.addEventListener('bouncerFormInvalid', function (event) {
 
 document.addEventListener('bouncerFormValid', function () {
   const form = document.querySelector('[reset-password-form-validate]');
-  const formData = new FormData(form);
   const transaction = 'reset password';
 
   $.ajax({

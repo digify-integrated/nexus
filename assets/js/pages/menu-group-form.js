@@ -80,24 +80,39 @@ function initializeForm(){
     }, false);
       
     document.addEventListener('bouncerFormValid', function () {
+        const email_account = $('#email_account').text();
         const form = document.querySelector('[menu-group-form-validate]');
-        const formData = new FormData(form);
-        const transaction = 'authenticate';
+        const transaction = 'submit menu group';
       
         $.ajax({
-          type: 'POST',
-          url: 'controller.php',
-          data: $(form).serialize() + '&transaction=' + transaction,
-          dataType: 'JSON',
-          beforeSend: function() {
-            disableFormSubmitButton('submit-data');
-        },
-        success: function (response) {
-           
-        },
-        complete: function() {
-            enableFormSubmitButton('submit-data', 'Save');
-        }
+            type: 'POST',
+            url: 'controller.php',
+            data: $(form).serialize() + '&email_account=' + email_account + '&transaction=' + transaction,
+            dataType: 'JSON',
+            beforeSend: function() {
+                disableFormSubmitButton('submit-data');
+            },
+            success: function (response) {
+                switch (response[0]['RESPONSE']) {
+                    case 'Inserted':
+                        setNotification('Insert Menu Group Success', 'The menu group has been inserted successfully.', 'success');
+                        window.location = window.location.href + '?id=' + response[0]['MENU_GROUP_ID'];
+                        break;
+                    case 'Updated':
+                        setNotification('Update Menu Group Success', 'The menu group has been updated successfully.', 'success');
+                        window.location.reload();
+                        break;
+                    case 'Inactive User':
+                        window.location = '404.php';
+                        break;
+                    default:
+                        setNotification('Transaction Error', response, 'error');
+                        break;
+                }
+            },
+            complete: function() {
+                enableFormSubmitButton('submit-data', 'Save');
+            }
         });
     }, false);
 }

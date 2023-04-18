@@ -43,23 +43,23 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT '';
 
     IF NEW.user_status <> OLD.user_status THEN
-        SET audit_log = CONCAT(audit_log, "user status: ", OLD.user_status, " -> ", NEW.user_status, "<br/>");
+        SET audit_log = CONCAT(audit_log, "User Status: ", OLD.user_status, " -> ", NEW.user_status, "<br/>");
     END IF;
 
     IF NEW.password_expiry_date <> OLD.password_expiry_date THEN
-        SET audit_log = CONCAT(audit_log, "password expiry date: ", OLD.password_expiry_date, " -> ", NEW.password_expiry_date, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Password Expiry Date: ", OLD.password_expiry_date, " -> ", NEW.password_expiry_date, "<br/>");
     END IF;
 
     IF NEW.failed_login <> OLD.failed_login THEN
-        SET audit_log = CONCAT(audit_log, "failed login: ", OLD.failed_login, " -> ", NEW.failed_login, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Failed Login: ", OLD.failed_login, " -> ", NEW.failed_login, "<br/>");
     END IF;
 
     IF NEW.last_failed_login <> OLD.last_failed_login THEN
-        SET audit_log = CONCAT(audit_log, "last failed login: ", OLD.last_failed_login, " -> ", NEW.last_failed_login, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Last Failed Login: ", OLD.last_failed_login, " -> ", NEW.last_failed_login, "<br/>");
     END IF;
 
     IF NEW.last_connection_date <> OLD.last_connection_date THEN
-        SET audit_log = CONCAT(audit_log, "last connection date: ", OLD.last_connection_date, " -> ", NEW.last_connection_date, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Last Connection Date: ", OLD.last_connection_date, " -> ", NEW.last_connection_date, "<br/>");
     END IF;
     
     IF LENGTH(audit_log) > 0 THEN
@@ -75,35 +75,23 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT 'User created. <br/>';
 
     IF NEW.email_address <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>email address: ", NEW.email_address);
+        SET audit_log = CONCAT(audit_log, "<br/>Email Address: ", NEW.email_address);
     END IF;
 
     IF NEW.file_as <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>file as: ", NEW.file_as);
+        SET audit_log = CONCAT(audit_log, "<br/>File As: ", NEW.file_as);
     END IF;
 
     IF NEW.user_status <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>user status: ", NEW.user_status);
+        SET audit_log = CONCAT(audit_log, "<br/>User Status: ", NEW.user_status);
     END IF;
 
     IF NEW.password_expiry_date <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>password expiry date: ", NEW.password_expiry_date);
+        SET audit_log = CONCAT(audit_log, "<br/>Password Expiry Date: ", NEW.password_expiry_date);
     END IF;
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
     VALUES ('users', NEW.user_id, audit_log, NEW.last_log_by, NOW());
-END //
-
-CREATE TRIGGER users_trigger_delete
-BEFORE DELETE ON users
-FOR EACH ROW
-BEGIN
-    DECLARE audit_log TEXT DEFAULT '';
-
-    SET audit_log = CONCAT(audit_log, "The user '", OLD.user_id, "' has been deleted.");
-
-    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
-    VALUES ('users', OLD.user_id, audit_log, OLD.last_log_by, NOW());
 END //
 
 CREATE PROCEDURE check_user_exist(IN p_user_id INT(10), IN p_email_address VARCHAR(100))
@@ -236,27 +224,27 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT '';
 
     IF NEW.theme_contrast <> OLD.theme_contrast THEN
-        SET audit_log = CONCAT(audit_log, "theme contrast: ", OLD.theme_contrast, " -> ", NEW.theme_contrast, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Theme Contrast: ", OLD.theme_contrast, " -> ", NEW.theme_contrast, "<br/>");
     END IF;
 
     IF NEW.caption_show <> OLD.caption_show THEN
-        SET audit_log = CONCAT(audit_log, "caption show: ", OLD.caption_show, " -> ", NEW.caption_show, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Caption Show: ", OLD.caption_show, " -> ", NEW.caption_show, "<br/>");
     END IF;
 
     IF NEW.preset_theme <> OLD.preset_theme THEN
-        SET audit_log = CONCAT(audit_log, "preset theme: ", OLD.preset_theme, " -> ", NEW.preset_theme, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Preset Theme: ", OLD.preset_theme, " -> ", NEW.preset_theme, "<br/>");
     END IF;
 
     IF NEW.dark_layout <> OLD.dark_layout THEN
-        SET audit_log = CONCAT(audit_log, "dark layout: ", OLD.dark_layout, " -> ", NEW.dark_layout, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Dark Layout: ", OLD.dark_layout, " -> ", NEW.dark_layout, "<br/>");
     END IF;
 
     IF NEW.rtl_layout <> OLD.rtl_layout THEN
-        SET audit_log = CONCAT(audit_log, "rtl layout: ", OLD.rtl_layout, " -> ", NEW.rtl_layout, "<br/>");
+        SET audit_log = CONCAT(audit_log, "RTL Layout: ", OLD.rtl_layout, " -> ", NEW.rtl_layout, "<br/>");
     END IF;
 
     IF NEW.box_container <> OLD.box_container THEN
-        SET audit_log = CONCAT(audit_log, "box container: ", OLD.box_container, " -> ", NEW.box_container , "<br/>");
+        SET audit_log = CONCAT(audit_log, "Box Container: ", OLD.box_container, " -> ", NEW.box_container , "<br/>");
     END IF;
     
     IF LENGTH(audit_log) > 0 THEN
@@ -272,27 +260,27 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT 'UI Customization created. <br/>';
 
     IF NEW.theme_contrast <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>theme contrast: ", NEW.theme_contrast);
+        SET audit_log = CONCAT(audit_log, "<br/>Theme Contrast: ", NEW.theme_contrast);
     END IF;
 
     IF NEW.caption_show <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>caption show: ", NEW.caption_show);
+        SET audit_log = CONCAT(audit_log, "<br/>Caption Show: ", NEW.caption_show);
     END IF;
 
     IF NEW.preset_theme <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>preset theme: ", NEW.preset_theme);
+        SET audit_log = CONCAT(audit_log, "<br/>Preset Theme: ", NEW.preset_theme);
     END IF;
 
     IF NEW.dark_layout <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>dark layout: ", NEW.dark_layout);
+        SET audit_log = CONCAT(audit_log, "<br/>Dark Layout: ", NEW.dark_layout);
     END IF;
 
     IF NEW.rtl_layout <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>rtl layout: ", NEW.rtl_layout);
+        SET audit_log = CONCAT(audit_log, "<br/>RTL Layout: ", NEW.rtl_layout);
     END IF;
 
     IF NEW.box_container <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>box container: ", NEW.box_container);
+        SET audit_log = CONCAT(audit_log, "<br/>Box Container: ", NEW.box_container);
     END IF;
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
@@ -391,15 +379,15 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT '';
 
     IF NEW.role_name <> OLD.role_name THEN
-        SET audit_log = CONCAT(audit_log, "role name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Role Name: ", OLD.role_name, " -> ", NEW.role_name, "<br/>");
     END IF;
 
     IF NEW.role_description <> OLD.role_description THEN
-        SET audit_log = CONCAT(audit_log, "role description: ", OLD.role_description, " -> ", NEW.role_description, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Role Description: ", OLD.role_description, " -> ", NEW.role_description, "<br/>");
     END IF;
 
     IF NEW.assignable <> OLD.assignable THEN
-        SET audit_log = CONCAT(audit_log, "assignable: ", OLD.assignable, " -> ", NEW.assignable, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Assignable: ", OLD.assignable, " -> ", NEW.assignable, "<br/>");
     END IF;
     
     IF LENGTH(audit_log) > 0 THEN
@@ -415,31 +403,19 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT 'Role created. <br/>';
 
     IF NEW.role_name <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>role name: ", NEW.role_name);
+        SET audit_log = CONCAT(audit_log, "<br/>Role Name: ", NEW.role_name);
     END IF;
 
     IF NEW.role_description <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>role description: ", NEW.role_description);
+        SET audit_log = CONCAT(audit_log, "<br/>Role Description: ", NEW.role_description);
     END IF;
 
     IF NEW.assignable <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>assignable: ", NEW.assignable);
+        SET audit_log = CONCAT(audit_log, "<br/>Assignable: ", NEW.assignable);
     END IF;
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
     VALUES ('role', NEW.role_id, audit_log, NEW.last_log_by, NOW());
-END //
-
-CREATE TRIGGER role_trigger_delete
-BEFORE DELETE ON role
-FOR EACH ROW
-BEGIN
-    DECLARE audit_log TEXT DEFAULT '';
-
-    SET audit_log = CONCAT(audit_log, "The role '", OLD.role_id, "' has been deleted.");
-
-    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
-    VALUES ('role', OLD.role_id, audit_log, OLD.last_log_by, NOW());
 END //
 
 /* Role users table */
@@ -473,11 +449,11 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT '';
 
     IF NEW.menu_group_name <> OLD.menu_group_name THEN
-        SET audit_log = CONCAT(audit_log, "menu group name: ", OLD.menu_group_name, " -> ", NEW.menu_group_name, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Menu Group Name: ", OLD.menu_group_name, " -> ", NEW.menu_group_name, "<br/>");
     END IF;
 
     IF NEW.order_sequence <> OLD.order_sequence THEN
-        SET audit_log = CONCAT(audit_log, "order sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
     END IF;
     
     IF LENGTH(audit_log) > 0 THEN
@@ -493,27 +469,15 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT 'Menu group created. <br/>';
 
     IF NEW.menu_group_name <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>menu group name: ", NEW.menu_group_name);
+        SET audit_log = CONCAT(audit_log, "<br/>Menu Group Name: ", NEW.menu_group_name);
     END IF;
 
     IF NEW.order_sequence <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>order sequence: ", NEW.order_sequence);
+        SET audit_log = CONCAT(audit_log, "<br/>Order Sequence: ", NEW.order_sequence);
     END IF;
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
     VALUES ('menu_groups', NEW.menu_group_id, audit_log, NEW.last_log_by, NOW());
-END //
-
-CREATE TRIGGER menu_groups_trigger_delete
-BEFORE DELETE ON menu_groups
-FOR EACH ROW
-BEGIN
-    DECLARE audit_log TEXT DEFAULT '';
-
-    SET audit_log = CONCAT(audit_log, "The menu group '", OLD.menu_group_id, "' has been deleted.");
-
-    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
-    VALUES ('menu_groups', OLD.menu_group_id, audit_log, OLD.last_log_by, NOW());
 END //
 
 CREATE PROCEDURE check_menu_groups_exist(IN p_menu_group_id INT(10))
@@ -523,10 +487,12 @@ BEGIN
     WHERE menu_group_id = p_menu_group_id;
 END //
 
-CREATE PROCEDURE insert_menu_groups(IN p_menu_group_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
+CREATE PROCEDURE insert_menu_groups(IN p_menu_group_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10), OUT p_menu_group_id INT(10))
 BEGIN
     INSERT INTO menu_groups (menu_group_name, order_sequence, last_log_by) 
 	VALUES(p_menu_group_name, p_order_sequence, p_last_log_by);
+	
+    SET p_menu_group_id = LAST_INSERT_ID();
 END //
 
 CREATE PROCEDURE update_menu_groups(IN p_menu_group_id INT(10), IN p_menu_group_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
@@ -569,15 +535,15 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT '';
 
     IF NEW.menu_name <> OLD.menu_name THEN
-        SET audit_log = CONCAT(audit_log, "menu name: ", OLD.menu_name, " -> ", NEW.menu_name, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Menu Name: ", OLD.menu_name, " -> ", NEW.menu_name, "<br/>");
     END IF;
 
     IF NEW.menu_group_id <> OLD.menu_group_id THEN
-        SET audit_log = CONCAT(audit_log, "menu group id: ", OLD.menu_group_id, " -> ", NEW.menu_group_id, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Menu Group ID: ", OLD.menu_group_id, " -> ", NEW.menu_group_id, "<br/>");
     END IF;
 
     IF NEW.order_sequence <> OLD.order_sequence THEN
-        SET audit_log = CONCAT(audit_log, "order sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
+        SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
     END IF;
     
     IF LENGTH(audit_log) > 0 THEN
@@ -593,31 +559,19 @@ BEGIN
     DECLARE audit_log TEXT DEFAULT 'Menu created. <br/>';
 
     IF NEW.menu_name <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>menu name: ", NEW.menu_name);
+        SET audit_log = CONCAT(audit_log, "<br/>Menu Name: ", NEW.menu_name);
     END IF;
 
     IF NEW.menu_group_id <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>menu group id: ", NEW.menu_group_id);
+        SET audit_log = CONCAT(audit_log, "<br/>Menu Group ID: ", NEW.menu_group_id);
     END IF;
 
     IF NEW.order_sequence <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>order sequence: ", NEW.order_sequence);
+        SET audit_log = CONCAT(audit_log, "<br/>Order Sequence: ", NEW.order_sequence);
     END IF;
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
     VALUES ('menu', NEW.menu_id, audit_log, NEW.last_log_by, NOW());
-END //
-
-CREATE TRIGGER menu_trigger_delete
-BEFORE DELETE ON menu
-FOR EACH ROW
-BEGIN
-    DECLARE audit_log TEXT DEFAULT '';
-
-    SET audit_log = CONCAT(audit_log, "The menu '", OLD.menu_id, "' has been deleted.");
-
-    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
-    VALUES ('menu', OLD.menu_id, audit_log, OLD.last_log_by, NOW());
 END //
 
 /* Menu access right table */
