@@ -15,6 +15,47 @@
         $(document).on('click','#discard-create',function() {
             discardCreate('menu-groups.php');
         });
+
+        $(document).on('click','#delete-menu-group',function() {
+            const menu_group_id = $(this).data('menu-group-id');
+            const transaction = 'delete menu group';
+    
+            Swal.fire({
+                title: 'Confirm Menu Group Deletion',
+                text: 'Are you sure you want to delete this menu group?',
+                icon: 'warning',
+                showCancelButton: !0,
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonClass: 'btn btn-danger mt-2',
+                cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                buttonsStyling: !1
+            }).then(function(result) {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'controller.php',
+                        data: {username : username, menu_group_id : menu_group_id, transaction : transaction},
+                        success: function (response) {
+                            switch (response) {
+                                case 'Deleted':
+                                    set_toastr('Menu Group Deleted', 'The menu group has been deleted successfully.', 'success');
+                                    window.location = 'menu-groups.php';
+                                    break;
+                                case 'Inactive User':
+                                case 'Not Found':
+                                    window.location = '404.php';
+                                    break;
+                                default:
+                                    show_toastr('Menu Group Deletion Error', response, 'error');
+                                    break;
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
     });
 })(jQuery);
 
