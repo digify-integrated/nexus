@@ -647,7 +647,7 @@ class Api{
     # Name       : insert_menu_groups
     # Purpose    : Inserts the menu group.
     #
-    # Returns    : Bool/String
+    # Returns    : Array
     #
     # -------------------------------------------------------------
     public function insert_menu_groups($p_menu_group_name, $p_order_sequence, $p_last_log_by){
@@ -680,6 +680,30 @@ class Api{
     
     # -------------------------------------------------------------
     #   Delete methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_menu_groups
+    # Purpose    : Delete the menu group.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_menu_groups($p_menu_group_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_menu_groups(:p_menu_group_id)');
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------

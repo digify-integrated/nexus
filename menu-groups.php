@@ -14,6 +14,9 @@ if($check_user_status){
   if($menu_read_access_right > 0){            
     require('views/_interface_settings.php');
     require('views/_user_account_details.php');
+
+    $menu_group_create_access_right = $api->check_menu_access_rights($email, 1, 'create');
+    $menu_group_delete_access_right = $api->check_menu_access_rights($email, 1, 'delete');
   }
   else{
     header('location: 404.php');
@@ -69,19 +72,28 @@ else{
                     <div class="col-sm-6">
                       <h5>Menu Groups List</h5>
                     </div>
-                    <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                          Action
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          <li><button class="dropdown-item" type="button">Action</button></li>
-                          <li><button class="dropdown-item" type="button">Another action</button></li>
-                          <li><button class="dropdown-item" type="button">Something else here</button></li>
-                        </ul>
-                      </div>
-                      <a href="menu-group-form.php" class="btn btn-success">Create</a>
-                    </div>
+                    <?php
+                      if($menu_group_create_access_right > 0 || $menu_group_delete_access_right > 0){
+                        $action = ' <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">';
+                        
+                          if($menu_group_delete_access_right > 0){
+                            $action .= '<div class="btn-group m-r-10">
+                                          <button type="button" class="btn btn-outline-secondary dropdown-toggle d-none action-dropdown" data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                          <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><button class="dropdown-item" type="button" id="delete-menu-group">Delete Menu Group</button></li>
+                                          </ul>
+                                          </div>';
+                          }
+
+                          if($menu_group_create_access_right > 0){
+                            $action .= '<a href="menu-group-form.php" class="btn btn-success">Create</a>';
+                          }
+
+                        $action .= '</div>';
+                          
+                        echo $action;
+                      }
+                    ?>
                   </div>
                 </div>
               </div>
@@ -116,6 +128,7 @@ else{
         include_once('views/_required_js.php'); 
         include_once('views/_customizer.php'); 
     ?>
+    <script src="./assets/js/plugins/sweetalert2.all.min.js"></script>
     <script src="./assets/js/plugins/jquery.dataTables.min.js"></script>
     <script src="./assets/js/plugins/dataTables.bootstrap5.min.js"></script>
     <script src="./assets/js/pages/menu-groups.js?v=<?php echo rand(); ?>"></script>

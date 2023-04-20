@@ -35,7 +35,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                         $menu_group_delete_access_right = $api->check_menu_access_rights($email_account, 1, 'delete');
 
                         if($menu_group_delete_access_right > 0){
-                            $delete = '<button type="button" class="btn btn-icon btn-danger delete-menu-group" title="Delete Menu Group">
+                            $delete = '<button type="button" class="btn btn-icon btn-danger delete-menu-group" data-menu-group-id="' . $menu_group_id . '" title="Delete Menu Group">
                                             <i class="ti ti-trash"></i>
                                         </button>';
                         }
@@ -44,7 +44,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                         }
     
                         $response[] = array(
-                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" type="checkbox" value="'. $menu_group_id_encrypted .'">',
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-delete="1" type="checkbox" value="'. $menu_group_id .'">',
                             'MENU_GROUP_ID' => $menu_group_id,
                             'MENU_GROUP_NAME' => $menu_group_name,
                             'ORDER_SEQUENCE' => $order_sequence,

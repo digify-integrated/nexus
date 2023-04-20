@@ -2,15 +2,123 @@
     'use strict';
 
     $(function() {
+        const email_account = $('#email_account').text();
+
         if($('#menu-groups-table').length){
             initialized_menu_groups_table('#menu-groups-table');
         }
+
+        $(document).on('click','.delete-menu-group',function() {
+            const menu_group_id = $(this).data('menu-group-id');
+            const transaction = 'delete menu group';
+    
+            Swal.fire({
+                title: 'Confirm Menu Group Deletion',
+                text: 'Are you sure you want to delete this menu group?',
+                icon: 'warning',
+                showCancelButton: !0,
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonClass: 'btn btn-danger mt-2',
+                cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                buttonsStyling: !1
+            }).then(function(result) {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'controller.php',
+                        data: {email_account : email_account, menu_group_id : menu_group_id, transaction : transaction},
+                        success: function (response) {
+                            switch (response) {
+                                case 'Deleted':
+                                    showNotification('Menu Group Deleted', 'The menu group has been deleted successfully.', 'success');
+                                    reloadDatatable('#menu-groups-table');
+                                    break;
+                                case 'Not Found':
+                                    showNotification('Menu Group Deletion Error', 'The menu group does not exist.', 'danger');
+                                    reloadDatatable('#menu-groups-table');
+                                    break;
+                                case 'Inactive User':
+                                case 'User Not Found':
+                                    window.location = 'logout.php?logout';
+                                    break;
+                                default:
+                                    showNotification('Menu Group Deletion Error', response, 'danger');
+                                    break;
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
+
+        $(document).on('click','#delete-menu-group',function() {
+            let menu_group_id = [];
+            const transaction = 'delete multiple menu group';
+
+            $('.datatable-checkbox-children[data-delete="1"]').each((index, element) => {
+                if ($(element).is(':checked')) {
+                    menu_group_id.push(element.value);
+                }
+            });
+    
+            if(menu_group_id.length > 0){
+                Swal.fire({
+                    title: 'Confirm Multiple Departments Deletion',
+                    text: 'Are you sure you want to delete these departments?',
+                    icon: 'warning',
+                    showCancelButton: !0,
+                    confirmButtonText: 'Delete',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonClass: 'btn btn-danger mt-2',
+                    cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                    buttonsStyling: !1
+                }).then(function(result) {
+                    if (result.value) {
+                        
+                        $.ajax({
+                            type: 'POST',
+                            url: 'controller.php',
+                            data: {email_account : email_account, department_id : department_id, transaction : transaction},
+                            success: function (response) {
+                                switch (response) {
+                                    case 'Deleted':
+                                        showNotification('Menu Group Deleted', 'The menu group has been deleted successfully.', 'success');
+                                        reloadDatatable('#menu-groups-table');
+                                        break;
+                                    case 'Not Found':
+                                        showNotification('Menu Group Deletion Error', 'The menu group does not exist.', 'danger');
+                                        reloadDatatable('#menu-groups-table');
+                                        break;
+                                    case 'Inactive User':
+                                    case 'User Not Found':
+                                        window.location = 'logout.php?logout';
+                                        break;
+                                    default:
+                                        showNotification('Menu Group Deletion Error', response, 'danger');
+                                        break;
+                                }
+                            },
+                            complete: function(){
+                                $('.multiple').addClass('d-none');
+                                $('.multiple-action').addClass('d-none');
+                            }
+                        });
+                        
+                        return false;
+                    }
+                });
+            }
+            else{
+                showNotification('Multiple Menu Group Deletion Error', 'Please select the menu groups you wish to delete.', 'danger');
+            }
+        });
     });
 })(jQuery);
 
 function initialized_menu_groups_table(datatable_name, buttons = false, show_all = false){
-    //hide_multiple_buttons();
-    
+    toggleHideActionDropdown();
     const email_account = $('#email_account').text();
     const type = 'menu groups table';
     var settings;

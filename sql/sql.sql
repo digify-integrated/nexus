@@ -504,6 +504,11 @@ BEGIN
        	WHERE menu_group_id = p_menu_group_id;
 END //
 
+CREATE PROCEDURE delete_menu_groups(IN p_menu_group_id INT(10))
+BEGIN
+    DELETE FROM menu_groups WHERE menu_group_id = p_menu_group_id;
+END //
+
 CREATE PROCEDURE get_menu_groups_details(IN p_menu_group_id INT(10))
 BEGIN
     SELECT menu_group_name, order_sequence, last_log_by

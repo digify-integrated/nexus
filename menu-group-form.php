@@ -15,6 +15,12 @@ if($check_user_status){
     if(isset($_GET['id']) && !empty($_GET['id'])){
       $id = $_GET['id'];
       $menu_group_id = $api->decrypt_data($id);
+
+      $check_menu_groups_exist = $api->check_menu_groups_exist($menu_group_id);
+        
+      if($check_menu_groups_exist === 0){
+        header('location: 404.php');
+      }
     }
     else{
       $menu_group_id = null;

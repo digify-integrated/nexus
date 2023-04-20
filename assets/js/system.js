@@ -44,6 +44,17 @@
                   });
             });
         }
+
+        $(document).on('click','#datatable-checkbox',function() {
+            var status = $(this).is(':checked') ? true : false;
+            $('.datatable-checkbox-children').prop('checked',status);
+    
+            toggleActionDropdown();
+        });
+
+        $(document).on('click','.datatable-checkbox-children',function() {
+            toggleActionDropdown();
+        });
     });
 })(jQuery);
 
@@ -172,8 +183,8 @@ function saveCustomization(type, customization_value){
                     showNotification('Update UI Settings Success', 'The UI settings has been updated successfully.', 'success');
                     break;
                 case 'Inactive User':
-                case 'Not Found':
-                    window.location = '404.php';
+                case 'User Not Found':
+                    window.location = 'logout.php?logout';
                     break;
                 default:
                     showNotification('Update UI Settings Error', response, 'danger');
@@ -454,7 +465,7 @@ function changeBoxContainer(value) {
 }
 
 function reloadDatatable(datatable){
-    hide_multiple_buttons();
+    hideMultipleButtons();
     $(datatable).DataTable().ajax.reload();
 }
 
@@ -477,9 +488,23 @@ function readjustDatatableColumn() {
 }
 
 function intializeMaxLength(){
-    $('[maxlength]').maxlength({
-        alwaysShow: true,
-        warningClass: "badge rounded-pill bg-primary",
-        limitReachedClass: "badge rounded-pill bg-danger",
-    });
+    if ($('[maxlength]').length) {
+        $('[maxlength]').maxlength({
+            alwaysShow: true,
+            warningClass: "badge rounded-pill bg-primary",
+            limitReachedClass: "badge rounded-pill bg-danger",
+        });
+    }
+}
+
+function toggleActionDropdown(){
+    const inputElements = Array.from(document.querySelectorAll('.datatable-checkbox-children'));
+    const multipleAction = $('.action-dropdown');
+    const checkedValue = inputElements.filter(chk => chk.checked).length;
+
+    multipleAction.toggleClass('d-none', checkedValue === 0);
+}
+
+function toggleHideActionDropdown(){
+    $('#datatable-checkbox').prop('checked', false);
 }

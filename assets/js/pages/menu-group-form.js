@@ -17,6 +17,7 @@
         });
 
         $(document).on('click','#delete-menu-group',function() {
+            const email_account = $('#email_account').text();
             const menu_group_id = $(this).data('menu-group-id');
             const transaction = 'delete menu group';
     
@@ -35,19 +36,23 @@
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {username : username, menu_group_id : menu_group_id, transaction : transaction},
+                        data: {email_account : email_account, menu_group_id : menu_group_id, transaction : transaction},
                         success: function (response) {
                             switch (response) {
                                 case 'Deleted':
-                                    set_toastr('Menu Group Deleted', 'The menu group has been deleted successfully.', 'success');
+                                    setNotification('Menu Group Deleted', 'The menu group has been deleted successfully.', 'success');
                                     window.location = 'menu-groups.php';
                                     break;
-                                case 'Inactive User':
                                 case 'Not Found':
+                                    setNotification('Menu Group Deletion Error', 'The menu group does not exist.', 'danger');
                                     window.location = '404.php';
                                     break;
+                                case 'Inactive User':
+                                case 'User Not Found':
+                                    window.location = 'logout.php?logout';
+                                    break;
                                 default:
-                                    show_toastr('Menu Group Deletion Error', response, 'error');
+                                    show_toastr('Menu Group Deletion Error', response, 'danger');
                                     break;
                             }
                         }
@@ -144,10 +149,10 @@ function initializeForm(){
                         window.location.reload();
                         break;
                     case 'Inactive User':
-                        window.location = '404.php';
+                        window.location = 'logout.php?logout';
                         break;
                     default:
-                        setNotification('Transaction Error', response, 'error');
+                        setNotification('Transaction Error', response, 'danger');
                         break;
                 }
             },
