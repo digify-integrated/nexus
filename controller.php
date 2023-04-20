@@ -158,7 +158,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     }
                 }
                 else{
-                    echo 'Not Found';
+                    echo 'User Not Found';
                 }
             }
         break;
@@ -222,7 +222,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 }
                 else{
                     $response[] = array(
-                        'RESPONSE' => 'Not Found'
+                        'RESPONSE' => 'User Not Found'
                     );
                 }
 
@@ -233,6 +233,46 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
         # -------------------------------------------------------------
         #   Delete transactions
+        # -------------------------------------------------------------
+
+        # Delete menu group
+        case 'delete menu group':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_menu_groups_exist = $api->check_menu_groups_exist($menu_group_id);
+        
+                        if($check_menu_groups_exist > 0){
+                            $delete_menu_groups = $api->delete_menu_groups($menu_group_id);
+                
+                            if($delete_menu_groups){
+                                echo 'Deleted';
+                            }
+                            else{
+                                echo $delete_menu_groups;
+                            }
+                        }
+                        else{
+                            echo 'Not Found';
+                        }       
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
         # -------------------------------------------------------------
 
         # -------------------------------------------------------------
