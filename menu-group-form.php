@@ -104,7 +104,8 @@ else{
                                               <ul class="dropdown-menu dropdown-menu-end">';
                                               
                           if ($menu_group_create_access_right > 0) {
-                            $dropdown .= '<li><a class="dropdown-item" href="menu-group-form.php">Create Menu Group</a></li>';
+                            $dropdown .= '<li><a class="dropdown-item" href="menu-group-form.php">Create Menu Group</a></li>
+                            <li><button class="dropdown-item" type="button" data-menu-group-id="' . $menu_group_id . '" id="duplicate-menu-group">Duplicate Menu Group</button></li>';
                           }
 
                           if ($menu_group_delete_access_right > 0) {
@@ -140,7 +141,7 @@ else{
           <?php
           if(!empty($menu_group_id)){
             if($menu_item_create_access_right > 0){
-              $menu_item_create = '<button type="button" class="btn btn-success" id="create-menu-item-">Create</button>';
+              $menu_item_create = '<button type="button" class="btn btn-success" id="create-menu-item">Create</button>';
             }
 
             echo '<div class="col-lg-12">

@@ -31,11 +31,11 @@
                         success: function (response) {
                             switch (response) {
                                 case 'Deleted':
-                                    showNotification('Menu Group Deleted', 'The menu group has been deleted successfully.', 'success');
+                                    showNotification('Delete Menu Group Success', 'The menu group has been deleted successfully.', 'success');
                                     reloadDatatable('#menu-groups-table');
                                     break;
                                 case 'Not Found':
-                                    showNotification('Menu Group Deletion Error', 'The menu group does not exist.', 'danger');
+                                    showNotification('Delete Menu Group Error', 'The menu group does not exist.', 'danger');
                                     reloadDatatable('#menu-groups-table');
                                     break;
                                 case 'Inactive User':
@@ -43,7 +43,7 @@
                                     window.location = 'logout.php?logout';
                                     break;
                                 default:
-                                    showNotification('Menu Group Deletion Error', response, 'danger');
+                                    showNotification('Delete Menu Group Error', response, 'danger');
                                     break;
                             }
                         }
@@ -65,8 +65,8 @@
     
             if(menu_group_id.length > 0){
                 Swal.fire({
-                    title: 'Confirm Multiple Departments Deletion',
-                    text: 'Are you sure you want to delete these departments?',
+                    title: 'Confirm Multiple Menu Groups Deletion',
+                    text: 'Are you sure you want to delete these menu groups?',
                     icon: 'warning',
                     showCancelButton: !0,
                     confirmButtonText: 'Delete',
@@ -76,19 +76,14 @@
                     buttonsStyling: !1
                 }).then(function(result) {
                     if (result.value) {
-                        
                         $.ajax({
                             type: 'POST',
                             url: 'controller.php',
-                            data: {email_account : email_account, department_id : department_id, transaction : transaction},
+                            data: {email_account : email_account, menu_group_id : menu_group_id, transaction : transaction},
                             success: function (response) {
                                 switch (response) {
                                     case 'Deleted':
-                                        showNotification('Menu Group Deleted', 'The menu group has been deleted successfully.', 'success');
-                                        reloadDatatable('#menu-groups-table');
-                                        break;
-                                    case 'Not Found':
-                                        showNotification('Menu Group Deletion Error', 'The menu group does not exist.', 'danger');
+                                        showNotification('Delete Menu Group Success', 'The selected menu groups have been deleted successfully.', 'success');
                                         reloadDatatable('#menu-groups-table');
                                         break;
                                     case 'Inactive User':
@@ -101,8 +96,7 @@
                                 }
                             },
                             complete: function(){
-                                $('.multiple').addClass('d-none');
-                                $('.multiple-action').addClass('d-none');
+                                toggleHideActionDropdown();
                             }
                         });
                         
@@ -111,7 +105,7 @@
                 });
             }
             else{
-                showNotification('Multiple Menu Group Deletion Error', 'Please select the menu groups you wish to delete.', 'danger');
+                showNotification('Deletion Multiple Menu Group Error', 'Please select the menu groups you wish to delete.', 'danger');
             }
         });
     });
@@ -119,6 +113,7 @@
 
 function initialized_menu_groups_table(datatable_name, buttons = false, show_all = false){
     toggleHideActionDropdown();
+
     const email_account = $('#email_account').text();
     const type = 'menu groups table';
     var settings;

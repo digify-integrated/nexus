@@ -712,6 +712,45 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : duplicate_menu_groups
+    # Purpose    : Inserts the menu group.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function duplicate_menu_groups($menu_group_id, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL duplicate_menu_groups(:menu_group_id, :p_last_log_by, @p_menu_group_id)');
+            $sql->bindValue(':menu_group_id', $menu_group_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_menu_group_id AS menu_group_id");
+                $menu_group_id = $result->fetch(PDO::FETCH_ASSOC)['menu_group_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'MENU_GROUP_ID' => $this->encrypt_data($menu_group_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Get details methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : get_user_details
     # Purpose    : Gets the user details.
     #

@@ -495,6 +495,22 @@ BEGIN
     SET p_menu_group_id = LAST_INSERT_ID();
 END //
 
+CREATE PROCEDURE duplicate_menu_groups(IN p_menu_group_id INT(10), IN p_last_log_by INT(10), OUT p_new_menu_group_id INT(10))
+BEGIN
+    DECLARE p_menu_group_name VARCHAR(255);
+    DECLARE p_order_sequence INT(10);
+    
+    SELECT menu_group_name, order_sequence 
+    INTO p_menu_group_name, p_order_sequence 
+    FROM menu_groups 
+    WHERE menu_group_id = p_menu_group_id;
+    
+    INSERT INTO menu_groups (menu_group_name, order_sequence, last_log_by) 
+    VALUES(p_menu_group_name, p_order_sequence, p_last_log_by);
+    
+    SET p_new_menu_group_id = LAST_INSERT_ID();
+END //
+
 CREATE PROCEDURE update_menu_groups(IN p_menu_group_id INT(10), IN p_menu_group_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
 BEGIN
 	UPDATE menu_groups

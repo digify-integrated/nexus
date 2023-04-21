@@ -8,6 +8,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
     $api = new Api;
     $system_date = date('Y-m-d');
     $current_time = date('H:i:s');
+    $error = '';
 
     switch ($transaction) {
         # Authenticate
@@ -271,6 +272,106 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 else{
                     echo 'User Not Found';
                 }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Delete multiple menu group
+        case 'delete multiple menu group':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $menu_group_ids = $_POST['menu_group_id'];
+
+                        foreach($menu_group_ids as $menu_group_id){
+                            $delete_menu_groups = $api->delete_menu_groups($menu_group_id);
+                                                
+                            if(!$delete_menu_groups){
+                                $error = $delete_menu_groups;
+                                break;
+                            }
+                        }
+
+                        if(empty($error)){
+                            echo 'Deleted';
+                        }
+                        else{
+                            echo $error;
+                        }
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # -------------------------------------------------------------
+        #   Duplicate transactions
+        # -------------------------------------------------------------
+
+        # Duplicate menu group
+        case 'duplicate menu group':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $user_details = $api->get_user_details(null, $email_account);
+                    $user_id = $user_details[0]['USER_ID'];
+
+                    $check_user_status = $api->check_user_status($user_id, $email_account);
+    
+                    if($check_user_status){
+                        $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_menu_groups_exist = $api->check_menu_groups_exist($menu_group_id);
+        
+                        if($check_menu_groups_exist > 0){
+                            $duplicate_menu_groups = $api->duplicate_menu_groups($menu_group_id, $user_id);
+                
+                            if($duplicate_menu_groups[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Duplicated',
+                                    'MENU_GROUP_ID' => $duplicate_menu_groups[0]['MENU_GROUP_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $duplicate_menu_groups
+                                );
+                            }
+                        }
+                        else{
+                            $response[] = array(
+                                'RESPONSE' => 'Not Found'
+                            );
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
             }
         break;
         # -------------------------------------------------------------

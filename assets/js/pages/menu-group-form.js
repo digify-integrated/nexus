@@ -61,6 +61,57 @@
                 }
             });
         });
+
+        $(document).on('click','#duplicate-menu-group',function() {
+            const email_account = $('#email_account').text();
+            const menu_group_id = $(this).data('menu-group-id');
+            const transaction = 'duplicate menu group';
+    
+            Swal.fire({
+                title: 'Confirm Menu Group Duplication',
+                text: 'Are you sure you want to duplicate this menu group?',
+                icon: 'info',
+                showCancelButton: !0,
+                confirmButtonText: 'Duplicate',
+                cancelButtonText: 'Cancel',
+                confirmButtonClass: 'btn btn-info mt-2',
+                cancelButtonClass: 'btn btn-secondary ms-2 mt-2',
+                buttonsStyling: !1
+            }).then(function(result) {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'controller.php',
+                        data: {email_account : email_account, menu_group_id : menu_group_id, transaction : transaction},
+                        dataType: 'JSON',
+                        success: function (response) {
+                            switch (response[0]['RESPONSE']) {
+                                case 'Duplicated':
+                                    setNotification('Duplicate Menu Group Success', 'The menu group has been duplicated successfully.', 'success');
+                                    window.location = 'menu-group-form.php?id=' + response[0]['MENU_GROUP_ID'];
+                                    break;
+                                case 'Not Found':
+                                    setNotification('Duplicate Menu Group Error', 'The source menu group does not exist.', 'danger');
+                                    window.location = '404.php';
+                                    break;
+                                case 'Inactive User':
+                                case 'User Not Found':
+                                    window.location = 'logout.php?logout';
+                                    break;
+                                default:
+                                    setNotification('Transaction Error', response[0]['RESPONSE'], 'danger');
+                                    break;
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
+
+        $(document).on('click','#create-menu-item',function() {
+            
+        });
     });
 })(jQuery);
 
