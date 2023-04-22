@@ -968,6 +968,40 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_modal_size
+    # Purpose    : regurns the size of the modal.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function get_modal_size($size){
+        $sizes = ['SM' => 'modal-sm', 'LG' => 'modal-lg', 'XL' => 'modal-xl'];
+
+        return $sizes[$size] ?? null;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_modal_content
+    # Purpose    : regurns the size of the modal.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function get_modal_content($generation_type){
+        switch ($generation_type){
+            case 'menu item form':
+                
+            break;
+        }
+
+        return null;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Check methods
     # -------------------------------------------------------------
 
@@ -1032,6 +1066,20 @@ class Api{
                 return $stmt->errorInfo()[2];
             }
         }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_modal_scrollable
+    # Purpose    : Check if the modal to be generated
+    #              is scrollable or not.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function check_modal_scrollable($scrollable){
+        return $scrollable ? 'modal-dialog-scrollable' : null;
     }
     # -------------------------------------------------------------
 
@@ -1153,60 +1201,42 @@ class Api{
                 $menu_group_write_access_right = $this->check_menu_access_rights($email, 1, 'write');
 
                 if(empty($reference_id) && $menu_group_create_access_right > 0){
-                    $form_fields = '<div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="hidden" id="menu_group_id" name="menu_group_id">
-                                                <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
-                                            </div>
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <input type="hidden" id="menu_group_id" name="menu_group_id">
+                                            <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                            <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0" required>
-                                            </div>
+                                        <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0" required>
                                         </div>
                                     </div>';
                 }
                 else if(!empty($reference_id) && $menu_group_write_access_right > 0){
-                    $form_fields = '<div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="menu_group_label"></label>
-                                                <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
-                                                <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
-                                            </div>
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_group_label"></label>
+                                            <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
+                                            <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
-                                                <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence" min="0" required>
-                                            </div>
+                                        <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="order_sequence_label"></label>
+                                            <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence" min="0" required>
                                         </div>
                                     </div>';
                 }
                 else{
-                    $form_fields = '<div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="menu_group" class="col-sm-3 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="menu_group_label"></label>
-                                            </div>
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Group</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_group_label"></label>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label for="order_sequence" class="col-sm-3 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
-                                            <div class="col-sm-9">
-                                                <label class="col-form-label form-details" id="order_sequence_label"></label>
-                                            </div>
+                                        <label class="col-lg-2 col-form-label">Order Sequence</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="order_sequence_label"></label>
                                         </div>
                                     </div>';
                 }
@@ -1221,6 +1251,46 @@ class Api{
         }
 
         return $form;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_form
+    # Purpose    : generates form based on type.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_modal($generation_type, $form_id, $modal_id, $modal_title, $modal_size = 'R', $is_scrollable = true, $has_submit_button = true){
+        $modal_size = $this->get_modal_size($modal_size);
+        $is_scrollable = $this->check_modal_scrollable($is_scrollable);
+        $modal_content = $this->get_modal_content($generation_type);
+
+        if($has_submit_button == 1){
+            $button = '<button type="submit" class="btn btn-primary" id="submit-form" form="'. $form_id .'">Submit</button>';
+        }
+        else{
+            $button = '';
+        }
+
+        $modal = '<div id="'. $modal_id .'" class="modal fade modal-animate anim-fade-in-scale" tabindex="-1" role="dialog" aria-labelledby="modal-'. $modal_id .'" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered '. $is_scrollable .' '. $modal_size .'" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="modal-'. $modal_id .'-title">'. $modal_title .'</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="modal-body">'. $modal_content .'</div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      '. $button .'
+                    </div>
+                  </div>
+                </div>
+              </div>';
+
+        return $modal;
     }
     # -------------------------------------------------------------
 

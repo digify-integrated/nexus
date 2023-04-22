@@ -15,6 +15,45 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
         #   Generate elements functions
         # -------------------------------------------------------------
 
+        case 'system modal':
+            if(isset($_POST['modal_title']) && !empty($_POST['modal_title']) && isset($_POST['modal_size']) && !empty($_POST['modal_size']) && isset($_POST['is_scrollable']) && isset($_POST['has_submit_button']) && isset($_POST['form_id']) && !empty($_POST['form_id'])){
+                $modal_title = $_POST['modal_title'];
+                $modal_size = $api->get_modal_size($_POST['modal_size']);
+                $is_scrollable = $api->check_modal_scrollable($_POST['is_scrollable']);
+                $form_id = $_POST['form_id'];
+                $has_submit_button = $_POST['has_submit_button'];
+    
+                if($has_submit_button == 1){
+                    $button = '<button type="submit" class="btn btn-primary" id="submit-form" form="'. $form_id .'">Submit</button>';
+                }
+                else{
+                    $button = '';
+                }
+
+                $modal = '<div id="System-Modal" class="modal fade modal-animate anim-fade-in-scale" tabindex="-1" role="dialog" aria-labelledby="modal-'. $form_id .'" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered '. $is_scrollable .' '. $modal_size .'" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="modal-'. $form_id .'-title">'. $modal_title .'</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="modal-body"></div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      '. $button .'
+                    </div>
+                  </div>
+                </div>
+              </div>';
+    
+                $response[] = array(
+                    'MODAL' => $modal
+                );
+    
+                echo json_encode($response);
+            }
+        break;
+
         # -------------------------------------------------------------
         #   Generate table functions
         # -------------------------------------------------------------

@@ -58,31 +58,6 @@
     });
 })(jQuery);
 
-function generateModal(generation_type, modal_title, modal_size, is_scrollable, submit_button, generate_type, form_id, add, email_account){
-    const type = 'system modal';
-
-    $.ajax({
-        url: 'system-generation.php',
-        method: 'POST',
-        dataType: 'JSON',
-        data: {type : type, username : username, title : title, size : size, scrollable : scrollable, submit_button : submit_button, generate_type : generate_type, form_id : form_id},
-        beforeSend: function(){
-            $('#System-Modal').remove();
-        },
-        success: function(response) {
-            $('body').append(response[0].MODAL);
-        },
-        complete : function(){
-            /*if(generate_type == 'form'){
-                generate_form(form_type, form_id, add, username);
-            }
-            else{
-                generate_element(form_type, '', '', '1', username);
-            }*/
-        }
-    });
-}
-
 function displayDetails(transaction){
     switch (transaction) {
         case 'menu groups details':

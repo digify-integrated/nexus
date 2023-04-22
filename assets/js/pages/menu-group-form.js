@@ -110,7 +110,7 @@
         });
 
         $(document).on('click','#create-menu-item',function() {
-            
+            $('#menu-item-modal').modal('show');
         });
     });
 })(jQuery);

@@ -30,6 +30,7 @@ if($check_user_status){
     $menu_group_write_access_right = $api->check_menu_access_rights($email, 1, 'write');
     $menu_group_delete_access_right = $api->check_menu_access_rights($email, 1, 'delete');
     $menu_item_create_access_right = $api->check_menu_access_rights($email, 2, 'create');
+    $menu_item_write_access_right = $api->check_menu_access_rights($email, 2, 'write');
         
     require('views/_interface_settings.php');
     require('views/_user_account_details.php');
@@ -91,10 +92,10 @@ else{
               <div id="sticky-action" class="sticky-action">
                 <div class="card-header">
                   <div class="row align-items-center">
-                    <div class="col-sm-6">
+                    <div class="col-md-6">
                       <h5>Menu Groups Form</h5>
                     </div>
-                    <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+                    <div class="col-md-6 text-sm-end mt-3 mt-sm-0">
                       <?php
                         if (!empty($menu_group_id)) {
                             $dropdown = '<div class="btn-group m-r-5 ">
@@ -179,6 +180,10 @@ else{
 
           if(!empty($menu_group_id)){
             echo $api->generate_log_notes('menu_groups', $menu_group_id);
+          }
+
+          if($menu_item_create_access_right > 0 || $menu_item_write_access_right > 0){
+            echo $api->generate_modal('menu item form', 'menu-item-form', 'menu-item-modal', 'Menu Item');
           }
         ?>
         </div>
