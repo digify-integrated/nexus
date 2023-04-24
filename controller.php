@@ -232,6 +232,60 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
+         # Submit menu group
+         case 'submit menu group':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])  && isset($_POST['menu_item_id']) && isset($_POST['menu_item_name']) && !empty($_POST['menu_item_name']) && isset($_POST['order_sequence'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $user_details = $api->get_user_details(null, $email_account);
+                        $user_id = $user_details[0]['USER_ID'];
+
+                        $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
+                        $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
+                        $menu_item_name = htmlspecialchars($_POST['menu_item_name'], ENT_QUOTES, 'UTF-8');
+                        $order_sequence = htmlspecialchars($_POST['order_sequence'], ENT_QUOTES, 'UTF-8');
+
+                        $check_menu_item_exist = $api->check_menu_item_exist($menu_item_id);
+        
+                        if($check_menu_item_exist > 0){
+                            $update_menu_item = $api->update_menu_item($menu_item_id, $menu_item_name, $order_sequence, $user_id);
+                
+                            if($update_menu_item){
+                                echo 'Updated';
+                            }
+                            else{
+                                echo $update_menu_item;
+                            }
+                        }
+                        else{
+                            $insert_menu_item = $api->insert_menu_item($menu_item_name, $order_sequence, $user_id);
+                
+                            if($insert_menu_item){
+                                echo 'Inserted';
+                            }
+                            else{
+                                echo $insert_menu_item;
+                            }
+                        }       
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+
         # -------------------------------------------------------------
         #   Delete transactions
         # -------------------------------------------------------------

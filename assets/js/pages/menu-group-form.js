@@ -2,7 +2,7 @@
     'use strict';
 
     $(function() {
-        initializeForm();
+        initializeMenuGroupForm();
 
         if($('#menu-group-id').length){
             displayDetails('menu groups details');
@@ -10,10 +10,18 @@
             if($('#menu-item-table').length){
                 initializeMenuItemTable('#menu-item-table');
             }
+
+            if($('#menu-item-modal').length){
+                initializeMenuItemForm();
+            }
         }
         
         $(document).on('click','#discard-create',function() {
             discardCreate('menu-groups.php');
+        });
+
+        $(document).on('click','#edit-form',function() {            
+            displayDetails('menu groups details');
         });
 
         $(document).on('click','#delete-menu-group',function() {
@@ -111,6 +119,8 @@
 
         $(document).on('click','#create-menu-item',function() {
             $('#menu-item-modal').modal('show');
+
+            resetModalForm();
         });
     });
 })(jQuery);
@@ -122,8 +132,8 @@ function initializeMenuItemTable(datatable_name, buttons = false, show_all = fal
     var settings;
 
     const column = [ 
-        { 'data' : 'MENU_ID' },
-        { 'data' : 'MENU_NAME' },
+        { 'data' : 'MENU_ITEM_ID' },
+        { 'data' : 'MENU_ITEM_NAME' },
         { 'data' : 'ORDER_SEQUENCE' },
         { 'data' : 'ACTION' }
     ];
@@ -167,7 +177,7 @@ function initializeMenuItemTable(datatable_name, buttons = false, show_all = fal
     $(datatable_name).dataTable(settings);
 }
 
-function initializeForm(){
+function initializeMenuGroupForm(){
     const bouncer = new Bouncer('[menu-group-form-validate]', {
         disableSubmit: true
     });
@@ -204,6 +214,53 @@ function initializeForm(){
                         break;
                     default:
                         setNotification('Transaction Error', response, 'danger');
+                        break;
+                }
+            },
+            complete: function() {
+                enableFormSubmitButton('submit-data', 'Save');
+            }
+        });
+    }, false);
+}
+
+function initializeMenuItemForm(){
+    const bouncer = new Bouncer('[menu-item-form-validate]', {
+        disableSubmit: true
+    });
+      
+    document.addEventListener('bouncerFormInvalid', function (event) {
+        window.scrollTo(0, event.detail.errors[0].offsetTop);
+    }, false);
+      
+    document.addEventListener('bouncerFormValid', function () {
+        const email_account = $('#email_account').text();
+        const menu_group_id = $('#menu-group-id').text();
+        const form = document.querySelector('[menu-item-form-validate]');
+        const transaction = 'submit menu item';
+      
+        $.ajax({
+            type: 'POST',
+            url: 'controller.php',
+            data: $(form).serialize() + '&email_account=' + email_account + '&menu_group_id=' + menu_group_id + '&transaction=' + transaction,
+            beforeSend: function() {
+                disableFormSubmitButton('submit-data');
+            },
+            success: function (response) {
+                switch (response[0]['RESPONSE']) {
+                    case 'Inserted':
+                        showNotification('Insert Menu Item Success', 'The menu item has been inserted successfully.', 'success');
+                        reloadDatatable('#menu-item-table');
+                        break;
+                    case 'Updated':
+                        showNotification('Update Menu Item Success', 'The menu item has been updated successfully.', 'success');
+                        reloadDatatable('#menu-item-table');
+                        break;
+                    case 'Inactive User':
+                        window.location = 'logout.php?logout';
+                        break;
+                    default:
+                        showNotification('Transaction Error', response, 'danger');
                         break;
                 }
             },

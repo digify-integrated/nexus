@@ -83,6 +83,20 @@ function displayDetails(transaction){
 function resetForm(){
     $('.form-details').removeClass('d-none');
     $('.form-edit').addClass('d-none');
+
+    var errorMessages = document.querySelectorAll('.error-message');
+
+    errorMessages.forEach(function(errorMessage) {
+      errorMessage.parentNode.removeChild(errorMessage);
+    });
+}
+
+function resetModalForm(){
+    var errorMessages = document.querySelectorAll('.error-message');
+
+    errorMessages.forEach(function(errorMessage) {
+      errorMessage.parentNode.removeChild(errorMessage);
+    });
 }
 
 function discardCreate(windows_location){

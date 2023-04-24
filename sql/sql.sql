@@ -533,30 +533,27 @@ BEGIN
 END //
 
 /* Menu table */
-CREATE TABLE menu(
-	menu_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-	menu_name VARCHAR(100) NOT NULL,
+CREATE TABLE menu_item(
+	menu_item_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	menu_item_name VARCHAR(100) NOT NULL,
 	menu_group_id INT(10) UNSIGNED NOT NULL,
     order_sequence TINYINT(10) NOT NULL,
     last_log_by INT(10) NOT NULL
 );
 
-CREATE INDEX menu_groups_index_menu_id ON menu(menu_id);
+CREATE INDEX menu_item_index_menu_item_id ON menu_item(menu_item_id);
 
-INSERT INTO menu (menu_name, menu_group_id, order_sequence, last_log_by) VALUES ('Menu Group', '1', '1', '1');
-INSERT INTO menu (menu_name, menu_group_id, order_sequence, last_log_by) VALUES ('Menu Item', '1', '2', '1');
-
-ALTER TABLE menu
+ALTER TABLE menu_item
 ADD FOREIGN KEY (menu_group_id) REFERENCES menu_groups(menu_group_id);
 
-CREATE TRIGGER menu_trigger_update
-AFTER UPDATE ON menu
+CREATE TRIGGER menu_item_trigger_update
+AFTER UPDATE ON menu_item
 FOR EACH ROW
 BEGIN
     DECLARE audit_log TEXT DEFAULT '';
 
-    IF NEW.menu_name <> OLD.menu_name THEN
-        SET audit_log = CONCAT(audit_log, "Menu Name: ", OLD.menu_name, " -> ", NEW.menu_name, "<br/>");
+    IF NEW.menu_item_name <> OLD.menu_item_name THEN
+        SET audit_log = CONCAT(audit_log, "Menu Item Name: ", OLD.menu_item_name, " -> ", NEW.menu_item_name, "<br/>");
     END IF;
 
     IF NEW.menu_group_id <> OLD.menu_group_id THEN
@@ -569,18 +566,18 @@ BEGIN
     
     IF LENGTH(audit_log) > 0 THEN
         INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
-        VALUES ('menu', NEW.menu_id, audit_log, NEW.last_log_by, NOW());
+        VALUES ('menu_item', NEW.menu_item_id, audit_log, NEW.last_log_by, NOW());
     END IF;
 END //
 
-CREATE TRIGGER menu_trigger_insert
-AFTER INSERT ON menu
+CREATE TRIGGER menu_item_trigger_insert
+AFTER INSERT ON menu_item
 FOR EACH ROW
 BEGIN
     DECLARE audit_log TEXT DEFAULT 'Menu created. <br/>';
 
-    IF NEW.menu_name <> '' THEN
-        SET audit_log = CONCAT(audit_log, "<br/>Menu Name: ", NEW.menu_name);
+    IF NEW.menu_item_name <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Menu Item Name: ", NEW.menu_item_name);
     END IF;
 
     IF NEW.menu_group_id <> '' THEN
@@ -592,12 +589,66 @@ BEGIN
     END IF;
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
-    VALUES ('menu', NEW.menu_id, audit_log, NEW.last_log_by, NOW());
+    VALUES ('menu_item', NEW.menu_item_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE PROCEDURE check_menu_item_exist(IN p_menu_item_id INT(10))
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM menu_item
+    WHERE menu_item_id = p_menu_item_id;
+END //
+
+CREATE PROCEDURE insert_menu_item(IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10), OUT p_menu_item_id INT(10))
+BEGIN
+    INSERT INTO menu_item (menu_item_name, menu_group_id, order_sequence, last_log_by) 
+	VALUES(p_menu_item_name, p_menu_group_id, p_order_sequence, p_last_log_by);
+	
+    SET p_menu_item_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE duplicate_menu_item(IN p_menu_item_id INT(10), IN p_last_log_by INT(10), OUT p_new_menu_item_id INT(10))
+BEGIN
+    DECLARE p_menu_item_name VARCHAR(255);
+    DECLARE p_menu_group_id INT(10);
+    DECLARE p_order_sequence INT(10);
+    
+    SELECT menu_item_name, menu_group_id, order_sequence 
+    INTO p_menu_item_name, p_menu_group_id, p_order_sequence 
+    FROM menu_item 
+    WHERE menu_item_id = p_menu_item_id;
+    
+    INSERT INTO menu_item (menu_item_name, menu_group_id, order_sequence, last_log_by) 
+    VALUES(p_menu_item_name, p_menu_group_id, p_order_sequence, p_last_log_by);
+    
+    SET p_new_menu_item_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE update_menu_item(IN p_menu_item_id INT(10), IN p_menu_group_id INT(10), IN p_menu_item_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
+BEGIN
+	UPDATE menu_item
+        SET menu_item_name = p_menu_item_name,
+        menu_group_id = p_menu_group_id,
+        order_sequence = p_order_sequence,
+        last_log_by = p_last_log_by
+       	WHERE menu_item_id = p_menu_item_id;
+END //
+
+CREATE PROCEDURE delete_menu_item(IN p_menu_item_id INT(10))
+BEGIN
+    DELETE FROM menu_item WHERE menu_item_id = p_menu_item_id;
+END //
+
+CREATE PROCEDURE get_menu_item_details(IN p_menu_item_id INT(10))
+BEGIN
+    SELECT menu_item_name, menu_group_id, order_sequence, last_log_by
+	FROM menu_item 
+	WHERE menu_item_id = p_menu_item_id;
 END //
 
 /* Menu access right table */
 CREATE TABLE menu_access_right(
-	menu_id INT(10) NOT NULL,
+	menu_item_id INT(10) NOT NULL,
 	role_id INT(10) UNSIGNED NOT NULL,
 	read_access TINYINT(1) NOT NULL,
     write_access TINYINT(1) NOT NULL,
@@ -606,25 +657,26 @@ CREATE TABLE menu_access_right(
     last_log_by INT(10) NOT NULL
 );
 
-INSERT INTO menu_access_right (menu_id, role_id, read_access, write_access, create_access, delete_access, last_log_by) VALUES ('1', '1', '1', '1', '1', '1', '1');
+INSERT INTO menu_access_right (menu_item_id, role_id, read_access, write_access, create_access, delete_access, last_log_by) VALUES ('1', '1', '1', '1', '1', '1', '1');
+INSERT INTO menu_access_right (menu_item_id, role_id, read_access, write_access, create_access, delete_access, last_log_by) VALUES ('2', '1', '1', '1', '1', '1', '1');
 
-CREATE PROCEDURE check_menu_access_rights(IN p_user_id INT(10), IN p_menu_id INT(10), IN p_access_type VARCHAR(10))
+CREATE PROCEDURE check_menu_access_rights(IN p_user_id INT(10), IN p_menu_item_id INT(10), IN p_access_type VARCHAR(10))
 BEGIN
 	IF p_access_type = 'read' THEN
         SELECT COUNT(role_id) AS TOTAL
         FROM role_users
-        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where read_access = '1');
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where read_access = '1' AND menu_item_id = menu_item_id);
     ELSEIF p_access_type = 'write' THEN
         SELECT COUNT(role_id) AS TOTAL
         FROM role_users
-        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where write_access = '1');
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where write_access = '1' AND menu_item_id = menu_item_id);
     ELSEIF p_access_type = 'create' THEN
         SELECT COUNT(role_id) AS TOTAL
         FROM role_users
-        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where create_access = '1');
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where create_access = '1' AND menu_item_id = menu_item_id);
     ELSE
         SELECT COUNT(role_id) AS TOTAL
         FROM role_users
-        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where delete_access = '1');
+        WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where delete_access = '1' AND menu_item_id = menu_item_id);
     END IF;
 END //

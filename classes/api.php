@@ -1047,14 +1047,14 @@ class Api{
     # Returns    : Number
     #
     # -------------------------------------------------------------
-    public function check_menu_access_rights($p_email_address, $p_menu_id, $p_access_type){
+    public function check_menu_access_rights($p_email_address, $p_menu_item_id, $p_access_type){
         if ($this->databaseConnection()) {
             $user_details = $this->get_user_details(null, $p_email_address);
             $p_user_id = $user_details[0]['USER_ID'];
 
-            $sql = $this->db_connection->prepare('CALL check_menu_access_rights(:p_user_id, :p_menu_id, :p_access_type)');
+            $sql = $this->db_connection->prepare('CALL check_menu_access_rights(:p_user_id, :p_menu_item_id, :p_access_type)');
             $sql->bindValue(':p_user_id', $p_user_id);
-            $sql->bindValue(':p_menu_id', $p_menu_id);
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
             $sql->bindValue(':p_access_type', $p_access_type);
 
             if($sql->execute()){
@@ -1243,9 +1243,7 @@ class Api{
                 
                 $form .= '<form id="menu-group-form" method="post" action="#" menu-group-form-validate>
                             <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
-                            <div class="row">
-                                '. $form_fields .'
-                            </div>
+                            '. $form_fields .'
                         </form>';
             break;
         }
@@ -1256,8 +1254,8 @@ class Api{
 
     # -------------------------------------------------------------
     #
-    # Name       : generate_form
-    # Purpose    : generates form based on type.
+    # Name       : generate_modal
+    # Purpose    : generates modal based on generation type.
     #
     # Returns    : String
     #
@@ -1265,7 +1263,7 @@ class Api{
     public function generate_modal($generation_type, $form_id, $modal_id, $modal_title, $modal_size = 'R', $is_scrollable = true, $has_submit_button = true){
         $modal_size = $this->get_modal_size($modal_size);
         $is_scrollable = $this->check_modal_scrollable($is_scrollable);
-        $modal_content = $this->get_modal_content($generation_type);
+        $modal_content = $this->generate_modal_content($generation_type, $form_id);
 
         if($has_submit_button == 1){
             $button = '<button type="submit" class="btn btn-primary" id="submit-form" form="'. $form_id .'">Submit</button>';
@@ -1291,6 +1289,37 @@ class Api{
               </div>';
 
         return $modal;
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_modal_content
+    # Purpose    : generates modal content based on generation type.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_modal_content($generation_type, $form_id) {
+        $form = '';
+
+        switch ($generation_type){
+            case 'menu item form':                
+                $form .= '<form id="'. $form_id .'" method="post" action="#" menu-item-form-validate>
+                            <div class="form-group">
+                                <label class="form-label">Menu Group <span class="text-danger">*</span></label>
+                                <input type="hidden" id="menu_item_id" name="menu_item_id">
+                                <input type="text" class="form-control" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Order Sequence <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0" required>
+                            </div>
+                        </form>';
+            break;
+        }
+
+        return $form;
     }
     # -------------------------------------------------------------
 
