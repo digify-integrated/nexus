@@ -24,7 +24,7 @@
             <div class="auth-sidecontent">
                 <img src="<?php echo $login_background; ?>" alt="images" class="img-fluid img-auth-side">
             </div>
-            <form class="auth-form" id="signin-form" method="post" action="#" signin-form-validate>
+            <form class="auth-form" id="signin-form" method="post" action="#">
                 <div class="card my-5">
                     <div class="card-body">
                         <div class="text-center">
@@ -32,10 +32,18 @@
                         </div>
                         <h4 class="text-center f-w-500 mb-3">Login with your email</h4>
                         <div class="form-group mb-3">
-                            <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" data-bouncer-message="Invalid email address. Please enter a valid email address and try again." autocomplete="off" required>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" data-bouncer-message="Invalid email address. Please enter a valid email address and try again." autocomplete="off">
                         </div>
                         <div class="form-group mb-3">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                        </div>
+                        <div class="form-group mb-3">
+                            <select class="form-control" data-trigger name="choices_single_default" id="choices-single-default">
+                                <option value="">This is a placeholder</option>
+                                <option value="Choice 1">Choice 1</option>
+                                <option value="Choice 2">Choice 2</option>
+                                <option value="Choice 3">Choice 3</option>
+                            </select>
                         </div>
                         <div class="d-flex mt-1 justify-content-between align-items-center">
                             <div class="form-check">
@@ -55,6 +63,7 @@
     <?php 
         include_once('views/_required_js.php');
     ?>
+    <script src="./assets/js/plugins/choices.min.js"></script>
     <script src="./assets/js/pages/index.js?v=<?php echo rand(); ?>"></script>
 </body>
 

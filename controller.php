@@ -232,8 +232,8 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
-         # Submit menu group
-         case 'submit menu group':
+        # Submit menu group
+        case 'submit menu group':
             if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])  && isset($_POST['menu_item_id']) && isset($_POST['menu_item_name']) && !empty($_POST['menu_item_name']) && isset($_POST['order_sequence'])){
                 $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
 
@@ -252,9 +252,11 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $order_sequence = htmlspecialchars($_POST['order_sequence'], ENT_QUOTES, 'UTF-8');
 
                         $check_menu_item_exist = $api->check_menu_item_exist($menu_item_id);
+
+                        echo $check_menu_item_exist;
         
-                        if($check_menu_item_exist > 0){
-                            $update_menu_item = $api->update_menu_item($menu_item_id, $menu_item_name, $order_sequence, $user_id);
+                       /* if($check_menu_item_exist > 0){
+                            $update_menu_item = $api->update_menu_item($menu_item_id, $menu_item_name, $menu_group_id, $order_sequence, $user_id);
                 
                             if($update_menu_item){
                                 echo 'Updated';
@@ -264,15 +266,15 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             }
                         }
                         else{
-                            $insert_menu_item = $api->insert_menu_item($menu_item_name, $order_sequence, $user_id);
+                            $insert_menu_item = $api->insert_menu_item($menu_item_name, $menu_group_id, $order_sequence, $user_id);
                 
-                            if($insert_menu_item){
+                            if($insert_menu_item[0]['RESPONSE']){
                                 echo 'Inserted';
                             }
                             else{
                                 echo $insert_menu_item;
                             }
-                        }       
+                        }*/
                     }
                     else{
                         echo 'Inactive User';

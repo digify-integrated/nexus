@@ -178,17 +178,19 @@ function initializeMenuItemTable(datatable_name, buttons = false, show_all = fal
 }
 
 function initializeMenuGroupForm(){
-    const bouncer = new Bouncer('[menu-group-form-validate]', {
-        disableSubmit: true
+    const bouncer = new Bouncer('#menu-group-form', {
+        disableSubmit: true,
+        customValidEventName: 'menuGroupFormValid'
     });
       
     document.addEventListener('bouncerFormInvalid', function (event) {
         window.scrollTo(0, event.detail.errors[0].offsetTop);
     }, false);
       
-    document.addEventListener('bouncerFormValid', function () {
+    document.addEventListener('menuGroupFormValid', function () {
+        alert();
         const email_account = $('#email_account').text();
-        const form = document.querySelector('[menu-group-form-validate]');
+        const form = document.querySelector('#menu-group-form');
         const transaction = 'submit menu group';
       
         $.ajax({
@@ -225,18 +227,19 @@ function initializeMenuGroupForm(){
 }
 
 function initializeMenuItemForm(){
-    const bouncer = new Bouncer('[menu-item-form-validate]', {
-        disableSubmit: true
+    const bouncer = new Bouncer('#menu-item-form', {
+        disableSubmit: true,
+        customValidEventName: 'menuItemFormValid'
     });
       
     document.addEventListener('bouncerFormInvalid', function (event) {
         window.scrollTo(0, event.detail.errors[0].offsetTop);
     }, false);
       
-    document.addEventListener('bouncerFormValid', function () {
+    document.addEventListener('menuItemFormValid', function () {
         const email_account = $('#email_account').text();
         const menu_group_id = $('#menu-group-id').text();
-        const form = document.querySelector('[menu-item-form-validate]');
+        const form = document.querySelector('#menu-item-form');
         const transaction = 'submit menu item';
       
         $.ajax({
@@ -247,7 +250,7 @@ function initializeMenuItemForm(){
                 disableFormSubmitButton('submit-data');
             },
             success: function (response) {
-                switch (response[0]['RESPONSE']) {
+                switch (response) {
                     case 'Inserted':
                         showNotification('Insert Menu Item Success', 'The menu item has been inserted successfully.', 'success');
                         reloadDatatable('#menu-item-table');

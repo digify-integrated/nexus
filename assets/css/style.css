@@ -2936,12 +2936,16 @@ textarea.is-valid.dataTable-input {
   z-index: 3;
 }
 
-.invalid-feedback {
+.invalid-feedback, .error {
   display: none;
   width: 100%;
   margin-top: 0.25rem;
   font-size: 80%;
   color: #dc2626;
+}
+
+.error {
+  font-size: .8rem !important;
 }
 
 .invalid-tooltip {

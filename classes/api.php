@@ -427,6 +427,31 @@ class Api{
         }
     }
     # -------------------------------------------------------------
+    
+    # -------------------------------------------------------------
+    #
+    # Name       : check_menu_item_exist
+    # Purpose    : Checks if the menu item exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_menu_item_exist($p_menu_item_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_menu_item_exist(:p_menu_item_id)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['total'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #   Update methods
@@ -563,6 +588,33 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_menu_item
+    # Purpose    : Updates the menu item.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function update_menu_item($p_menu_item_id, $p_menu_item_name, $p_menu_group_id, $p_order_sequence, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_menu_item(:p_menu_item_id, :p_menu_item_name, :p_menu_group_id, :p_order_sequence, :p_last_log_by)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
+            $sql->bindValue(':p_menu_item_name', $p_menu_item_name);
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+            $sql->bindValue(':p_order_sequence', $p_order_sequence);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
 
@@ -677,6 +729,43 @@ class Api{
     }
     
     # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_menu_item
+    # Purpose    : Inserts the menu item.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function insert_menu_item($p_menu_item_name, $p_menu_group_id, $p_order_sequence, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_menu_item(:p_menu_item_name, :p_menu_group_id, :p_order_sequence, :p_last_log_by, @p_menu_item_id)');
+            $sql->bindValue(':p_menu_item_name', $p_menu_item_name);
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+            $sql->bindValue(':p_order_sequence', $p_order_sequence);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_menu_item_id AS p_menu_item_id");
+                $p_menu_item_id = $result->fetch(PDO::FETCH_ASSOC)['p_menu_item_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'MENU_ITEM_ID' => $this->encrypt_data($p_menu_item_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    
+    # -------------------------------------------------------------
     
     # -------------------------------------------------------------
     #   Delete methods
@@ -694,6 +783,30 @@ class Api{
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_menu_groups(:p_menu_group_id)');
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_menu_item
+    # Purpose    : Delete the menu item.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_menu_item($p_menu_item_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_menu_item(:p_menu_item_id)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
     
             if($sql->execute()){
                 return true;
@@ -731,6 +844,41 @@ class Api{
                 $response[] = array(
                     'RESPONSE' => true,
                     'MENU_GROUP_ID' => $this->encrypt_data($menu_group_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : duplicate_menu_item
+    # Purpose    : Inserts the menu group.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function duplicate_menu_item($menu_item_id, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL duplicate_menu_item(:menu_item_id, :p_last_log_by, @p_menu_item_id)');
+            $sql->bindValue(':menu_item_id', $menu_item_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_menu_item_id AS menu_item_id");
+                $menu_item_id = $result->fetch(PDO::FETCH_ASSOC)['menu_item_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'MENU_ITEM_ID' => $this->encrypt_data($menu_item_id)
                 );
             }
             else{
