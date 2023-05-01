@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="./assets/css/plugins/notifier.css">
-    <link rel="stylesheet" href="./assets/fonts/inter/inter.css" id="main-font-link" />
     <link rel="stylesheet" href="./assets/fonts/tabler-icons.min.css" />
     <link rel="stylesheet" href="./assets/fonts/feather.css" />
     <link rel="stylesheet" href="./assets/fonts/fontawesome.css" />

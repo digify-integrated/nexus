@@ -2,6 +2,7 @@
     'use strict';
 
     $(function() {
+        $.fn.modal.Constructor.prototype.enforceFocus = function() {};
         checkNotification();
         uiCustomization();
         loadUISettings();
@@ -14,6 +15,20 @@
 
         if($('.log-notes-scroll').length){
             new SimpleBar(document.querySelector('.log-notes-scroll'));
+        }
+
+        if($('.select2').length){
+            $('.select2').select2({}).on("change", function (e) {
+                $(this).valid()
+            });
+        }
+
+        if($('.modal-select2').length){
+            $('.modal-select2').select2({
+                dropdownParent: $('.modal')
+            }).on("change", function (e) {
+                $(this).valid()
+            });
         }
 
         if($('#edit-form').length){
@@ -70,32 +85,85 @@ function displayDetails(transaction){
                 data: {menu_group_id : menu_group_id, transaction : transaction},
                 success: function(response) {
                     $('#menu_group').val(response[0].MENU_GROUP_NAME);
-                    $('#order_sequence').val(response[0].ORDER_SEQUENCE);
+                    $('#menu_group_order_sequence').val(response[0].ORDER_SEQUENCE);
                     
                     $('#menu_group_label').text(response[0].MENU_GROUP_NAME);
                     $('#order_sequence_label').text(response[0].ORDER_SEQUENCE);
                 }
             });
             break;
+        case 'modal menu item details':
+            const menu_item_id = sessionStorage.getItem('menu_item_id');
+            
+            $.ajax({
+                url: 'controller.php',
+                method: 'POST',
+                dataType: 'JSON',
+                data: {menu_item_id : menu_item_id, transaction : transaction},
+                beforeSend: function() {
+                    resetModalForm('menu-item-form');
+                },
+                success: function(response) {
+                    $('#menu_item_id').val(menu_item_id);
+                    $('#menu_item_name').val(response[0].MENU_ITEM_NAME);
+                    $('#menu_item_url').val(response[0].MENU_ITEM_URL);
+                    $('#menu_item_order_sequence').val(response[0].ORDER_SEQUENCE);
+
+                    checkEmpty(response[0].PARENT_ID, '#parent_id', 'select');
+                }
+            });
+            break;
+    }
+}
+
+function checkEmpty(value, id, type){
+    const $element = $(id);
+
+    if (value) {
+        switch (type) {
+            case 'select':
+                $element.val(value).change();
+                break;
+            case 'text':
+                $element.text(value);
+                break;
+            default:
+                $element.val(value);
+                break;
+        }
     }
 }
 
 function resetForm(){
+    var errorMessages = document.querySelectorAll('.error');
+  
+    errorMessages.forEach(function(errorMessage) {
+      errorMessage.parentNode.removeChild(errorMessage);
+    });
+  
+    var invalidInputs = document.querySelectorAll('.is-invalid');
+    invalidInputs.forEach(function(invalidInput) {
+      invalidInput.classList.remove('is-invalid');
+    });
+    
     $('.form-details').removeClass('d-none');
     $('.form-edit').addClass('d-none');
+}
 
-    var errorMessages = document.querySelectorAll('.error-message');
+function resetModalForm(form_id){
+    var form = document.getElementById(form_id);
+
+    form.reset();
+
+    var errorMessages = document.querySelectorAll('.error');
 
     errorMessages.forEach(function(errorMessage) {
       errorMessage.parentNode.removeChild(errorMessage);
     });
-}
 
-function resetModalForm(){
-    var errorMessages = document.querySelectorAll('.error-message');
-
-    errorMessages.forEach(function(errorMessage) {
-      errorMessage.parentNode.removeChild(errorMessage);
+    var invalidInputs = form.querySelectorAll('.is-invalid');
+    invalidInputs.forEach(function(invalidInput) {
+        invalidInput.classList.remove('is-invalid');
     });
 }
 
@@ -146,18 +214,18 @@ function enableFormSubmitButton(buttonId, buttonText) {
 }
 
 function showNotification(notificationTitle, notificationMessage, notificationType) {
-    const notificationIcons = {
-        success: './assets/images/notification/ok-48.png',
-        danger: './assets/images/notification/high_priority-48.png',
-        info: './assets/images/notification/survey-48.png',
-        warning: './assets/images/notification/medium_priority-48.png',
-        default: './assets/images/notification/clock-48.png'
-    };
-  
-    const icon = notificationIcons[notificationType] || notificationIcons.default;
-    const duration = (notificationType === 'danger' || notificationType === 'warning') ? 6000 : 4000;
-  
-    notifier.show(notificationTitle, notificationMessage, notificationType, icon, duration);
+  const notificationIcons = {
+    success: './assets/images/notification/ok-48.png',
+    danger: './assets/images/notification/high_priority-48.png',
+    info: './assets/images/notification/survey-48.png',
+    warning: './assets/images/notification/medium_priority-48.png',
+    default: './assets/images/notification/clock-48.png'
+  };
+
+  const icon = notificationIcons[notificationType] || notificationIcons.default;
+  const duration = (notificationType === 'danger' || notificationType === 'warning') ? 6000 : 4000;
+
+  notifier.show(notificationTitle, notificationMessage, notificationType, icon, duration);
 }
 
 function setNotification(notificationTitle, notificationMessage, notificationType){

@@ -113,14 +113,18 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                     $menu_item_write_access_right = $api->check_menu_access_rights($email_account, 2, 'write');
                     $menu_item_delete_access_right = $api->check_menu_access_rights($email_account, 2, 'delete');
 
-                    $sql = $api->db_connection->prepare('SELECT menu_item_id, menu_item_name, order_sequence FROM menu_item WHERE menu_group_id = :menu_group_id');
+                    $sql = $api->db_connection->prepare('SELECT menu_item_id, menu_item_name, parent_id, order_sequence FROM menu_item WHERE menu_group_id = :menu_group_id');
                     $sql->bindValue(':menu_group_id', $menu_group_id);
         
                     if($sql->execute()){
                         while($row = $sql->fetch()){
                             $menu_item_id = $row['menu_item_id'];
                             $menu_item_name = $row['menu_item_name'];
+                            $parent_id = $row['parent_id'];
                             $order_sequence = $row['order_sequence'];
+
+                            $parent_menu_item_details = $api->get_menu_item_details($parent_id);
+                            $parent_menu_item_name = $parent_menu_item_details[0]['MENU_ITEM_NAME'] ?? null;
 
                             if($menu_item_write_access_right > 0 && $menu_group_write_access_right > 0){
                                 $update = '<button type="button" class="btn btn-icon btn-info update-menu-item" data-menu-item-id="'. $menu_item_id .'" title="Edit Menu Item">
@@ -132,7 +136,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                             }
     
                             if($menu_item_delete_access_right > 0 && $menu_group_write_access_right > 0){
-                                $delete = '<button type="button" class="btn btn-icon btn-danger delete-menu-item" title="Delete Menu Item">
+                                $delete = '<button type="button" class="btn btn-icon btn-danger delete-menu-item" data-menu-item-id="'. $menu_item_id .'" title="Delete Menu Item">
                                                 <i class="ti ti-trash"></i>
                                             </button>';
                             }
@@ -143,6 +147,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                             $response[] = array(
                                 'MENU_ITEM_ID' => $menu_item_id,
                                 'MENU_ITEM_NAME' => $menu_item_name,
+                                'PARENT_ID' => $parent_menu_item_name,
                                 'ORDER_SEQUENCE' => $order_sequence,
                                 'ACTION' => '<div class="d-flex gap-2">
                                             '. $update .'

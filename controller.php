@@ -167,7 +167,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
         # Submit menu group
         case 'submit menu group':
-            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && isset($_POST['menu_group']) && !empty($_POST['menu_group']) && isset($_POST['order_sequence'])){
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && isset($_POST['menu_group']) && !empty($_POST['menu_group']) && isset($_POST['menu_group_order_sequence'])){
                 $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
 
                 $check_user_exist = $api->check_user_exist(null, $email_account);
@@ -181,7 +181,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
                         $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
                         $menu_group = htmlspecialchars($_POST['menu_group'], ENT_QUOTES, 'UTF-8');
-                        $order_sequence = htmlspecialchars($_POST['order_sequence'], ENT_QUOTES, 'UTF-8');
+                        $order_sequence = htmlspecialchars($_POST['menu_group_order_sequence'], ENT_QUOTES, 'UTF-8');
 
                         $check_menu_groups_exist = $api->check_menu_groups_exist($menu_group_id);
         
@@ -232,9 +232,9 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
-        # Submit menu group
-        case 'submit menu group':
-            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])  && isset($_POST['menu_item_id']) && isset($_POST['menu_item_name']) && !empty($_POST['menu_item_name']) && isset($_POST['order_sequence'])){
+        # Submit menu item
+        case 'submit menu item':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])  && isset($_POST['menu_item_id']) && isset($_POST['menu_item_name']) && !empty($_POST['menu_item_name']) && isset($_POST['menu_item_order_sequence']) && isset($_POST['menu_item_url']) && isset($_POST['parent_id'])){
                 $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
 
                 $check_user_exist = $api->check_user_exist(null, $email_account);
@@ -249,14 +249,14 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
                         $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
                         $menu_item_name = htmlspecialchars($_POST['menu_item_name'], ENT_QUOTES, 'UTF-8');
-                        $order_sequence = htmlspecialchars($_POST['order_sequence'], ENT_QUOTES, 'UTF-8');
+                        $order_sequence = htmlspecialchars($_POST['menu_item_order_sequence'], ENT_QUOTES, 'UTF-8');
+                        $menu_item_url = htmlspecialchars($_POST['menu_item_url'], ENT_QUOTES, 'UTF-8');
+                        $parent_id = htmlspecialchars($_POST['parent_id'], ENT_QUOTES, 'UTF-8');
 
                         $check_menu_item_exist = $api->check_menu_item_exist($menu_item_id);
-
-                        echo $check_menu_item_exist;
         
-                       /* if($check_menu_item_exist > 0){
-                            $update_menu_item = $api->update_menu_item($menu_item_id, $menu_item_name, $menu_group_id, $order_sequence, $user_id);
+                       if($check_menu_item_exist > 0){
+                            $update_menu_item = $api->update_menu_item($menu_item_id, $menu_item_name, $menu_group_id, $menu_item_url, $parent_id, $order_sequence, $user_id);
                 
                             if($update_menu_item){
                                 echo 'Updated';
@@ -266,7 +266,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             }
                         }
                         else{
-                            $insert_menu_item = $api->insert_menu_item($menu_item_name, $menu_group_id, $order_sequence, $user_id);
+                            $insert_menu_item = $api->insert_menu_item($menu_item_name, $menu_group_id, $menu_item_url, $parent_id, $order_sequence, $user_id);
                 
                             if($insert_menu_item[0]['RESPONSE']){
                                 echo 'Inserted';
@@ -274,7 +274,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             else{
                                 echo $insert_menu_item;
                             }
-                        }*/
+                        }
                     }
                     else{
                         echo 'Inactive User';
@@ -286,7 +286,6 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
             }
         break;
         # -------------------------------------------------------------
-
 
         # -------------------------------------------------------------
         #   Delete transactions
@@ -350,6 +349,86 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                                                 
                             if(!$delete_menu_groups){
                                 $error = $delete_menu_groups;
+                                break;
+                            }
+                        }
+
+                        if(empty($error)){
+                            echo 'Deleted';
+                        }
+                        else{
+                            echo $error;
+                        }
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Delete menu item
+        case 'delete menu item':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_menu_item_exist = $api->check_menu_item_exist($menu_item_id);
+        
+                        if($check_menu_item_exist > 0){
+                            $delete_menu_item = $api->delete_menu_item($menu_item_id);
+                
+                            if($delete_menu_item){
+                                echo 'Deleted';
+                            }
+                            else{
+                                echo $delete_menu_item;
+                            }
+                        }
+                        else{
+                            echo 'Not Found';
+                        }       
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Delete multiple menu item
+        case 'delete multiple menu item':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $menu_item_ids = $_POST['menu_item_id'];
+
+                        foreach($menu_item_ids as $menu_item_id){
+                            $delete_menu_item = $api->delete_menu_item($menu_item_id);
+                                                
+                            if(!$delete_menu_item){
+                                $error = $delete_menu_item;
                                 break;
                             }
                         }
@@ -532,6 +611,23 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $response[] = array(
                     'MENU_GROUP_NAME' => $menu_groups_details[0]['MENU_GROUP_NAME'],
                     'ORDER_SEQUENCE' => $menu_groups_details[0]['ORDER_SEQUENCE']
+                );
+    
+                echo json_encode($response);
+            }
+        break;
+
+        case 'modal menu item details':
+            if(isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
+                $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
+
+                $menu_item_details = $api->get_menu_item_details($menu_item_id);
+    
+                $response[] = array(
+                    'MENU_ITEM_NAME' => $menu_item_details[0]['MENU_ITEM_NAME'],
+                    'MENU_ITEM_URL' => $menu_item_details[0]['MENU_ITEM_URL'],
+                    'PARENT_ID' => $menu_item_details[0]['PARENT_ID'],
+                    'ORDER_SEQUENCE' => $menu_item_details[0]['ORDER_SEQUENCE']
                 );
     
                 echo json_encode($response);

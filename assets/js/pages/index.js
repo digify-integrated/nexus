@@ -1,10 +1,4 @@
-$(document).ready(function () {
-
-  const choicesSelect = new Choices('#choices-single-default', {
-    searchEnabled: false,
-    itemSelectText: '',
-  });
-  
+$(document).ready(function () {  
   $('#signin-form').validate({
     rules: {
       email: {
@@ -12,7 +6,7 @@ $(document).ready(function () {
         email: true
       },
       choices_single_default: {
-        required: true,
+        required: true
       },
       password: {
         required: true
@@ -30,26 +24,30 @@ $(document).ready(function () {
         required: 'Please enter your password'
       }
     },
-    errorPlacement: function(error, element) {
-      if (element.parent('.input-group').length) {
-          error.insertAfter(element.parent());
-      } else if (element.hasClass('choices__input')) {
-          error.insertAfter(element.siblings('.choices__list--dropdown'));
-      } else {
-          error.insertAfter(element);
+    errorPlacement: function (error, element) {
+      if (element.hasClass('select2')) {
+        error.insertAfter(element.next('.select2-container'));
+      }
+      else if (element.parent('.input-group').length) {
+        error.insertAfter(element.parent());
+      }
+      else {
+        error.insertAfter(element);
       }
     },
     highlight: function(element) {
-        if ($(element).hasClass('choices__input')) {
-            $(element).siblings('.choices__list--dropdown').addClass('is-invalid');
-        } else {
-            $(element).addClass('is-invalid');
-        }
+      if ($(element).hasClass('select2-hidden-accessible')) {
+          $(element).next().find('.select2-selection__rendered').addClass('is-invalid');
+      } 
+      else {
+          $(element).addClass('is-invalid');
+      }
     },
     unhighlight: function(element) {
-        if ($(element).hasClass('choices__input')) {
-            $(element).siblings('.choices__list--dropdown').removeClass('is-invalid');
-        } else {
+        if ($(element).hasClass('select2-hidden-accessible')) {
+            $(element).next().find('.select2-selection__rendered').removeClass('is-invalid');
+        }
+        else {
             $(element).removeClass('is-invalid');
         }
     },

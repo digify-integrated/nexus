@@ -537,6 +537,8 @@ CREATE TABLE menu_item(
 	menu_item_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	menu_item_name VARCHAR(100) NOT NULL,
 	menu_group_id INT(10) UNSIGNED NOT NULL,
+	menu_item_url VARCHAR(50),
+	parent_id INT(10) UNSIGNED,
     order_sequence TINYINT(10) NOT NULL,
     last_log_by INT(10) NOT NULL
 );
@@ -560,6 +562,14 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "Menu Group ID: ", OLD.menu_group_id, " -> ", NEW.menu_group_id, "<br/>");
     END IF;
 
+    IF NEW.menu_item_url <> OLD.parent_id THEN
+        SET audit_log = CONCAT(audit_log, "URL: ", OLD.menu_item_url, " -> ", NEW.menu_item_url, "<br/>");
+    END IF;
+
+    IF NEW.parent_id <> OLD.parent_id THEN
+        SET audit_log = CONCAT(audit_log, "Parent ID: ", OLD.parent_id, " -> ", NEW.parent_id, "<br/>");
+    END IF;
+
     IF NEW.order_sequence <> OLD.order_sequence THEN
         SET audit_log = CONCAT(audit_log, "Order Sequence: ", OLD.order_sequence, " -> ", NEW.order_sequence, "<br/>");
     END IF;
@@ -574,7 +584,7 @@ CREATE TRIGGER menu_item_trigger_insert
 AFTER INSERT ON menu_item
 FOR EACH ROW
 BEGIN
-    DECLARE audit_log TEXT DEFAULT 'Menu created. <br/>';
+    DECLARE audit_log TEXT DEFAULT 'Menu item created. <br/>';
 
     IF NEW.menu_item_name <> '' THEN
         SET audit_log = CONCAT(audit_log, "<br/>Menu Item Name: ", NEW.menu_item_name);
@@ -582,6 +592,14 @@ BEGIN
 
     IF NEW.menu_group_id <> '' THEN
         SET audit_log = CONCAT(audit_log, "<br/>Menu Group ID: ", NEW.menu_group_id);
+    END IF;
+
+    IF NEW.menu_item_url <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>URL: ", NEW.menu_item_url);
+    END IF;
+
+    IF NEW.parent_id <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Parent ID: ", NEW.parent_id);
     END IF;
 
     IF NEW.order_sequence <> '' THEN
@@ -599,10 +617,10 @@ BEGIN
     WHERE menu_item_id = p_menu_item_id;
 END //
 
-CREATE PROCEDURE insert_menu_item(IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10), OUT p_menu_item_id INT(10))
+CREATE PROCEDURE insert_menu_item(IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_menu_item_url VARCHAR(50), IN p_parent_id INT(10), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10), OUT p_menu_item_id INT(10))
 BEGIN
-    INSERT INTO menu_item (menu_item_name, menu_group_id, order_sequence, last_log_by) 
-	VALUES(p_menu_item_name, p_menu_group_id, p_order_sequence, p_last_log_by);
+    INSERT INTO menu_item (menu_item_name, menu_group_id, parent_id, order_sequence, last_log_by) 
+	VALUES(p_menu_item_name, p_menu_group_id, p_parent_id, p_order_sequence, p_last_log_by);
 	
     SET p_menu_item_id = LAST_INSERT_ID();
 END //
@@ -611,24 +629,28 @@ CREATE PROCEDURE duplicate_menu_item(IN p_menu_item_id INT(10), IN p_last_log_by
 BEGIN
     DECLARE p_menu_item_name VARCHAR(255);
     DECLARE p_menu_group_id INT(10);
-    DECLARE p_order_sequence INT(10);
+    DECLARE p_menu_item_url VARCHAR(50);
+    DECLARE p_parent_id INT(10);
+    DECLARE p_order_sequence TINYINT(10);
     
-    SELECT menu_item_name, menu_group_id, order_sequence 
-    INTO p_menu_item_name, p_menu_group_id, p_order_sequence 
+    SELECT menu_item_name, menu_group_id, menu_item_url, parent_id, order_sequence 
+    INTO p_menu_item_name, p_menu_group_id, p_menu_item_url, p_parent_id, p_order_sequence 
     FROM menu_item 
     WHERE menu_item_id = p_menu_item_id;
     
-    INSERT INTO menu_item (menu_item_name, menu_group_id, order_sequence, last_log_by) 
-    VALUES(p_menu_item_name, p_menu_group_id, p_order_sequence, p_last_log_by);
+    INSERT INTO menu_item (menu_item_name, menu_group_id, menu_item_url, parent_id, order_sequence, last_log_by) 
+    VALUES(p_menu_item_name, p_menu_group_id, p_parent_id, p_menu_item_url, p_order_sequence, p_last_log_by);
     
     SET p_new_menu_item_id = LAST_INSERT_ID();
 END //
 
-CREATE PROCEDURE update_menu_item(IN p_menu_item_id INT(10), IN p_menu_group_id INT(10), IN p_menu_item_name VARCHAR(100), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
+CREATE PROCEDURE update_menu_item(IN p_menu_item_id INT(10), IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_menu_item_url VARCHAR(50), IN p_parent_id INT(10), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
 BEGIN
 	UPDATE menu_item
         SET menu_item_name = p_menu_item_name,
         menu_group_id = p_menu_group_id,
+        menu_item_url = p_menu_item_url,
+        parent_id = p_parent_id,
         order_sequence = p_order_sequence,
         last_log_by = p_last_log_by
        	WHERE menu_item_id = p_menu_item_id;
@@ -641,7 +663,7 @@ END //
 
 CREATE PROCEDURE get_menu_item_details(IN p_menu_item_id INT(10))
 BEGIN
-    SELECT menu_item_name, menu_group_id, order_sequence, last_log_by
+    SELECT menu_item_name, menu_group_id, menu_item_url, parent_id, order_sequence, last_log_by
 	FROM menu_item 
 	WHERE menu_item_id = p_menu_item_id;
 END //

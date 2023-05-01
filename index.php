@@ -13,7 +13,6 @@
 <head>
     <?php include_once('views/_title.php'); ?>
     <?php include_once('views/_required_css.php'); ?>
-    <link rel="stylesheet" href="./assets/css/uikit.css">
 </head>
 
 <body>
@@ -37,14 +36,6 @@
                         <div class="form-group mb-3">
                             <input type="password" class="form-control" id="password" name="password" placeholder="Password">
                         </div>
-                        <div class="form-group mb-3">
-                            <select class="form-control" data-trigger name="choices_single_default" id="choices-single-default">
-                                <option value="">This is a placeholder</option>
-                                <option value="Choice 1">Choice 1</option>
-                                <option value="Choice 2">Choice 2</option>
-                                <option value="Choice 3">Choice 3</option>
-                            </select>
-                        </div>
                         <div class="d-flex mt-1 justify-content-between align-items-center">
                             <div class="form-check">
                                 <input class="form-check-input input-primary" type="checkbox" id="remember_me" name="remember_me">
@@ -63,7 +54,6 @@
     <?php 
         include_once('views/_required_js.php');
     ?>
-    <script src="./assets/js/plugins/choices.min.js"></script>
     <script src="./assets/js/pages/index.js?v=<?php echo rand(); ?>"></script>
 </body>
 

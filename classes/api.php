@@ -595,12 +595,14 @@ class Api{
     # Returns    : Bool/String
     #
     # -------------------------------------------------------------
-    public function update_menu_item($p_menu_item_id, $p_menu_item_name, $p_menu_group_id, $p_order_sequence, $p_last_log_by){
+    public function update_menu_item($p_menu_item_id, $p_menu_item_name, $p_menu_group_id, $p_menu_item_url, $p_parent_id, $p_order_sequence, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL update_menu_item(:p_menu_item_id, :p_menu_item_name, :p_menu_group_id, :p_order_sequence, :p_last_log_by)');
+            $sql = $this->db_connection->prepare('CALL update_menu_item(:p_menu_item_id, :p_menu_item_name, :p_menu_group_id, :p_menu_item_url, :p_parent_id, :p_order_sequence, :p_last_log_by)');
             $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
             $sql->bindValue(':p_menu_item_name', $p_menu_item_name);
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+            $sql->bindValue(':p_menu_item_url', $p_menu_item_url);
+            $sql->bindValue(':p_parent_id', $p_parent_id);
             $sql->bindValue(':p_order_sequence', $p_order_sequence);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
 
@@ -738,11 +740,13 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function insert_menu_item($p_menu_item_name, $p_menu_group_id, $p_order_sequence, $p_last_log_by){
+    public function insert_menu_item($p_menu_item_name, $p_menu_group_id, $p_menu_item_url, $p_parent_id, $p_order_sequence, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL insert_menu_item(:p_menu_item_name, :p_menu_group_id, :p_order_sequence, :p_last_log_by, @p_menu_item_id)');
+            $sql = $this->db_connection->prepare('CALL insert_menu_item(:p_menu_item_name, :p_menu_group_id, :p_menu_item_url, :p_parent_id, :p_order_sequence, :p_last_log_by, @p_menu_item_id)');
             $sql->bindValue(':p_menu_item_name', $p_menu_item_name);
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+            $sql->bindValue(':p_menu_item_url', $p_menu_item_url);
+            $sql->bindValue(':p_parent_id', $p_parent_id);
             $sql->bindValue(':p_order_sequence', $p_order_sequence);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
     
@@ -1030,6 +1034,42 @@ class Api{
                 while($row = $sql->fetch()){
                     $response[] = array(
                         'MENU_GROUP_NAME' => $row['menu_group_name'],
+                        'ORDER_SEQUENCE' => $row['order_sequence'],
+                        'LAST_LOG_BY' => $row['last_log_by']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_menu_item_details
+    # Purpose    : Gets the menu item details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_menu_item_details($p_menu_item_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_menu_item_details(:p_menu_item_id)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'MENU_ITEM_NAME' => $row['menu_item_name'],
+                        'MENU_GROUP_ID' => $row['menu_group_id'],
+                        'MENU_ITEM_URL' => $row['menu_item_url'],
+                        'PARENT_ID' => $row['parent_id'],
                         'ORDER_SEQUENCE' => $row['order_sequence'],
                         'LAST_LOG_BY' => $row['last_log_by']
                     );
@@ -1353,11 +1393,11 @@ class Api{
                                         <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
                                             <input type="hidden" id="menu_group_id" name="menu_group_id">
-                                            <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
+                                            <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off">
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
-                                            <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0" required>
+                                            <input type="number" class="form-control" id="menu_group_order_sequence" name="menu_group_order_sequence" min="0">
                                         </div>
                                     </div>';
                 }
@@ -1367,12 +1407,12 @@ class Api{
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="menu_group_label"></label>
                                             <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
-                                            <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off" required>
+                                            <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off">
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="order_sequence_label"></label>
-                                            <input type="number" class="form-control d-none form-edit" id="order_sequence" name="order_sequence" min="0" required>
+                                            <input type="number" class="form-control d-none form-edit" id="menu_group_order_sequence" name="menu_group_order_sequence" min="0">
                                         </div>
                                     </div>';
                 }
@@ -1389,7 +1429,7 @@ class Api{
                                     </div>';
                 }
                 
-                $form .= '<form id="menu-group-form" method="post" action="#" menu-group-form-validate>
+                $form .= '<form id="menu-group-form" method="post" action="#">
                             <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
                             '. $form_fields .'
                         </form>';
@@ -1453,15 +1493,26 @@ class Api{
 
         switch ($generation_type){
             case 'menu item form':                
-                $form .= '<form id="'. $form_id .'" method="post" action="#" menu-item-form-validate>
+                $form .= '<form id="'. $form_id .'" method="post" action="#">
                             <div class="form-group">
-                                <label class="form-label">Menu Group <span class="text-danger">*</span></label>
+                                <label class="form-label">Menu Item Name <span class="text-danger">*</span></label>
                                 <input type="hidden" id="menu_item_id" name="menu_item_id">
-                                <input type="text" class="form-control" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off" required>
+                                <input type="text" class="form-control" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Order Sequence <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="order_sequence" name="order_sequence" min="0" required>
+                                <input type="number" class="form-control" id="menu_item_order_sequence" name="menu_item_order_sequence" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">URL</label>
+                                <input type="text" class="form-control" id="menu_item_url" name="menu_item_url" maxlength="50" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Parent Menu Item</label>
+                                <select class="form-control modal-select2" name="parent_id" id="parent_id">
+                                    <option value="0">--</option>
+                                    '. $this->generate_menu_item_options() .'
+                                </select>
                             </div>
                         </form>';
             break;
@@ -1473,6 +1524,41 @@ class Api{
 
     # -------------------------------------------------------------
     #   Generate options methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_menu_item_options
+    # Purpose    : Generates menu item options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_menu_item_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('SELECT menu_item_id, menu_item_name FROM menu_item ORDER BY menu_item_name');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $menu_item_id = $row['menu_item_id'];
+                        $menu_item_name = $row['menu_item_name'];
+    
+                        $option .= "<option value='". htmlspecialchars($menu_item_id, ENT_QUOTES) ."'>". htmlspecialchars($menu_item_name, ENT_QUOTES) ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
     # -------------------------------------------------------------
 
 }
