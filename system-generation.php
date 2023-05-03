@@ -12,49 +12,6 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
 
     switch ($type) {
         # -------------------------------------------------------------
-        #   Generate elements functions
-        # -------------------------------------------------------------
-
-        case 'system modal':
-            if(isset($_POST['modal_title']) && !empty($_POST['modal_title']) && isset($_POST['modal_size']) && !empty($_POST['modal_size']) && isset($_POST['is_scrollable']) && isset($_POST['has_submit_button']) && isset($_POST['form_id']) && !empty($_POST['form_id'])){
-                $modal_title = $_POST['modal_title'];
-                $modal_size = $api->get_modal_size($_POST['modal_size']);
-                $is_scrollable = $api->check_modal_scrollable($_POST['is_scrollable']);
-                $form_id = $_POST['form_id'];
-                $has_submit_button = $_POST['has_submit_button'];
-    
-                if($has_submit_button == 1){
-                    $button = '<button type="submit" class="btn btn-primary" id="submit-form" form="'. $form_id .'">Submit</button>';
-                }
-                else{
-                    $button = '';
-                }
-
-                $modal = '<div id="System-Modal" class="modal fade modal-animate anim-fade-in-scale" tabindex="-1" role="dialog" aria-labelledby="modal-'. $form_id .'" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered '. $is_scrollable .' '. $modal_size .'" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="modal-'. $form_id .'-title">'. $modal_title .'</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="modal-body"></div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      '. $button .'
-                    </div>
-                  </div>
-                </div>
-              </div>';
-    
-                $response[] = array(
-                    'MODAL' => $modal
-                );
-    
-                echo json_encode($response);
-            }
-        break;
-
-        # -------------------------------------------------------------
         #   Generate table functions
         # -------------------------------------------------------------
 
@@ -63,15 +20,15 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
             if ($api->databaseConnection()) {
                 $sql = $api->db_connection->prepare('SELECT menu_group_id, menu_group_name, order_sequence FROM menu_groups');
     
-                if($sql->execute()){
+                if($sql->execute()){                    
+                    $menu_group_delete_access_right = $api->check_menu_access_rights($email_account, 1, 'delete');
+
                     while($row = $sql->fetch()){
                         $menu_group_id = $row['menu_group_id'];
                         $menu_group_name = $row['menu_group_name'];
                         $order_sequence = $row['order_sequence'];
     
                         $menu_group_id_encrypted = $api->encrypt_data($menu_group_id);
-
-                        $menu_group_delete_access_right = $api->check_menu_access_rights($email_account, 1, 'delete');
 
                         if($menu_group_delete_access_right > 0){
                             $delete = '<button type="button" class="btn btn-icon btn-danger delete-menu-group" data-menu-group-id="' . $menu_group_id . '" title="Delete Menu Group">
@@ -112,6 +69,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                     $menu_group_write_access_right = $api->check_menu_access_rights($email_account, 1, 'write');
                     $menu_item_write_access_right = $api->check_menu_access_rights($email_account, 2, 'write');
                     $menu_item_delete_access_right = $api->check_menu_access_rights($email_account, 2, 'delete');
+                    $assign_menu_item_role_access = $api->check_system_action_access_rights($email_account, 1);
 
                     $sql = $api->db_connection->prepare('SELECT menu_item_id, menu_item_name, parent_id, order_sequence FROM menu_item WHERE menu_group_id = :menu_group_id');
                     $sql->bindValue(':menu_group_id', $menu_group_id);
@@ -144,6 +102,15 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                                 $delete = null;
                             }
         
+                            if($assign_menu_item_role_access > 0){
+                                $assign = '<button type="button" class="btn btn-icon btn-warning assign-menu-item-role-access" data-menu-item-id="'. $menu_item_id .'" title="Assign Menu Item Role Access">
+                                                <i class="ti ti-user-check"></i>
+                                            </button>';
+                            }
+                            else{
+                                $assign = null;
+                            }
+        
                             $response[] = array(
                                 'MENU_ITEM_ID' => $menu_item_id,
                                 'MENU_ITEM_NAME' => $menu_item_name,
@@ -151,8 +118,75 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                                 'ORDER_SEQUENCE' => $order_sequence,
                                 'ACTION' => '<div class="d-flex gap-2">
                                             '. $update .'
+                                            '. $assign .'
                                             '. $delete .'
                                         </div>'
+                            );
+                        }
+        
+                        echo json_encode($response);
+                    }
+                    else{
+                        echo $sql->errorInfo()[2];
+                    }
+                }
+            }
+        break;
+
+        # Assign menu item role access table
+        case 'assign menu item role access table':
+            if ($api->databaseConnection()) {
+                if(isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
+                    $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
+
+                    $sql = $api->db_connection->prepare('SELECT role_id, role_name FROM role');
+    
+                    if($sql->execute()){
+                        while($row = $sql->fetch()){
+                            $role_id = $row['role_id'];
+                            $role_name = $row['role_name'];
+
+                            $role_menu_access_rights = $api->get_role_menu_access_rights($menu_item_id, $role_id);
+
+                            $read_access = $role_menu_access_rights[0]['READ_ACCESS'] ?? 0;
+                            $write_access = $role_menu_access_rights[0]['WRITE_ACCESS'] ?? 0;
+                            $create_access = $role_menu_access_rights[0]['CREATE_ACCESS'] ?? 0;
+                            $delete_access = $role_menu_access_rights[0]['DELETE_ACCESS'] ?? 0;
+
+                            if($read_access == 1){
+                                $read_checked = 'checked';
+                            }
+                            else{
+                                $read_checked = null;
+                            }
+
+                            if($write_access == 1){
+                                $write_checked = 'checked';
+                            }
+                            else{
+                                $write_checked = null;
+                            }
+
+                            if($create_access == 1){
+                                $create_checked = 'checked';
+                            }
+                            else{
+                                $create_checked = null;
+                            }
+
+                            if($delete_access == 1){
+                                $delete_checked = 'checked';
+                            }
+                            else{
+                                $delete_checked = null;
+                            }
+        
+                            $response[] = array(
+                                'ROLE_NAME' => $role_name,
+                                'READ_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-read" type="checkbox" value="'. $read_access .'" '. $read_checked .'></div>',
+                                'WRITE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-write" type="checkbox" value="'. $write_access .'" '. $write_checked .'></div>',
+                                'CREATE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-create" type="checkbox" value="'. $create_access .'" '. $create_checked .'></div>',
+                                'DELETE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-delete" type="checkbox" value="'. $delete_access .'" '. $delete_checked .'></div>'
                             );
                         }
         

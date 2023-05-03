@@ -20,7 +20,7 @@
             discardCreate('menu-groups.php');
         });
 
-        $(document).on('click','#edit-form',function() {            
+        $(document).on('click','#edit-form',function() {
             displayDetails('menu groups details');
         });
 
@@ -123,6 +123,15 @@
             resetModalForm("menu-item-form");
         });
 
+        $(document).on('click','.assign-menu-item-role-access',function() {
+            const menu_item_id = $(this).data('menu-item-id');
+
+            sessionStorage.setItem('menu_item_id', menu_item_id);
+
+            $('#assign-menu-item-role-access-modal').modal('show');
+            initializeAssignMenuItemRoleAccessTable('#assign-menu-item-role-access-table');
+        });
+
         $(document).on('click','.update-menu-item',function() {
             const menu_item_id = $(this).data('menu-item-id');
     
@@ -210,6 +219,60 @@ function initializeMenuItemTable(datatable_name, buttons = false, show_all = fal
             'method' : 'POST',
             'dataType': 'JSON',
             'data': {'type' : type, 'email_account' : email_account, 'menu_group_id' : menu_group_id},
+            'dataSrc' : ''
+        },
+        'order': [[ 0, 'asc' ]],
+        'columns' : column,
+        'columnDefs': column_definition,
+        'lengthMenu': length_menu,
+        'language': {
+            'emptyTable': 'No data found',
+            'searchPlaceholder': 'Search...',
+            'search': '',
+            'loadingRecords': 'Just a moment while we fetch your data...'
+        }
+    };
+
+    if (buttons) {
+        settings.dom = "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>";
+        settings.buttons = ['csv', 'excel', 'pdf'];
+    }
+
+    destroyDatatable(datatable_name);
+
+    $(datatable_name).dataTable(settings);
+}
+
+function initializeAssignMenuItemRoleAccessTable(datatable_name, buttons = false, show_all = false){
+    const menu_item_id = sessionStorage.getItem('menu_item_id');
+    const email_account = $('#email_account').text();
+    const type = 'assign menu item role access table';
+    var settings;
+
+    const column = [ 
+        { 'data' : 'ROLE_NAME' },
+        { 'data' : 'READ_ACCESS' },
+        { 'data' : 'WRITE_ACCESS' },
+        { 'data' : 'CREATE_ACCESS' },
+        { 'data' : 'DELETE_ACCESS' }
+    ];
+
+    const column_definition = [
+        { 'width': '40%', 'aTargets': 0 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 1 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 2 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 3 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 4 },
+    ];
+
+    const length_menu = show_all ? [[-1], ['All']] : [[-1], ['All']];
+
+    settings = {
+        'ajax': { 
+            'url' : 'system-generation.php',
+            'method' : 'POST',
+            'dataType': 'JSON',
+            'data': {'type' : type, 'email_account' : email_account, 'menu_item_id' : menu_item_id},
             'dataSrc' : ''
         },
         'order': [[ 0, 'asc' ]],

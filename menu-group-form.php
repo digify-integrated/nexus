@@ -31,6 +31,7 @@ if($check_user_status){
     $menu_group_delete_access_right = $api->check_menu_access_rights($email, 1, 'delete');
     $menu_item_create_access_right = $api->check_menu_access_rights($email, 2, 'create');
     $menu_item_write_access_right = $api->check_menu_access_rights($email, 2, 'write');
+    $assign_menu_item_role_access = $api->check_system_action_access_rights($email, 1);
         
     require('views/_interface_settings.php');
     require('views/_user_account_details.php');
@@ -152,7 +153,7 @@ else{
                         <div class="card-header">
                           <div class="row align-items-center">
                             <div class="col-sm-6">
-                              <h5>Menu Groups Form</h5>
+                              <h5>Menu Item</h5>
                             </div>
                             <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
                               '. $menu_item_create .'
@@ -186,6 +187,10 @@ else{
 
           if($menu_item_create_access_right > 0 || $menu_item_write_access_right > 0){
             echo $api->generate_modal('menu item form', 'menu-item-form', 'menu-item-modal', 'Menu Item');
+          }
+
+          if($assign_menu_item_role_access > 0){
+            echo $api->generate_modal('assign menu item role access form', 'assign-menu-item-role-access-form', 'assign-menu-item-role-access-modal', 'Assign Menu Item Role Access', 'LG');
           }
         ?>
         </div>

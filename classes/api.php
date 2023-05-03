@@ -595,14 +595,15 @@ class Api{
     # Returns    : Bool/String
     #
     # -------------------------------------------------------------
-    public function update_menu_item($p_menu_item_id, $p_menu_item_name, $p_menu_group_id, $p_menu_item_url, $p_parent_id, $p_order_sequence, $p_last_log_by){
+    public function update_menu_item($p_menu_item_id, $p_menu_item_name, $p_menu_group_id, $p_menu_item_url, $p_parent_id, $p_menu_item_icon, $p_order_sequence, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL update_menu_item(:p_menu_item_id, :p_menu_item_name, :p_menu_group_id, :p_menu_item_url, :p_parent_id, :p_order_sequence, :p_last_log_by)');
+            $sql = $this->db_connection->prepare('CALL update_menu_item(:p_menu_item_id, :p_menu_item_name, :p_menu_group_id, :p_menu_item_url, :p_parent_id, :p_menu_item_icon, :p_order_sequence, :p_last_log_by)');
             $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
             $sql->bindValue(':p_menu_item_name', $p_menu_item_name);
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
             $sql->bindValue(':p_menu_item_url', $p_menu_item_url);
             $sql->bindValue(':p_parent_id', $p_parent_id);
+            $sql->bindValue(':p_menu_item_icon', $p_menu_item_icon);
             $sql->bindValue(':p_order_sequence', $p_order_sequence);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
 
@@ -740,13 +741,14 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function insert_menu_item($p_menu_item_name, $p_menu_group_id, $p_menu_item_url, $p_parent_id, $p_order_sequence, $p_last_log_by){
+    public function insert_menu_item($p_menu_item_name, $p_menu_group_id, $p_menu_item_url, $p_parent_id, $p_menu_item_icon, $p_order_sequence, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL insert_menu_item(:p_menu_item_name, :p_menu_group_id, :p_menu_item_url, :p_parent_id, :p_order_sequence, :p_last_log_by, @p_menu_item_id)');
+            $sql = $this->db_connection->prepare('CALL insert_menu_item(:p_menu_item_name, :p_menu_group_id, :p_menu_item_url, :p_parent_id, :p_menu_item_icon, :p_order_sequence, :p_last_log_by, @p_menu_item_id)');
             $sql->bindValue(':p_menu_item_name', $p_menu_item_name);
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
             $sql->bindValue(':p_menu_item_url', $p_menu_item_url);
             $sql->bindValue(':p_parent_id', $p_parent_id);
+            $sql->bindValue(':p_menu_item_icon', $p_menu_item_icon);
             $sql->bindValue(':p_order_sequence', $p_order_sequence);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
     
@@ -1070,8 +1072,78 @@ class Api{
                         'MENU_GROUP_ID' => $row['menu_group_id'],
                         'MENU_ITEM_URL' => $row['menu_item_url'],
                         'PARENT_ID' => $row['parent_id'],
+                        'MENU_ITEM_ICON' => $row['menu_item_icon'],
                         'ORDER_SEQUENCE' => $row['order_sequence'],
                         'LAST_LOG_BY' => $row['last_log_by']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_role_details
+    # Purpose    : Gets the role details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_role_details($p_role_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_role_details(:p_role_id)');
+            $sql->bindValue(':p_role_id', $p_role_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'ROLE_NAME' => $row['role_name'],
+                        'ROLE_DESCRIPTION' => $row['role_description'],
+                        'ASSIGNABLE' => $row['assignable'],
+                        'LAST_LOG_BY' => $row['last_log_by']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_role_menu_access_rights
+    # Purpose    : Gets the role details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_role_menu_access_rights($p_menu_item_id, $p_role_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_role_menu_access_rights(:p_menu_item_id, :p_role_id)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
+            $sql->bindValue(':p_role_id', $p_role_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'READ_ACCESS' => $row['read_access'],
+                        'WRITE_ACCESS' => $row['write_access'],
+                        'CREATE_ACCESS' => $row['create_access'],
+                        'DELETE_ACCESS' => $row['delete_access']
                     );
                 }
 
@@ -1244,6 +1316,35 @@ class Api{
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
             $sql->bindValue(':p_access_type', $p_access_type);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['TOTAL'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : check_system_action_access_rights
+    # Purpose    : Checks the menu access rights of the role based on type.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_system_action_access_rights($p_email_address, $p_system_action_id){
+        if ($this->databaseConnection()) {
+            $user_details = $this->get_user_details(null, $p_email_address);
+            $p_user_id = $user_details[0]['USER_ID'];
+
+            $sql = $this->db_connection->prepare('CALL check_system_action_access_rights(:p_user_id, :p_system_action_id)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_system_action_id', $p_system_action_id);
 
             if($sql->execute()){
                 $row = $sql->fetch();
@@ -1492,20 +1593,24 @@ class Api{
         $form = '';
 
         switch ($generation_type){
-            case 'menu item form':                
+            case 'menu item form':
                 $form .= '<form id="'. $form_id .'" method="post" action="#">
                             <div class="form-group">
-                                <label class="form-label">Menu Item Name <span class="text-danger">*</span></label>
+                                <label class="form-label" for="menu_item_name">Menu Item Name <span class="text-danger">*</span></label>
                                 <input type="hidden" id="menu_item_id" name="menu_item_id">
                                 <input type="text" class="form-control" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Order Sequence <span class="text-danger">*</span></label>
+                                <label class="form-label" for="menu_item_order_sequence">Order Sequence <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="menu_item_order_sequence" name="menu_item_order_sequence" min="0">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">URL</label>
+                                <label class="form-label" for="menu_item_url">URL</label>
                                 <input type="text" class="form-control" id="menu_item_url" name="menu_item_url" maxlength="50" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="menu_item_icon">Menu Item Icon</label>
+                                <input type="text" class="form-control" id="menu_item_icon" name="menu_item_icon" maxlength="150" autocomplete="off">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Parent Menu Item</label>
@@ -1513,6 +1618,26 @@ class Api{
                                     <option value="0">--</option>
                                     '. $this->generate_menu_item_options() .'
                                 </select>
+                            </div>
+                        </form>';
+            break;
+            case 'assign menu item role access form':
+                $form .= '<form id="'. $form_id .'" method="post" action="#">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table id="assign-menu-item-role-access-table" class="table table-striped table-hover table-bordered nowrap w-100 dataTable">
+                                        <thead>
+                                        <tr>
+                                            <th class="all">Role</th>
+                                            <th class="all">Read</th>
+                                            <th class="all">Write</th>
+                                            <th class="all">Create</th>
+                                            <th class="all">Delete</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </form>';
             break;

@@ -47,9 +47,7 @@
                     <li class="pc-item">
                         <a href="dashboard.php" class="pc-link">
                             <span class="pc-micon">
-                                <svg class="pc-icon">
-                                    <use xlink:href="#custom-status-up"></use>
-                                </svg>
+                                <i data-feather="home"></i>
                             </span>
                             <span class="pc-mtext">Dashboard</span>
                         </a>
@@ -61,9 +59,7 @@
                     <li class="pc-item pc-hasmenu">
                         <a href="JavaScript:void(0);" class="pc-link">
                             <span class="pc-micon">
-                                <svg class="pc-icon">
-                                    <use xlink:href="#custom-row-vertical"></use>
-                                </svg>
+                                <i data-feather="sidebar"></i>
                             </span>
                             <span class="pc-mtext">User Interface</span>
                             <span class="pc-arrow"><i data-feather="chevron-right"></i></span>

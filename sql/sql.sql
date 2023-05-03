@@ -371,6 +371,7 @@ CREATE TABLE role(
 CREATE INDEX role_index_role_id ON role(role_id);
 
 INSERT INTO role (role_name, role_description, assignable, last_log_by) VALUES ('Administrator', 'Administrator', '1', '1');
+INSERT INTO role (role_name, role_description, assignable, last_log_by) VALUES ('Employee', 'Employee', '1', '1');
 
 CREATE TRIGGER role_trigger_update
 AFTER UPDATE ON role
@@ -416,6 +417,13 @@ BEGIN
 
     INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
     VALUES ('role', NEW.role_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE PROCEDURE get_role_details(IN p_role_id INT(10))
+BEGIN
+    SELECT role_name, role_description, assignable, last_log_by
+	FROM role 
+	WHERE role_id = p_role_id;
 END //
 
 /* Role users table */
@@ -539,6 +547,7 @@ CREATE TABLE menu_item(
 	menu_group_id INT(10) UNSIGNED NOT NULL,
 	menu_item_url VARCHAR(50),
 	parent_id INT(10) UNSIGNED,
+	menu_item_icon VARCHAR(150),
     order_sequence TINYINT(10) NOT NULL,
     last_log_by INT(10) NOT NULL
 );
@@ -568,6 +577,10 @@ BEGIN
 
     IF NEW.parent_id <> OLD.parent_id THEN
         SET audit_log = CONCAT(audit_log, "Parent ID: ", OLD.parent_id, " -> ", NEW.parent_id, "<br/>");
+    END IF;
+
+    IF NEW.menu_item_icon <> OLD.menu_item_icon THEN
+        SET audit_log = CONCAT(audit_log, "Menu Item Icon: ", OLD.menu_item_icon, " -> ", NEW.menu_item_icon, "<br/>");
     END IF;
 
     IF NEW.order_sequence <> OLD.order_sequence THEN
@@ -602,6 +615,10 @@ BEGIN
         SET audit_log = CONCAT(audit_log, "<br/>Parent ID: ", NEW.parent_id);
     END IF;
 
+    IF NEW.menu_item_icon <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Menu Item Icon: ", NEW.menu_item_icon);
+    END IF;
+
     IF NEW.order_sequence <> '' THEN
         SET audit_log = CONCAT(audit_log, "<br/>Order Sequence: ", NEW.order_sequence);
     END IF;
@@ -617,10 +634,10 @@ BEGIN
     WHERE menu_item_id = p_menu_item_id;
 END //
 
-CREATE PROCEDURE insert_menu_item(IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_menu_item_url VARCHAR(50), IN p_parent_id INT(10), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10), OUT p_menu_item_id INT(10))
+CREATE PROCEDURE insert_menu_item(IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_menu_item_url VARCHAR(50), IN p_parent_id INT(10), IN p_menu_item_icon VARCHAR(150), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10), OUT p_menu_item_id INT(10))
 BEGIN
-    INSERT INTO menu_item (menu_item_name, menu_group_id, parent_id, order_sequence, last_log_by) 
-	VALUES(p_menu_item_name, p_menu_group_id, p_parent_id, p_order_sequence, p_last_log_by);
+    INSERT INTO menu_item (menu_item_name, menu_group_id, parent_id, menu_item_icon, order_sequence, last_log_by) 
+	VALUES(p_menu_item_name, p_menu_group_id, p_parent_id, p_menu_item_icon, p_order_sequence, p_last_log_by);
 	
     SET p_menu_item_id = LAST_INSERT_ID();
 END //
@@ -631,26 +648,28 @@ BEGIN
     DECLARE p_menu_group_id INT(10);
     DECLARE p_menu_item_url VARCHAR(50);
     DECLARE p_parent_id INT(10);
+    DECLARE p_menu_item_icon VARCHAR(150);
     DECLARE p_order_sequence TINYINT(10);
     
-    SELECT menu_item_name, menu_group_id, menu_item_url, parent_id, order_sequence 
-    INTO p_menu_item_name, p_menu_group_id, p_menu_item_url, p_parent_id, p_order_sequence 
+    SELECT menu_item_name, menu_group_id, menu_item_url, parent_id, menu_item_icon, order_sequence 
+    INTO p_menu_item_name, p_menu_group_id, p_menu_item_url, p_parent_id, p_menu_item_icon, p_order_sequence 
     FROM menu_item 
     WHERE menu_item_id = p_menu_item_id;
     
-    INSERT INTO menu_item (menu_item_name, menu_group_id, menu_item_url, parent_id, order_sequence, last_log_by) 
-    VALUES(p_menu_item_name, p_menu_group_id, p_parent_id, p_menu_item_url, p_order_sequence, p_last_log_by);
+    INSERT INTO menu_item (menu_item_name, menu_group_id, menu_item_url, parent_id, menu_item_icon, order_sequence, last_log_by) 
+    VALUES(p_menu_item_name, p_menu_group_id, p_menu_item_url, p_parent_id, p_menu_item_icon, p_order_sequence, p_last_log_by);
     
     SET p_new_menu_item_id = LAST_INSERT_ID();
 END //
 
-CREATE PROCEDURE update_menu_item(IN p_menu_item_id INT(10), IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_menu_item_url VARCHAR(50), IN p_parent_id INT(10), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
+CREATE PROCEDURE update_menu_item(IN p_menu_item_id INT(10), IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_menu_item_url VARCHAR(50), IN p_parent_id INT(10), IN p_menu_item_icon VARCHAR(150), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10))
 BEGIN
 	UPDATE menu_item
         SET menu_item_name = p_menu_item_name,
         menu_group_id = p_menu_group_id,
         menu_item_url = p_menu_item_url,
         parent_id = p_parent_id,
+        menu_item_icon = p_menu_item_icon,
         order_sequence = p_order_sequence,
         last_log_by = p_last_log_by
        	WHERE menu_item_id = p_menu_item_id;
@@ -663,7 +682,7 @@ END //
 
 CREATE PROCEDURE get_menu_item_details(IN p_menu_item_id INT(10))
 BEGIN
-    SELECT menu_item_name, menu_group_id, menu_item_url, parent_id, order_sequence, last_log_by
+    SELECT menu_item_name, menu_group_id, menu_item_url, parent_id, menu_item_icon, order_sequence, last_log_by
 	FROM menu_item 
 	WHERE menu_item_id = p_menu_item_id;
 END //
@@ -701,4 +720,37 @@ BEGIN
         FROM role_users
         WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM menu_access_right where delete_access = '1' AND menu_item_id = menu_item_id);
     END IF;
+END //
+
+CREATE PROCEDURE get_role_menu_access_rights(IN p_menu_item_id INT(10), IN p_role_id INT(10))
+BEGIN
+    SELECT read_access, write_access, create_access, delete_access
+    FROM menu_access_right 
+    WHERE menu_item_id = p_menu_item_id AND role_id = p_role_id;
+END //
+
+/* System action */
+
+CREATE TABLE system_action(
+	system_action_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	system_action_name VARCHAR(100) NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX system_action_index_system_action_id ON system_action(system_action_id);
+
+INSERT INTO system_action (system_action_name, last_log_by) VALUES ('Assign Menu Item Role Access', '1');
+
+CREATE TABLE system_action_access_rights(
+	system_action_id INT(10) UNSIGNED NOT NULL,
+	role_id INT(10) UNSIGNED NOT NULL
+);
+
+INSERT INTO system_action_access_rights (system_action_id, role_id) VALUES ('1', '1');
+
+CREATE PROCEDURE check_system_action_access_rights(IN p_user_id INT(10), IN p_system_action_id INT(10))
+BEGIN
+	SELECT COUNT(role_id) AS TOTAL
+    FROM role_users
+    WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM system_action_access_rights where system_action_id = p_system_action_id);
 END //
