@@ -183,10 +183,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
         
                             $response[] = array(
                                 'ROLE_NAME' => $role_name,
-                                'READ_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-read" type="checkbox" value="'. $read_access .'" '. $read_checked .'></div>',
-                                'WRITE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-write" type="checkbox" value="'. $write_access .'" '. $write_checked .'></div>',
-                                'CREATE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-create" type="checkbox" value="'. $create_access .'" '. $create_checked .'></div>',
-                                'DELETE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input '. $role_id .'-delete" type="checkbox" value="'. $delete_access .'" '. $delete_checked .'></div>'
+                                'READ_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input role-access" type="checkbox" value="'. $role_id .'-read" '. $read_checked .'></div>',
+                                'WRITE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input role-access" type="checkbox" value="'. $role_id .'-write" '. $write_checked .'></div>',
+                                'CREATE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input role-access" type="checkbox" value="'. $role_id .'-create" '. $create_checked .'></div>',
+                                'DELETE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input role-access" type="checkbox" value="'. $role_id .'-delete" '. $delete_checked .'></div>'
                             );
                         }
         

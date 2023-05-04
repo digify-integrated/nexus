@@ -86,8 +86,8 @@
                                         showNotification('Delete Menu Group Success', 'The selected menu groups have been deleted successfully.', 'success');
                                         reloadDatatable('#menu-groups-table');
                                         break;
-                                    case 'Inactive User':
                                     case 'User Not Found':
+                                    case 'Inactive User':
                                         window.location = 'logout.php?logout';
                                         break;
                                     default:

@@ -288,6 +288,71 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
+        # Submit menu item role access
+        case 'submit menu item role access':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])  && isset($_POST['permission'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+                $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
+                $permissions = explode(',', $_POST['permission']);
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        foreach ($permissions as $permission) {
+                            $parts = explode('-', $permission);
+                            $role_id = $parts[0];
+                            $access_type = $parts[1];
+                            $access = $parts[2];
+        
+                            $check_role_menu_item_access_right_exist = $api->check_role_menu_item_access_right_exist($menu_item_id, $role_id);
+        
+                            if($check_role_menu_item_access_right_exist == 1){
+                                $update_role_menu_item_access_right = $api->update_role_menu_item_access_right($menu_item_id, $role_id, $access_type, $access);
+        
+                                if(!$update_role_menu_item_access_right){
+                                    $error = $update_role_menu_item_access_right;
+                                    break;
+                                }
+                            }
+                            else{
+                                $insert_role_menu_item_access_right = $api->insert_role_menu_item_access_right($menu_item_id, $role_id);
+                             
+                                if($insert_role_menu_item_access_right){
+                                    $update_role_menu_item_access_right = $api->update_role_menu_item_access_right($menu_item_id, $role_id, $access_type, $access);
+        
+                                    if(!$update_role_menu_item_access_right){
+                                        $error = $update_role_menu_item_access_right;
+                                        break;
+                                    }
+                                }
+                                else{
+                                    $error = $insert_role_menu_item_access_right;
+                                    break;
+                                }
+                            }
+                        }
+        
+                        if(empty($error)){
+                            echo 'Updated';
+                        }
+                        else{
+                            echo $error;
+                        }
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
         # -------------------------------------------------------------
         #   Delete transactions
         # -------------------------------------------------------------

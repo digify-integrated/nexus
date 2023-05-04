@@ -267,8 +267,8 @@ function saveCustomization(type, customization_value){
                 case 'Updated':
                     showNotification('Update UI Settings Success', 'The UI settings has been updated successfully.', 'success');
                     break;
-                case 'Inactive User':
                 case 'User Not Found':
+                case 'Inactive User':
                     window.location = 'logout.php?logout';
                     break;
                 default:

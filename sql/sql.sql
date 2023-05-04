@@ -701,6 +701,100 @@ CREATE TABLE menu_access_right(
 INSERT INTO menu_access_right (menu_item_id, role_id, read_access, write_access, create_access, delete_access, last_log_by) VALUES ('1', '1', '1', '1', '1', '1', '1');
 INSERT INTO menu_access_right (menu_item_id, role_id, read_access, write_access, create_access, delete_access, last_log_by) VALUES ('2', '1', '1', '1', '1', '1', '1');
 
+CREATE TRIGGER menu_access_right_update
+AFTER UPDATE ON menu_access_right
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    SET audit_log = CONCAT(audit_log, "Role ID: ", OLD.role_id, "<br/>");
+
+    IF NEW.read_access <> OLD.read_access THEN
+        SET audit_log = CONCAT(audit_log, "Read Access: ", OLD.read_access, " -> ", NEW.read_access, "<br/>");
+    END IF;
+
+    IF NEW.write_access <> OLD.write_access THEN
+        SET audit_log = CONCAT(audit_log, "Write Access: ", OLD.write_access, " -> ", NEW.write_access, "<br/>");
+    END IF;
+
+    IF NEW.create_access <> OLD.create_access THEN
+        SET audit_log = CONCAT(audit_log, "Create Access: ", OLD.create_access, " -> ", NEW.create_access, "<br/>");
+    END IF;
+
+    IF NEW.delete_access <> OLD.delete_access THEN
+        SET audit_log = CONCAT(audit_log, "Delete Access: ", OLD.delete_access, " -> ", NEW.delete_access, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('menu_access_right', NEW.menu_item_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER menu_item_trigger_insert
+AFTER INSERT ON menu_item
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Menu item access rights created. <br/>';
+
+    IF NEW.role_id <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Role ID: ", NEW.role_id);
+    END IF;
+
+    IF NEW.read_access <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Read Access: ", NEW.read_access);
+    END IF;
+
+    IF NEW.write_access <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Write Access: ", NEW.write_access);
+    END IF;
+
+    IF NEW.create_access <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Create Access: ", NEW.create_access);
+    END IF;
+
+    IF NEW.delete_access <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Delete Access: ", delete_access.menu_item_icon);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('menu_access_right', NEW.menu_item_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE PROCEDURE check_role_menu_access_right_exist(IN p_menu_item_id INT(10), IN p_role_id INT(10))
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM menu_access_right
+    WHERE menu_item_id = p_menu_item_id AND role_id = p_role_id;
+END //
+
+CREATE PROCEDURE insert_role_menu_access_right(IN p_menu_item_id INT(10), IN p_role_id INT(10))
+BEGIN
+    INSERT INTO menu_access_right (menu_item_id, role_id) 
+	VALUES(p_menu_item_id, p_role_id);
+END //
+
+CREATE PROCEDURE update_role_menu_access_right(IN p_menu_item_id INT(10), IN p_role_id INT(10), IN p_access_type VARCHAR(10), IN p_access TINYINT(1))
+BEGIN
+	IF p_access_type = 'read' THEN
+        UPDATE menu_access_right
+        SET read_access = p_access
+        WHERE menu_item_id = p_menu_item_id AND role_id = p_role_id;
+    ELSEIF p_access_type = 'write' THEN
+        UPDATE menu_access_right
+        SET write_access = p_access
+        WHERE menu_item_id = p_menu_item_id AND role_id = p_role_id;
+    ELSEIF p_access_type = 'create' THEN
+        UPDATE menu_access_right
+        SET create_access = p_access
+        WHERE menu_item_id = p_menu_item_id AND role_id = p_role_id;
+    ELSE
+        UPDATE menu_access_right
+        SET delete_access = p_access
+        WHERE menu_item_id = p_menu_item_id AND role_id = p_role_id;
+    END IF;
+END //
+
 CREATE PROCEDURE check_menu_access_rights(IN p_user_id INT(10), IN p_menu_item_id INT(10), IN p_access_type VARCHAR(10))
 BEGIN
 	IF p_access_type = 'read' THEN

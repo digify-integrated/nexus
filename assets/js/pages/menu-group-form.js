@@ -14,6 +14,10 @@
             if($('#menu-item-modal').length){
                 initializeMenuItemForm();
             }
+
+            if($('#assign-menu-item-role-access-modal').length){
+                initializeMenuItemRoleAccessForm();
+            }
         }
         
         $(document).on('click','#discard-create',function() {
@@ -55,8 +59,8 @@
                                     setNotification('Delete Menu Group Error', 'The menu group does not exist.', 'danger');
                                     window.location = '404.php';
                                     break;
-                                case 'Inactive User':
                                 case 'User Not Found':
+                                case 'Inactive User':
                                     window.location = 'logout.php?logout';
                                     break;
                                 default:
@@ -102,8 +106,8 @@
                                     setNotification('Duplicate Menu Group Error', 'The source menu group does not exist.', 'danger');
                                     window.location = '404.php';
                                     break;
-                                case 'Inactive User':
                                 case 'User Not Found':
+                                case 'Inactive User':
                                     window.location = 'logout.php?logout';
                                     break;
                                 default:
@@ -173,6 +177,7 @@
                                     showNotification('Delete Menu Item Error', 'The menu item does not exist or has already been deleted.', 'warning');
                                     reloadDatatable('#menu-item-table');
                                     break;
+                                case 'User Not Found':
                                 case 'Inactive User':
                                     window.location = '404.php';
                                     break;
@@ -364,6 +369,7 @@ function initializeMenuGroupForm(){
                             setNotification('Update Menu Group Success', 'The menu group has been updated successfully.', 'success');
                             window.location.reload();
                             break;
+                        case 'User Not Found':
                         case 'Inactive User':
                             window.location = 'logout.php?logout';
                             break;
@@ -447,6 +453,7 @@ function initializeMenuItemForm(){
                         case 'Updated':
                             showNotification('Update Menu Item Success', 'The menu item has been updated successfully.', 'success');
                             break;
+                        case 'User Not Found':
                         case 'Inactive User':
                             window.location = 'logout.php?logout';
                             break;
@@ -460,6 +467,57 @@ function initializeMenuItemForm(){
                     $('#menu-item-modal').modal('hide');
                     reloadDatatable('#menu-item-table');
                     resetModalForm('menu-item-form');
+                }
+            });
+        
+            return false;
+        }
+    });
+}
+
+function initializeMenuItemRoleAccessForm(){
+    $('#assign-menu-item-role-access-form').validate({
+        submitHandler: function(form) {
+            const email_account = $('#email_account').text();
+            const transaction = 'submit menu item role access';
+
+            var menu_item_id = sessionStorage.getItem('menu_item_id');
+            
+            var permission = [];
+        
+            $('.role-access').each(function(){
+                if($(this).is(':checked')){  
+                    permission.push(this.value + '-1' );  
+                }
+                else{
+                    permission.push(this.value + '-0' );
+                }
+            });
+        
+            $.ajax({
+                type: 'POST',
+                url: 'controller.php',
+                data: $(form).serialize() + '&email_account=' + email_account + '&menu_item_id=' + menu_item_id + '&permission=' + permission + '&transaction=' + transaction,
+                beforeSend: function() {
+                    disableFormSubmitButton('submit-form');
+                },
+                success: function (response) {
+                    switch (response) {
+                        case 'Updated':
+                            showNotification('Update Menu Item Role Access Success', 'The menu item role access has been updated successfully.', 'success');
+                            break;
+                        case 'User Not Found':
+                        case 'Inactive User':
+                            window.location = 'logout.php?logout';
+                            break;
+                        default:
+                            showNotification('Transaction Error', response, 'danger');
+                            break;
+                    }
+                },
+                complete: function() {
+                    enableFormSubmitButton('submit-form', 'Submit');
+                    $('#assign-menu-item-role-access-modal').modal('hide');
                 }
             });
         

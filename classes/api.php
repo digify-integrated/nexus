@@ -452,6 +452,32 @@ class Api{
         }
     }
     # -------------------------------------------------------------
+    
+    # -------------------------------------------------------------
+    #
+    # Name       : check_role_menu_item_access_right_exist
+    # Purpose    : Checks if the role menu item access right exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_role_menu_item_access_right_exist($p_menu_item_id, $p_role_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_role_menu_item_access_right_exist(:p_menu_item_id, :p_role_id)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
+            $sql->bindValue(':p_role_id', $p_role_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['total'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #   Update methods
@@ -618,6 +644,32 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_role_menu_item_access_right
+    # Purpose    : Updates the role menu item access right.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function update_role_menu_item_access_right($p_menu_item_id, $p_role_id, $p_access_type, $p_access){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_role_menu_item_access_right(:p_menu_item_id, :p_role_id, :p_access_type, :p_access)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
+            $sql->bindValue(':p_role_id', $p_role_id);
+            $sql->bindValue(':p_access_type', $p_access_type);
+            $sql->bindValue(':p_access', $p_access);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
 
@@ -771,6 +823,30 @@ class Api{
         }
     }
     
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_role_menu_item_access_right
+    # Purpose    : Inserts the role menu item access right.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function insert_role_menu_item_access_right($p_menu_item_id, $p_role_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_role_menu_item_access_right(:p_menu_item_id, :p_role_id)');
+            $sql->bindValue(':p_menu_item_id', $p_menu_item_id);
+            $sql->bindValue(':p_role_id', $p_role_id);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
     # -------------------------------------------------------------
     
     # -------------------------------------------------------------
