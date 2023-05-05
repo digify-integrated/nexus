@@ -1562,14 +1562,13 @@ class Api{
 
         switch ($form_type){
             case 'menu groups form':
-                $menu_group_create_access_right = $this->check_menu_access_rights($email, 1, 'create');
-                $menu_group_write_access_right = $this->check_menu_access_rights($email, 1, 'write');
+                $menu_group_create_access_right = $this->check_menu_access_rights($email, 2, 'create');
+                $menu_group_write_access_right = $this->check_menu_access_rights($email, 2, 'write');
 
                 if(empty($reference_id) && $menu_group_create_access_right > 0){
                     $form_fields = '<div class="form-group row">
                                         <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
-                                            <input type="hidden" id="menu_group_id" name="menu_group_id">
                                             <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off">
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger">*</span></label>
@@ -1583,7 +1582,6 @@ class Api{
                                         <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="menu_group_label"></label>
-                                            <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
                                             <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off">
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
@@ -1608,6 +1606,134 @@ class Api{
                 
                 $form .= '<form id="menu-group-form" method="post" action="#">
                             <input type="hidden" id="menu_group_id" name="menu_group_id" value="'. $reference_id .'">
+                            '. $form_fields .'
+                        </form>';
+            break;
+            case 'menu item form':
+                $menu_item_create_access_right = $this->check_menu_access_rights($email, 3, 'create');
+                $menu_item_write_access_right = $this->check_menu_access_rights($email, 3, 'write');
+
+                if(empty($reference_id) && $menu_item_create_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Item <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <input type="text" class="form-control" id="menu_item" name="menu_item" maxlength="100" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <input type="number" class="form-control" id="menu_item_order_sequence" name="menu_item_order_sequence" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <select class="form-control select2" name="menu_group_id" id="menu_group_id">
+                                                <option value="0">--</option>
+                                                '. $this->generate_menu_group_options() .'
+                                            </select>
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">URL</label>
+                                        <div class="col-lg-4">
+                                            <input type="text" class="form-control" id="menu_item_url" name="menu_item_url" maxlength="50" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Item Icon</label>
+                                        <div class="col-lg-4">
+                                            <input type="text" class="form-control" id="menu_item_icon" name="menu_item_icon" maxlength="150" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Parent Menu Item</label>
+                                        <div class="col-lg-4">
+                                            <select class="form-control select2" name="parent_id" id="parent_id">
+                                                <option value="0">--</option>
+                                                '. $this->generate_menu_item_options() .'
+                                            </select>
+                                        </div>
+                                    </div>';
+                }
+                else if(!empty($reference_id) && $menu_item_write_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Item <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_item_name_label"></label>
+                                            <input type="text" class="form-control d-none form-edit" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="order_sequence_label"></label>
+                                            <input type="number" class="form-control d-none form-edit" id="menu_item_order_sequence" name="menu_item_order_sequence" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_group_id_label"></label>
+                                            <div class="d-none form-edit">
+                                                <select class="form-control select2" name="menu_group_id" id="menu_group_id">
+                                                    <option value="">--</option>
+                                                    '. $this->generate_menu_group_options() .'
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">URL</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_item_url_label"></label>
+                                            <input type="text" class="form-control d-none form-edit" id="menu_item_url" name="menu_item_url" maxlength="50" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Item Icon</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_item_icon_label"></label>
+                                            <input type="text" class="form-control d-none form-edit" id="menu_item_icon" name="menu_item_icon" maxlength="150" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Parent Menu Item</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="parent_id_label"></label>
+                                            <div class="d-none form-edit">
+                                                <select class="form-control select2 d-none form-edit" name="parent_id" id="parent_id">
+                                                    <option value="">--</option>
+                                                    '. $this->generate_menu_item_options() .'
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                else{
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Item <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_item_label"></label>
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="order_sequence_label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_group_id_label"></label>
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">URL</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_item_url_label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Menu Item Icon</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="menu_item_icon_label"></label>
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Parent Menu Item</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="parent_id_label"></label>
+                                        </div>
+                                    </div>';
+                }
+                
+                $form .= '<form id="menu-item-form" method="post" action="#">
+                            <input type="hidden" id="menu_item_id" name="menu_item_id" value="'. $reference_id .'">
                             '. $form_fields .'
                         </form>';
             break;
@@ -1750,6 +1876,41 @@ class Api{
                         $menu_item_name = $row['menu_item_name'];
     
                         $option .= "<option value='". htmlspecialchars($menu_item_id, ENT_QUOTES) ."'>". htmlspecialchars($menu_item_name, ENT_QUOTES) ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_menu_group_options
+    # Purpose    : Generates menu group options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_menu_group_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('SELECT menu_group_id, menu_group_name FROM menu_groups ORDER BY menu_group_name');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $menu_group_id = $row['menu_group_id'];
+                        $menu_group_name = $row['menu_group_name'];
+    
+                        $option .= "<option value='". htmlspecialchars($menu_group_id, ENT_QUOTES) ."'>". htmlspecialchars($menu_group_name, ENT_QUOTES) ."</option>";
                     }
     
                     return $option;

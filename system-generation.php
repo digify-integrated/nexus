@@ -21,7 +21,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                 $sql = $api->db_connection->prepare('SELECT menu_group_id, menu_group_name, order_sequence FROM menu_groups');
     
                 if($sql->execute()){                    
-                    $menu_group_delete_access_right = $api->check_menu_access_rights($email_account, 1, 'delete');
+                    $menu_group_delete_access_right = $api->check_menu_access_rights($email_account, 2, 'delete');
 
                     while($row = $sql->fetch()){
                         $menu_group_id = $row['menu_group_id'];
@@ -62,13 +62,13 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
         break;
 
         # Menu item table
-        case 'menu item table':
+        case 'menu group menu item table':
             if(isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])){
                 if ($api->databaseConnection()) {
                     $menu_group_id = $_POST['menu_group_id'];
-                    $menu_group_write_access_right = $api->check_menu_access_rights($email_account, 1, 'write');
-                    $menu_item_write_access_right = $api->check_menu_access_rights($email_account, 2, 'write');
-                    $menu_item_delete_access_right = $api->check_menu_access_rights($email_account, 2, 'delete');
+                    $menu_group_write_access_right = $api->check_menu_access_rights($email_account, 2, 'write');
+                    $menu_item_write_access_right = $api->check_menu_access_rights($email_account, 3, 'write');
+                    $menu_item_delete_access_right = $api->check_menu_access_rights($email_account, 3, 'delete');
                     $assign_menu_item_role_access = $api->check_system_action_access_rights($email_account, 1);
 
                     $sql = $api->db_connection->prepare('SELECT menu_item_id, menu_item_name, parent_id, order_sequence FROM menu_item WHERE menu_group_id = :menu_group_id');
@@ -129,6 +129,75 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                     else{
                         echo $sql->errorInfo()[2];
                     }
+                }
+            }
+        break;
+
+        # Menu item table
+        case 'menu item table':
+            if ($api->databaseConnection()) {
+                $menu_group_write_access_right = $api->check_menu_access_rights($email_account, 2, 'write');
+                $menu_item_write_access_right = $api->check_menu_access_rights($email_account, 3, 'write');
+                $menu_item_delete_access_right = $api->check_menu_access_rights($email_account, 3, 'delete');
+                $assign_menu_item_role_access = $api->check_system_action_access_rights($email_account, 1);
+
+                $sql = $api->db_connection->prepare('SELECT menu_item_id, menu_item_name, menu_group_id, parent_id, order_sequence FROM menu_item');
+    
+                if($sql->execute()){
+                    while($row = $sql->fetch()){
+                        $menu_item_id = $row['menu_item_id'];
+                        $menu_item_name = $row['menu_item_name'];
+                        $menu_group_id = $row['menu_group_id'];
+                        $parent_id = $row['parent_id'];
+                        $order_sequence = $row['order_sequence'];
+    
+                        $menu_item_id_encrypted = $api->encrypt_data($menu_item_id);
+
+                        $menu_groups_details = $api->get_menu_groups_details($menu_group_id);
+                        $menu_group_name = $menu_groups_details[0]['MENU_GROUP_NAME'] ?? null;
+
+                        $parent_menu_item_details = $api->get_menu_item_details($parent_id);
+                        $parent_menu_item_name = $parent_menu_item_details[0]['MENU_ITEM_NAME'] ?? null;
+
+                        if($menu_item_delete_access_right > 0 && $menu_group_write_access_right > 0){
+                            $delete = '<button type="button" class="btn btn-icon btn-danger delete-menu-item" data-menu-item-id="'. $menu_item_id .'" title="Delete Menu Item">
+                                            <i class="ti ti-trash"></i>
+                                        </button>';
+                        }
+                        else{
+                            $delete = null;
+                        }
+    
+                        if($assign_menu_item_role_access > 0){
+                            $assign = '<button type="button" class="btn btn-icon btn-warning assign-menu-item-role-access" data-menu-item-id="'. $menu_item_id .'" title="Assign Menu Item Role Access">
+                                            <i class="ti ti-user-check"></i>
+                                        </button>';
+                        }
+                        else{
+                            $assign = null;
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-delete="1" type="checkbox" value="'. $menu_item_id .'">',
+                            'MENU_ITEM_ID' => $menu_item_id,
+                            'MENU_ITEM_NAME' => $menu_item_name,
+                            'MENU_GROUP_NAME' => $menu_group_name,
+                            'PARENT_ID' => $parent_menu_item_name,
+                            'ORDER_SEQUENCE' => $order_sequence,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                            <a href="menu-item-form.php?id='. $menu_item_id_encrypted .'" class="btn btn-icon btn-primary" title="View Menu Item">
+                                                <i class="ti ti-eye"></i>
+                                            </a>
+                                        '. $assign .'
+                                        '. $delete .'
+                                    </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
                 }
             }
         break;

@@ -197,7 +197,7 @@
 function initializeMenuItemTable(datatable_name, buttons = false, show_all = false){
     const menu_group_id = $('#menu-group-id').text();
     const email_account = $('#email_account').text();
-    const type = 'menu item table';
+    const type = 'menu group menu item table';
     var settings;
 
     const column = [ 

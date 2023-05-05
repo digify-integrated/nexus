@@ -234,7 +234,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
         # Submit menu item
         case 'submit menu item':
-            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])  && isset($_POST['menu_item_id']) && isset($_POST['menu_item_name']) && !empty($_POST['menu_item_name']) && isset($_POST['menu_item_icon']) && isset($_POST['menu_item_order_sequence']) && isset($_POST['menu_item_url']) && isset($_POST['parent_id'])){
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id']) && isset($_POST['menu_item_id']) && isset($_POST['menu_item_name']) && !empty($_POST['menu_item_name']) && isset($_POST['menu_item_icon']) && isset($_POST['menu_item_order_sequence']) && isset($_POST['menu_item_url']) && isset($_POST['parent_id'])){
                 $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
 
                 $check_user_exist = $api->check_user_exist(null, $email_account);
@@ -260,30 +260,45 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             $update_menu_item = $api->update_menu_item($menu_item_id, $menu_item_name, $menu_group_id, $menu_item_url, $parent_id, $menu_item_icon, $order_sequence, $user_id);
                 
                             if($update_menu_item){
-                                echo 'Updated';
+                                $response[] = array(
+                                    'RESPONSE' => 'Updated'
+                                );
                             }
                             else{
-                                echo $update_menu_item;
+                                $response[] = array(
+                                    'RESPONSE' => $update_menu_item
+                                );
                             }
                         }
                         else{
                             $insert_menu_item = $api->insert_menu_item($menu_item_name, $menu_group_id, $menu_item_url, $parent_id, $menu_item_icon, $order_sequence, $user_id);
                 
                             if($insert_menu_item[0]['RESPONSE']){
-                                echo 'Inserted';
+                                $response[] = array(
+                                    'RESPONSE' => 'Inserted',
+                                    'MENU_ITEM_ID' => $insert_menu_item[0]['MENU_ITEM_ID']
+                                );
                             }
                             else{
-                                echo $insert_menu_item;
+                                $response[] = array(
+                                    'RESPONSE' => $insert_menu_item
+                                );
                             }
                         }
                     }
                     else{
-                        echo 'Inactive User';
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
                     }
                 }
                 else{
-                    echo 'User Not Found';
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
                 }
+
+                echo json_encode($response);
             }
         break;
         # -------------------------------------------------------------
@@ -577,6 +592,62 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
+        # Duplicate menu item
+        case 'duplicate menu item':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $user_details = $api->get_user_details(null, $email_account);
+                    $user_id = $user_details[0]['USER_ID'];
+
+                    $check_user_status = $api->check_user_status($user_id, $email_account);
+    
+                    if($check_user_status){
+                        $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_menu_items_exist = $api->check_menu_items_exist($menu_item_id);
+        
+                        if($check_menu_items_exist > 0){
+                            $duplicate_menu_items = $api->duplicate_menu_items($menu_item_id, $user_id);
+                
+                            if($duplicate_menu_items[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Duplicated',
+                                    'MENU_ITEM_ID' => $duplicate_menu_items[0]['MENU_ITEM_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $duplicate_menu_items
+                                );
+                            }
+                        }
+                        else{
+                            $response[] = array(
+                                'RESPONSE' => 'Not Found'
+                            );
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+        break;
+        # -------------------------------------------------------------
+
         # -------------------------------------------------------------
         #   Unlock transactions
         # -------------------------------------------------------------
@@ -693,6 +764,35 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     'MENU_ITEM_NAME' => $menu_item_details[0]['MENU_ITEM_NAME'],
                     'MENU_ITEM_URL' => $menu_item_details[0]['MENU_ITEM_URL'],
                     'PARENT_ID' => $menu_item_details[0]['PARENT_ID'],
+                    'MENU_ITEM_ICON' => $menu_item_details[0]['MENU_ITEM_ICON'],
+                    'ORDER_SEQUENCE' => $menu_item_details[0]['ORDER_SEQUENCE']
+                );
+    
+                echo json_encode($response);
+            }
+        break;
+
+        case 'menu item details':
+            if(isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
+                $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
+
+                $menu_item_details = $api->get_menu_item_details($menu_item_id);
+                $menu_group_id = $menu_item_details[0]['MENU_GROUP_ID'];
+                $parent_id = $menu_item_details[0]['PARENT_ID'];
+
+                $menu_groups_details = $api->get_menu_groups_details($menu_group_id);
+                $menu_group_name = $menu_groups_details[0]['MENU_GROUP_NAME'] ?? null;
+
+                $parent_menu_item_details = $api->get_menu_item_details($parent_id);
+                $parent_menu_item_name = $parent_menu_item_details[0]['MENU_ITEM_NAME'] ?? null;
+    
+                $response[] = array(
+                    'MENU_ITEM_NAME' => $menu_item_details[0]['MENU_ITEM_NAME'],
+                    'MENU_GROUP_ID' => $menu_group_id,
+                    'MENU_GROUP_NAME' => $menu_group_name,
+                    'MENU_ITEM_URL' => $menu_item_details[0]['MENU_ITEM_URL'],
+                    'PARENT_ID' => $parent_id,
+                    'PARENT_NAME' => $parent_menu_item_name,
                     'MENU_ITEM_ICON' => $menu_item_details[0]['MENU_ITEM_ICON'],
                     'ORDER_SEQUENCE' => $menu_item_details[0]['ORDER_SEQUENCE']
                 );

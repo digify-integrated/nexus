@@ -66,7 +66,7 @@
                         </a>
                         <ul class="pc-submenu">
                             <li class="pc-item"><a class="pc-link" href="menu-groups.php">Menu Groups</a></li>
-                            <li class="pc-item"><a class="pc-link" href="menu-item.php">Menu Item</a></li>
+                            <li class="pc-item"><a class="pc-link" href="menu-items.php">Menu Items</a></li>
                         </ul>
                     </li>
                 </ul>
