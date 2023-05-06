@@ -17,6 +17,7 @@ if($check_user_status){
 
     $menu_item_create_access_right = $api->check_menu_access_rights($email, 3, 'create');
     $menu_item_delete_access_right = $api->check_menu_access_rights($email, 3, 'delete');
+    $assign_menu_item_role_access = $api->check_system_action_access_rights($email, 1);
   }
   else{
     header('location: 404.php');
@@ -121,6 +122,11 @@ else{
               </div>
             </div>
           </div>
+          <?php
+            if($assign_menu_item_role_access > 0){
+              echo $api->generate_modal('assign menu item role access form', 'assign-menu-item-role-access-form', 'assign-menu-item-role-access-modal', 'Assign Menu Item Role Access', 'LG');
+            }
+          ?>
         </div>
       </div>
     </section>

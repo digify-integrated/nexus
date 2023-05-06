@@ -442,11 +442,12 @@ function initializeMenuItemForm(){
                 type: 'POST',
                 url: 'controller.php',
                 data: $(form).serialize() + '&email_account=' + email_account + '&menu_group_id=' + menu_group_id + '&transaction=' + transaction,
+                dataType: 'JSON',
                 beforeSend: function() {
-                    disableFormSubmitButton('submit-form');
+                    disableFormSubmitButton('submit-data');
                 },
                 success: function (response) {
-                    switch (response) {
+                    switch (response[0]['RESPONSE']) {
                         case 'Inserted':
                             showNotification('Insert Menu Item Success', 'The menu item has been inserted successfully.', 'success');
                             break;

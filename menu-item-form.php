@@ -109,6 +109,10 @@ else{
                             <li><button class="dropdown-item" type="button" data-menu-item-id="' . $menu_item_id . '" id="duplicate-menu-item">Duplicate Menu Item</button></li>';
                           }
 
+                          if ($assign_menu_item_role_access > 0) {
+                            $dropdown .= '<li><button class="dropdown-item" type="button" data-menu-item-id="' . $menu_item_id . '" id="assign-menu-item-role-access">Assign Menu Item Role Access</button></li>';
+                          }
+
                           if ($menu_item_delete_access_right > 0) {
                             $dropdown .= '<li><button class="dropdown-item" type="button" data-menu-item-id="' . $menu_item_id . '" id="delete-menu-item">Delete Menu Item</button></li>';
                           }
@@ -138,8 +142,40 @@ else{
               </div>
             </div>
           </div>
-
             <?php
+                if(!empty($menu_item_id)){  
+                  echo '<div class="col-lg-12">
+                          <div class="card">
+                            <div id="sticky-action" class="sticky-action">
+                              <div class="card-header">
+                                <div class="row align-items-center">
+                                  <div class="col-sm-12">
+                                    <h5>Submenu Item</h5>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="card-body">
+                              <div class="dt-responsive table-responsive">
+                                <table id="submenu-item-table" class="table table-striped table-hover table-bordered nowrap w-100 dataTable">
+                                  <thead>
+                                    <tr>
+                                      <th>#</th>
+                                      <th>Menu Item</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody></tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>';
+                }
+
+                if($assign_menu_item_role_access > 0){
+                  echo $api->generate_modal('assign menu item role access form', 'assign-menu-item-role-access-form', 'assign-menu-item-role-access-modal', 'Assign Menu Item Role Access', 'LG');
+                }
+
                 if(!empty($menu_item_id)){
                     echo $api->generate_log_notes('menu_item', $menu_item_id);
                 }

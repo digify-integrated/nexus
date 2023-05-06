@@ -84,6 +84,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                             $parent_menu_item_details = $api->get_menu_item_details($parent_id);
                             $parent_menu_item_name = $parent_menu_item_details[0]['MENU_ITEM_NAME'] ?? null;
 
+                            $menu_item_id_encrypted = $api->encrypt_data($menu_item_id); 
+
                             if($menu_item_write_access_right > 0 && $menu_group_write_access_right > 0){
                                 $update = '<button type="button" class="btn btn-icon btn-info update-menu-item" data-menu-item-id="'. $menu_item_id .'" title="Edit Menu Item">
                                                 <i class="ti ti-pencil"></i>
@@ -113,7 +115,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
         
                             $response[] = array(
                                 'MENU_ITEM_ID' => $menu_item_id,
-                                'MENU_ITEM_NAME' => $menu_item_name,
+                                'MENU_ITEM_NAME' => '<a href="menu-item-form.php?id='. $menu_item_id_encrypted .'">'. $menu_item_name . '</a>',
                                 'PARENT_ID' => $parent_menu_item_name,
                                 'ORDER_SEQUENCE' => $order_sequence,
                                 'ACTION' => '<div class="d-flex gap-2">
@@ -256,6 +258,37 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                                 'WRITE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input role-access" type="checkbox" value="'. $role_id .'-write" '. $write_checked .'></div>',
                                 'CREATE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input role-access" type="checkbox" value="'. $role_id .'-create" '. $create_checked .'></div>',
                                 'DELETE_ACCESS' => '<div class="form-check form-switch mb-2"><input class="form-check-input role-access" type="checkbox" value="'. $role_id .'-delete" '. $delete_checked .'></div>'
+                            );
+                        }
+        
+                        echo json_encode($response);
+                    }
+                    else{
+                        echo $sql->errorInfo()[2];
+                    }
+                }
+            }
+        break;
+
+        # Submenu item table
+        case 'submenu item table':
+            if(isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
+                if ($api->databaseConnection()) {
+                    $menu_item_id = $_POST['menu_item_id'];
+
+                    $sql = $api->db_connection->prepare('SELECT menu_item_id, menu_item_name FROM menu_item WHERE parent_id = :menu_item_id');
+                    $sql->bindValue(':menu_item_id', $menu_item_id);
+        
+                    if($sql->execute()){
+                        while($row = $sql->fetch()){
+                            $menu_item_id = $row['menu_item_id'];
+                            $menu_item_name = $row['menu_item_name'];
+
+                            $menu_item_id_encrypted = $api->encrypt_data($menu_item_id);
+        
+                            $response[] = array(
+                                'MENU_ITEM_ID' => $menu_item_id,
+                                'MENU_ITEM_NAME' => '<a href="menu-item-form.php?id='. $menu_item_id_encrypted .'">'. $menu_item_name .'</a>',
                             );
                         }
         

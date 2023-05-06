@@ -8,6 +8,10 @@
             initialized_menu_items_table('#menu-items-table');
         }
 
+        if($('#assign-menu-item-role-access-modal').length){
+            initializeMenuItemRoleAccessForm();
+        }
+
         $(document).on('click','.delete-menu-item',function() {
             const menu_item_id = $(this).data('menu-item-id');
             const transaction = 'delete menu item';
@@ -108,6 +112,15 @@
                 showNotification('Deletion Multiple Menu Item Error', 'Please select the menu items you wish to delete.', 'danger');
             }
         });
+
+        $(document).on('click','.assign-menu-item-role-access',function() {
+            const menu_item_id = $(this).data('menu-item-id');
+
+            sessionStorage.setItem('menu_item_id', menu_item_id);
+
+            $('#assign-menu-item-role-access-modal').modal('show');
+            initializeAssignMenuItemRoleAccessTable('#assign-menu-item-role-access-table');
+        });
     });
 })(jQuery);
 
@@ -174,4 +187,109 @@ function initialized_menu_items_table(datatable_name, buttons = false, show_all 
     destroyDatatable(datatable_name);
 
     $(datatable_name).dataTable(settings);
+}
+
+function initializeAssignMenuItemRoleAccessTable(datatable_name, buttons = false, show_all = false){
+    const menu_item_id = sessionStorage.getItem('menu_item_id');
+    const email_account = $('#email_account').text();
+    const type = 'assign menu item role access table';
+    var settings;
+
+    const column = [ 
+        { 'data' : 'ROLE_NAME' },
+        { 'data' : 'READ_ACCESS' },
+        { 'data' : 'WRITE_ACCESS' },
+        { 'data' : 'CREATE_ACCESS' },
+        { 'data' : 'DELETE_ACCESS' }
+    ];
+
+    const column_definition = [
+        { 'width': '40%', 'aTargets': 0 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 1 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 2 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 3 },
+        { 'width': '12%', 'bSortable': false, 'aTargets': 4 },
+    ];
+
+    const length_menu = show_all ? [[-1], ['All']] : [[-1], ['All']];
+
+    settings = {
+        'ajax': { 
+            'url' : 'system-generation.php',
+            'method' : 'POST',
+            'dataType': 'JSON',
+            'data': {'type' : type, 'email_account' : email_account, 'menu_item_id' : menu_item_id},
+            'dataSrc' : ''
+        },
+        'order': [[ 0, 'asc' ]],
+        'columns' : column,
+        'columnDefs': column_definition,
+        'lengthMenu': length_menu,
+        'language': {
+            'emptyTable': 'No data found',
+            'searchPlaceholder': 'Search...',
+            'search': '',
+            'loadingRecords': 'Just a moment while we fetch your data...'
+        }
+    };
+
+    if (buttons) {
+        settings.dom = "<'row'<'col-sm-3'l><'col-sm-6 text-center mb-2'B><'col-sm-3'f>>" +  "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>";
+        settings.buttons = ['csv', 'excel', 'pdf'];
+    }
+
+    destroyDatatable(datatable_name);
+
+    $(datatable_name).dataTable(settings);
+}
+
+function initializeMenuItemRoleAccessForm(){
+    $('#assign-menu-item-role-access-form').validate({
+        submitHandler: function(form) {
+            const email_account = $('#email_account').text();
+            const transaction = 'submit menu item role access';
+
+            var menu_item_id = sessionStorage.getItem('menu_item_id');
+            
+            var permission = [];
+        
+            $('.role-access').each(function(){
+                if($(this).is(':checked')){  
+                    permission.push(this.value + '-1' );  
+                }
+                else{
+                    permission.push(this.value + '-0' );
+                }
+            });
+        
+            $.ajax({
+                type: 'POST',
+                url: 'controller.php',
+                data: $(form).serialize() + '&email_account=' + email_account + '&menu_item_id=' + menu_item_id + '&permission=' + permission + '&transaction=' + transaction,
+                beforeSend: function() {
+                    disableFormSubmitButton('submit-form');
+                },
+                success: function (response) {
+                    switch (response) {
+                        case 'Updated':
+                            showNotification('Update Menu Item Role Access Success', 'The menu item role access has been updated successfully.', 'success');
+                            break;
+                        case 'User Not Found':
+                        case 'Inactive User':
+                            window.location = 'logout.php?logout';
+                            break;
+                        default:
+                            showNotification('Transaction Error', response, 'danger');
+                            break;
+                    }
+                },
+                complete: function() {
+                    enableFormSubmitButton('submit-form', 'Submit');
+                    $('#assign-menu-item-role-access-modal').modal('hide');
+                }
+            });
+        
+            return false;
+        }
+    });
 }

@@ -608,20 +608,20 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     if($check_user_status){
                         $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
 
-                        $check_menu_items_exist = $api->check_menu_items_exist($menu_item_id);
+                        $check_menu_item_exist = $api->check_menu_item_exist($menu_item_id);
         
-                        if($check_menu_items_exist > 0){
-                            $duplicate_menu_items = $api->duplicate_menu_items($menu_item_id, $user_id);
+                        if($check_menu_item_exist > 0){
+                            $duplicate_menu_item = $api->duplicate_menu_item($menu_item_id, $user_id);
                 
-                            if($duplicate_menu_items[0]['RESPONSE']){
+                            if($duplicate_menu_item[0]['RESPONSE']){
                                 $response[] = array(
                                     'RESPONSE' => 'Duplicated',
-                                    'MENU_ITEM_ID' => $duplicate_menu_items[0]['MENU_ITEM_ID']
+                                    'MENU_ITEM_ID' => $duplicate_menu_item[0]['MENU_ITEM_ID']
                                 );
                             }
                             else{
                                 $response[] = array(
-                                    'RESPONSE' => $duplicate_menu_items
+                                    'RESPONSE' => $duplicate_menu_item
                                 );
                             }
                         }
@@ -779,20 +779,39 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $menu_item_details = $api->get_menu_item_details($menu_item_id);
                 $menu_group_id = $menu_item_details[0]['MENU_GROUP_ID'];
                 $parent_id = $menu_item_details[0]['PARENT_ID'];
+                $menu_item_url = $menu_item_details[0]['MENU_ITEM_URL'];
+
+                $menu_group_id_encrypted = $api->encrypt_data($menu_group_id);
+                $parent_id_encrypted = $api->encrypt_data($parent_id);
 
                 $menu_groups_details = $api->get_menu_groups_details($menu_group_id);
                 $menu_group_name = $menu_groups_details[0]['MENU_GROUP_NAME'] ?? null;
 
                 $parent_menu_item_details = $api->get_menu_item_details($parent_id);
                 $parent_menu_item_name = $parent_menu_item_details[0]['MENU_ITEM_NAME'] ?? null;
+
+                if(!empty($parent_menu_item_name)){
+                    $parent_name = '<a href="menu-item-form.php?id='. $parent_id_encrypted .'">'. $parent_menu_item_name .'</a>';
+                }
+                else{
+                    $parent_name = null;
+                }
+
+                if(!empty($menu_item_url)){
+                    $menu_item_url_link = '<a href="'. $menu_item_url .'">'. $menu_item_url .'</a>';
+                }
+                else{
+                    $menu_item_url_link = null;
+                }
     
                 $response[] = array(
                     'MENU_ITEM_NAME' => $menu_item_details[0]['MENU_ITEM_NAME'],
                     'MENU_GROUP_ID' => $menu_group_id,
-                    'MENU_GROUP_NAME' => $menu_group_name,
-                    'MENU_ITEM_URL' => $menu_item_details[0]['MENU_ITEM_URL'],
+                    'MENU_GROUP_NAME' => '<a href="menu-group-form.php?id='. $menu_group_id_encrypted .'">'. $menu_group_name .'</a>',
+                    'PARENT_NAME' => $parent_name,
+                    'MENU_ITEM_URL_LINK' => $menu_item_url_link,
+                    'MENU_ITEM_URL' => $menu_item_url,
                     'PARENT_ID' => $parent_id,
-                    'PARENT_NAME' => $parent_menu_item_name,
                     'MENU_ITEM_ICON' => $menu_item_details[0]['MENU_ITEM_ICON'],
                     'ORDER_SEQUENCE' => $menu_item_details[0]['ORDER_SEQUENCE']
                 );

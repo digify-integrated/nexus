@@ -289,6 +289,9 @@ class Api{
                 $elapsed_time = $count . ' ' . $label . ($count == 1 ? '' : 's') . ' ago';
                 break;
             }
+            else{
+                $elapsed_time = 'Just Now';
+            }
         }
     
         return $elapsed_time;
@@ -1617,7 +1620,7 @@ class Api{
                     $form_fields = '<div class="form-group row">
                                         <label class="col-lg-2 col-form-label">Menu Item <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
-                                            <input type="text" class="form-control" id="menu_item" name="menu_item" maxlength="100" autocomplete="off">
+                                            <input type="text" class="form-control" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off">
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
@@ -1667,7 +1670,7 @@ class Api{
                                     <div class="form-group row">
                                         <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
-                                            <label class="col-form-label form-details fw-normal" id="menu_group_id_label"></label>
+                                            <div class="col-form-label form-details fw-normal" id="menu_group_id_label"></div>
                                             <div class="d-none form-edit">
                                                 <select class="form-control select2" name="menu_group_id" id="menu_group_id">
                                                     <option value="">--</option>
@@ -1677,7 +1680,7 @@ class Api{
                                         </div>
                                         <label class="col-lg-2 col-form-label">URL</label>
                                         <div class="col-lg-4">
-                                            <label class="col-form-label form-details fw-normal" id="menu_item_url_label"></label>
+                                            <div class="col-form-label form-details fw-normal" id="menu_item_url_label"></div>
                                             <input type="text" class="form-control d-none form-edit" id="menu_item_url" name="menu_item_url" maxlength="50" autocomplete="off">
                                         </div>
                                     </div>
@@ -1713,11 +1716,11 @@ class Api{
                                     <div class="form-group row">
                                         <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
-                                            <label class="col-form-label form-details fw-normal" id="menu_group_id_label"></label>
+                                            <div class="col-form-label form-details fw-normal" id="menu_group_id_label"></div>
                                         </div>
                                         <label class="col-lg-2 col-form-label">URL</label>
                                         <div class="col-lg-4">
-                                            <label class="col-form-label form-details fw-normal" id="menu_item_url_label"></label>
+                                            <div class="col-form-label form-details fw-normal" id="menu_item_url_label"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row">

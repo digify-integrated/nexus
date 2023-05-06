@@ -111,8 +111,8 @@ function displayDetails(transaction){
                     $('#menu_item_url').val(response[0].MENU_ITEM_URL);
                     $('#menu_item_icon').val(response[0].MENU_ITEM_ICON);
                     $('#menu_item_order_sequence').val(response[0].ORDER_SEQUENCE);
-
-                    checkEmpty(response[0].PARENT_ID, '#parent_id', 'select');
+                    
+                    checkOptionExist('#parent_id', response[0].PARENT_ID, '');
                 }
             });
             break;
@@ -132,16 +132,26 @@ function displayDetails(transaction){
                         
                         $('#menu_item_name_label').text(response[0].MENU_ITEM_NAME);
                         $('#order_sequence_label').text(response[0].ORDER_SEQUENCE);
-                        $('#menu_group_id_label').text(response[0].MENU_GROUP_NAME);
-                        $('#menu_item_url_label').text(response[0].MENU_ITEM_URL);
                         $('#menu_item_icon_label').text(response[0].MENU_ITEM_ICON);
-                        $('#parent_id_label').text(response[0].PARENT_NAME);
+                        
+                        document.getElementById("menu_group_id_label").innerHTML = response[0].MENU_GROUP_NAME;
+                        document.getElementById("menu_item_url_label").innerHTML = response[0].MENU_ITEM_URL_LINK;
+                        document.getElementById("parent_id_label").innerHTML = response[0].PARENT_NAME;
 
-                        checkEmpty(response[0].MENU_GROUP_ID, '#menu_group_id', 'select');
-                        checkEmpty(response[0].PARENT_ID, '#parent_id', 'select');
+                        checkOptionExist('#menu_group_id', response[0].MENU_GROUP_ID, '');
+                        checkOptionExist('#parent_id', response[0].PARENT_ID, '');
                     }
                 });
                 break;
+    }
+}
+
+function checkOptionExist(element, option, return_value){
+    if ($(element).find('option[value="' + option + '"]').length) {
+        $(element).val(option).trigger('change');
+    }
+    else{
+        $(element).val(return_value).trigger('change');
     }
 }
 
