@@ -75,7 +75,8 @@ else{
                     </div>
                     <?php
                       if($menu_item_create_access_right > 0 || $menu_item_delete_access_right > 0){
-                        $action = ' <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">';
+                        $action = ' <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+                                  <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#filter-canvas" aria-controls="offcanvasRight">Filter</button>';
                         
                           if($menu_item_delete_access_right > 0){
                             $action .= '<div class="btn-group m-r-10">
@@ -127,6 +128,17 @@ else{
               echo $api->generate_modal('assign menu item role access form', 'assign-menu-item-role-access-form', 'assign-menu-item-role-access-modal', 'Assign Menu Item Role Access', 'LG');
             }
           ?>
+          <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-canvas" aria-labelledby="offcanvasRightLabel">
+                      <div class="offcanvas-header">
+                        <h5 id="offcanvasRightLabel">Filter Menu Item</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                      </div>
+                      <div class="offcanvas-body">
+                        <div class="text-end">
+                          <button class="btn btn-light-danger btn-sm" data-bs-dismiss="offcanvas"> Close </button>
+                        </div>
+                      </div>
+                    </div>
         </div>
       </div>
     </section>
