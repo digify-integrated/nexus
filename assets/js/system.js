@@ -33,6 +33,12 @@
             });
         }
 
+        if($('.filter-select2').length){
+            $('.filter-select2').select2({
+                dropdownParent: $('#filter-canvas')
+            });
+        }
+
         if($('#edit-form').length){
             $(document).on('click','#edit-form',function() {
                 $('.form-details').addClass('d-none');

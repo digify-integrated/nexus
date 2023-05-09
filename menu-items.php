@@ -31,6 +31,7 @@ else{
 <html lang="en">
 <head>
     <?php include_once('views/_title.php'); ?>
+    <link rel="stylesheet" href="./assets/css/plugins/select2.min.css">
     <?php include_once('views/_required_css.php'); ?>
     <link rel="stylesheet" href="./assets/css/plugins/dataTables.bootstrap5.min.css">
 </head>
@@ -129,16 +130,31 @@ else{
             }
           ?>
           <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-canvas" aria-labelledby="offcanvasRightLabel">
-                      <div class="offcanvas-header">
-                        <h5 id="offcanvasRightLabel">Filter Menu Item</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                      </div>
-                      <div class="offcanvas-body">
-                        <div class="text-end">
-                          <button class="btn btn-light-danger btn-sm" data-bs-dismiss="offcanvas"> Close </button>
-                        </div>
-                      </div>
-                    </div>
+            <div class="offcanvas-header">
+              <h5 id="offcanvasRightLabel">Filter Menu Item</h5>
+              <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+              <div class="form-group">
+                <label class="form-label" for="filter_menu_group_id">Menu Group</label>
+                <select class="form-control filter-select2" name="filter_menu_group_id" id="filter_menu_group_id">
+                  <option value="">--</option>
+                  <?php echo $api->generate_menu_group_options(); ?>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="filter_parent_id">Parent Menu Item</label>
+                <select class="form-control filter-select2" name="filter_parent_id" id="filter_parent_id">
+                  <option value="">--</option>
+                  <?php echo $api->generate_menu_item_options(); ?>
+                </select>
+              </div>
+              <div class="text-end mt-4">
+                <button class="btn btn-light-primary btn-sm" id="apply-filter" data-bs-dismiss="offcanvas"> Apply </button>
+                <button class="btn btn-light-danger btn-sm" data-bs-dismiss="offcanvas"> Close </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -149,6 +165,7 @@ else{
         include_once('views/_customizer.php'); 
     ?>
     <script src="./assets/js/plugins/sweetalert2.all.min.js"></script>
+    <script src="./assets/js/plugins/select2.min.js?v=<?php echo rand(); ?>"></script>
     <script src="./assets/js/plugins/jquery.dataTables.min.js"></script>
     <script src="./assets/js/plugins/dataTables.bootstrap5.min.js"></script>
     <script src="./assets/js/pages/menu-items.js?v=<?php echo rand(); ?>"></script>
