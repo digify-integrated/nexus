@@ -540,6 +540,35 @@ BEGIN
 	WHERE menu_group_id = p_menu_group_id;
 END //
 
+CREATE PROCEDURE build_menu_group(IN p_user_id INT(10))
+BEGIN
+    SELECT mg.menu_group_id, mg.menu_group_name
+    FROM menu_groups mg
+    JOIN menu_item mi ON mi.menu_group_id = mg.menu_group_id
+    WHERE EXISTS (
+        SELECT 1
+        FROM menu_access_right mar
+        WHERE mar.menu_item_id = mi.menu_item_id
+        AND mar.read_access = 1
+        AND mar.role_id IN (
+            SELECT role_id
+            FROM role_users
+            WHERE user_id = p_user_id
+        )
+    )
+    ORDER BY mg.order_sequence;
+END //
+
+CREATE PROCEDURE build_menu_item(IN p_user_id INT(10), IN p_menu_group_id INT(10))
+BEGIN
+    SELECT mi.menu_item_id, mi.menu_item_name, mi.menu_group_id, mi.menu_item_url, mi.parent_id, mi.menu_item_icon
+    FROM menu_item AS mi
+    INNER JOIN menu_access_right AS mar ON mi.menu_item_id = mar.menu_item_id
+    INNER JOIN role_users AS ru ON mar.role_id = ru.role_id
+    WHERE mar.read_access = 1 AND ru.user_id = p_user_id AND mi.menu_group_id = p_menu_group_id
+    ORDER BY mi.order_sequence;
+END //
+
 /* Menu table */
 CREATE TABLE menu_item(
 	menu_item_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,

@@ -121,6 +121,10 @@
             $('#assign-menu-item-role-access-modal').modal('show');
             initializeAssignMenuItemRoleAccessTable('#assign-menu-item-role-access-table');
         });
+
+        $(document).on('click','#apply-filter',function() {
+            initialized_menu_items_table('#menu-items-table');
+        });
     });
 })(jQuery);
 
@@ -128,6 +132,8 @@ function initialized_menu_items_table(datatable_name, buttons = false, show_all 
     toggleHideActionDropdown();
 
     const email_account = $('#email_account').text();
+    const filter_menu_group_id = $('#filter_menu_group_id').val();
+    const filter_parent_id = $('#filter_parent_id').val();
     const type = 'menu item table';
     var settings;
 
@@ -158,7 +164,7 @@ function initialized_menu_items_table(datatable_name, buttons = false, show_all 
             'url' : 'system-generation.php',
             'method' : 'POST',
             'dataType': 'JSON',
-            'data': {'type' : type, 'email_account' : email_account},
+            'data': {'type' : type, 'email_account' : email_account, 'filter_menu_group_id' : filter_menu_group_id, 'filter_parent_id' : filter_parent_id},
             'dataSrc' : ''
         },
         'order': [[ 1, 'asc' ]],

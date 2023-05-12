@@ -69,6 +69,7 @@
                             <li class="pc-item"><a class="pc-link" href="menu-items.php">Menu Items</a></li>
                         </ul>
                     </li>
+                    <?php print_r($api->build_menu_item()); ?>
                 </ul>
             </div>
         </div>

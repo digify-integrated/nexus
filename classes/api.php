@@ -1309,7 +1309,7 @@ class Api{
     # -------------------------------------------------------------
     #
     # Name       : get_modal_size
-    # Purpose    : regurns the size of the modal.
+    # Purpose    : returns the size of the modal.
     #
     # Returns    : String
     #
@@ -1324,7 +1324,7 @@ class Api{
     # -------------------------------------------------------------
     #
     # Name       : get_modal_content
-    # Purpose    : regurns the size of the modal.
+    # Purpose    : returns the size of the modal.
     #
     # Returns    : String
     #
@@ -1340,6 +1340,150 @@ class Api{
     }
     # -------------------------------------------------------------
 
+    # -------------------------------------------------------------
+    #   Build methods
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : build_menu_group
+    # Purpose    : Builds the menu group.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function build_menu_group($p_email_address){
+        if ($this->databaseConnection()) {
+            $response = array();
+            $user_details = $this->get_user_details(null, $p_email_address);
+            $p_user_id = $user_details[0]['USER_ID'];
+
+            $sql = $this->db_connection->prepare('CALL build_menu_group(:p_user_id)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'MENU_GROUP_ID' => $row['menu_group_id'],
+                        'MENU_GROUP_NAME' => $row['menu_group_name']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : build_menu_item
+    # Purpose    : Builds the menu items.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function build_menu_item(){
+        if ($this->databaseConnection()) {
+            /*$response = array();
+            $user_details = $this->get_user_details(null, $p_email_address);
+            $p_user_id = $user_details[0]['USER_ID'];
+
+            $sql = $this->db_connection->prepare('CALL build_menu_item(:p_user_id, :p_menu_group_id)');
+            $sql->bindValue(':p_user_id', $p_user_id);
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'MENU_ITEM_ID' => $row['menu_item_id'],
+                        'MENU_ITEM_NAME' => $row['menu_item_name'],
+                        'MENU_ITEM_URL' => $row['menu_item_url'],
+                        'PARENT_ID' => $row['parent_id'],
+                        'MENU_ITEM_ICON' => $row['menu_item_icon']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }*/
+
+            $menuItems = array();
+            $sql = $this->db_connection->prepare('SELECT * FROM menu_item ORDER BY order_sequence');
+
+            if($sql->execute()){
+                while ($row = $sql->fetch()) {
+                    $menuItemId = $row['menu_item_id'];
+                    $menuItemName = $row['menu_item_name'];
+                    $menuGroupId = $row['menu_group_id'];
+                    $menuItemUrl = $row['menu_item_url'];
+                    $parentId = $row['parent_id'];
+                    $menuItemIcon = $row['menu_item_icon'];
+        
+                    $menuItemData = array(
+                        'menu_item_id' => $menuItemId,
+                        'menu_item_name' => $menuItemName,
+                        'menu_group_id' => $menuGroupId,
+                        'menu_item_url' => $menuItemUrl,
+                        'parent_id' => $parentId,
+                        'menu_item_icon' => $menuItemIcon,
+                        'sub_menu_items' => array()
+                    );
+        
+                    if ($parentId !== null) {
+                        foreach ($menuItems as &$item) {
+                            if ($item['menu_item_id'] === $parentId) {
+                                $item['sub_menu_items'][] = $menuItemData;
+                                break;
+                            }
+                        }
+                        unset($item);
+                    } else {
+                        $menuItems[] = $menuItemData;
+                    }
+                }
+        
+                return $menuItems;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : build_menu
+    # Purpose    : Builds the menu group.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function build_menu($p_email_address){
+        if ($this->databaseConnection()) {
+            $menu = '';
+            $menu_groups = $this->build_menu_group($p_email_address);
+
+            for($i = 0; $i < count($menu_groups); $i++) {
+                $menu_group_id = $menu_groups[$i]['MENU_GROUP_ID'];
+                $menu_group_name = $menu_groups[$i]['MENU_GROUP_NAME'];
+
+                $menu .= '<li class="pc-item pc-caption">
+                        <label>'. $menu_group_name .'</label>
+                    </li>';
+            }
+
+            return $menu;
+        }
+    }
+    # -------------------------------------------------------------
+    
     # -------------------------------------------------------------
     #   Check methods
     # -------------------------------------------------------------
@@ -1851,7 +1995,7 @@ class Api{
         return $form;
     }
     # -------------------------------------------------------------
-
+    
     # -------------------------------------------------------------
     #   Generate options methods
     # -------------------------------------------------------------
