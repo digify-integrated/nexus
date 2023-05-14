@@ -1386,9 +1386,9 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function build_menu_item(){
+    public function build_menu_item($p_email_address, $p_menu_group_id){
         if ($this->databaseConnection()) {
-            /*$response = array();
+            $menu_hierarchy = array();
             $user_details = $this->get_user_details(null, $p_email_address);
             $p_user_id = $user_details[0]['USER_ID'];
 
@@ -1396,64 +1396,97 @@ class Api{
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
 
-            if($sql->execute()){
-                while($row = $sql->fetch()){
-                    $response[] = array(
-                        'MENU_ITEM_ID' => $row['menu_item_id'],
-                        'MENU_ITEM_NAME' => $row['menu_item_name'],
-                        'MENU_ITEM_URL' => $row['menu_item_url'],
-                        'PARENT_ID' => $row['parent_id'],
-                        'MENU_ITEM_ICON' => $row['menu_item_icon']
-                    );
-                }
-
-                return $response;
-            }
-            else{
-                return $stmt->errorInfo()[2];
-            }*/
-
-            $menuItems = array();
-            $sql = $this->db_connection->prepare('SELECT * FROM menu_item ORDER BY order_sequence');
-
-            if($sql->execute()){
+            if ($sql->execute()) {
                 while ($row = $sql->fetch()) {
-                    $menuItemId = $row['menu_item_id'];
-                    $menuItemName = $row['menu_item_name'];
-                    $menuGroupId = $row['menu_group_id'];
-                    $menuItemUrl = $row['menu_item_url'];
-                    $parentId = $row['parent_id'];
-                    $menuItemIcon = $row['menu_item_icon'];
-        
-                    $menuItemData = array(
-                        'menu_item_id' => $menuItemId,
-                        'menu_item_name' => $menuItemName,
-                        'menu_group_id' => $menuGroupId,
-                        'menu_item_url' => $menuItemUrl,
-                        'parent_id' => $parentId,
-                        'menu_item_icon' => $menuItemIcon,
-                        'sub_menu_items' => array()
+                    $menu_item_id = $row['menu_item_id'];
+                    $menu_item_name = $row['menu_item_name'];
+                    $menu_item_url = $row['menu_item_url'];
+                    $parent_id = $row['parent_id'];
+                    $menu_item_icon = $row['menu_item_icon'];
+
+                    $menu_item = array(
+                        'MENU_ITEM_ID' => $menu_item_id,
+                        'MENU_ITEM_NAME' => $menu_item_name,
+                        'MENU_ITEM_URL' => $menu_item_url,
+                        'PARENT_ID' => $parent_id,
+                        'MENU_ITEM_ICON' => $menu_item_icon,
+                        'CHILDREN' => array()
                     );
-        
-                    if ($parentId !== null) {
-                        foreach ($menuItems as &$item) {
-                            if ($item['menu_item_id'] === $parentId) {
-                                $item['sub_menu_items'][] = $menuItemData;
+
+                    if (empty($parent_id)) {
+                        $menu_hierarchy[] = $menu_item;
+                    } else {
+                        foreach ($menu_hierarchy as &$parent) {
+                            if ($parent['MENU_ITEM_ID'] === $parent_id) {
+                                $parent['CHILDREN'][] = $menu_item;
                                 break;
                             }
                         }
-                        unset($item);
-                    } else {
-                        $menuItems[] = $menuItemData;
                     }
                 }
-        
-                return $menuItems;
-            }
-            else{
-                return $stmt->errorInfo()[2];
+
+                $html = '';
+                
+                foreach ($menu_hierarchy as $menu_item) {
+                    $html .= $this->build_menu_item_html($menu_item);
+                }
+
+                return $html;
+            } else {
+                return $sql->errorInfo()[2];
             }
         }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : build_menu_item_html
+    # Purpose    : Builds the menu item's HTML.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function build_menu_item_html($p_menu_item){
+        $html = '';
+
+        $menu_item_id = $p_menu_item['MENU_ITEM_ID'];
+        $menu_item_name = $p_menu_item['MENU_ITEM_NAME'];
+        $menu_item_url = $p_menu_item['MENU_ITEM_URL'];
+        $parent_id = $p_menu_item['PARENT_ID'];
+        $menu_item_icon = $p_menu_item['MENU_ITEM_ICON'];
+        $children = $p_menu_item['CHILDREN'];
+
+        if (empty($children)) {
+            $html .= '<li class="pc-item">';
+            $html .= '<a href="'. $menu_item_url .'" class="pc-link">';
+            $html .= '<span class="pc-micon">';
+            $html .= '<i data-feather="'. $menu_item_icon .'"></i>';
+            $html .= '</span>';
+            $html .= '<span class="pc-mtext">'. $menu_item_name .'</span></a>';
+            $html .= '</li>';
+        } else {
+            $html .= '<li class="pc-item pc-hasmenu">';
+            $html .= '<a href="#!" class="pc-link">';
+            $html .= '<span class="pc-micon">';
+            $html .= '<svg class="pc-icon">';
+            $html .= '<use xlink:href="#custom-level"></use>';
+            $html .= '</svg>';
+            $html .= '</span>';
+            $html .= '<span class="pc-mtext">' . $menu_item_name . '</span>';
+            $html .= '<span class="pc-arrow"><i data-feather="chevron-right"></i></span>';
+            $html .= '</a>';
+            $html .= '<ul class="pc-submenu">';
+    
+            foreach ($children as $child) {
+                $html .= $this->build_menu_item_html($child);
+            }
+    
+            $html .= '</ul>';
+            $html .= '</li>';
+        }
+
+        return $html;
     }
     # -------------------------------------------------------------
 
@@ -1465,20 +1498,23 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function build_menu($p_email_address){
+    public function build_menu($p_email_address)
+    {
         if ($this->databaseConnection()) {
             $menu = '';
             $menu_groups = $this->build_menu_group($p_email_address);
-
-            for($i = 0; $i < count($menu_groups); $i++) {
-                $menu_group_id = $menu_groups[$i]['MENU_GROUP_ID'];
-                $menu_group_name = $menu_groups[$i]['MENU_GROUP_NAME'];
-
+    
+            foreach ($menu_groups as $menu_group) {
+                $menu_group_id = $menu_group['MENU_GROUP_ID'];
+                $menu_group_name = $menu_group['MENU_GROUP_NAME'];
+    
                 $menu .= '<li class="pc-item pc-caption">
-                        <label>'. $menu_group_name .'</label>
-                    </li>';
+                            <label>'. $menu_group_name .'</label>
+                        </li>';
+    
+                $menu .= $this->build_menu_item($p_email_address, $menu_group_id);
             }
-
+    
             return $menu;
         }
     }

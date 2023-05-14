@@ -542,7 +542,7 @@ END //
 
 CREATE PROCEDURE build_menu_group(IN p_user_id INT(10))
 BEGIN
-    SELECT mg.menu_group_id, mg.menu_group_name
+    SELECT DISTINCT(mg.menu_group_id) as menu_group_id, mg.menu_group_name
     FROM menu_groups mg
     JOIN menu_item mi ON mi.menu_group_id = mg.menu_group_id
     WHERE EXISTS (
@@ -665,8 +665,8 @@ END //
 
 CREATE PROCEDURE insert_menu_item(IN p_menu_item_name VARCHAR(100), IN p_menu_group_id INT(10), IN p_menu_item_url VARCHAR(50), IN p_parent_id INT(10), IN p_menu_item_icon VARCHAR(150), IN p_order_sequence TINYINT(10), IN p_last_log_by INT(10), OUT p_menu_item_id INT(10))
 BEGIN
-    INSERT INTO menu_item (menu_item_name, menu_group_id, parent_id, menu_item_icon, order_sequence, last_log_by) 
-	VALUES(p_menu_item_name, p_menu_group_id, p_parent_id, p_menu_item_icon, p_order_sequence, p_last_log_by);
+    INSERT INTO menu_item (menu_item_name, menu_group_id, menu_item_url, parent_id, menu_item_icon, order_sequence, last_log_by) 
+	VALUES(p_menu_item_name, p_menu_group_id, p_menu_item_url, p_parent_id, p_menu_item_icon, p_order_sequence, p_last_log_by);
 	
     SET p_menu_item_id = LAST_INSERT_ID();
 END //
