@@ -1386,16 +1386,16 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function build_menu_item($p_email_address, $p_menu_group_id){
+    public function build_menu_item($p_email_address, $p_menu_group_id) {
         if ($this->databaseConnection()) {
-            $menu_hierarchy = array();
+            $menu_items = array();
             $user_details = $this->get_user_details(null, $p_email_address);
             $p_user_id = $user_details[0]['USER_ID'];
-
+    
             $sql = $this->db_connection->prepare('CALL build_menu_item(:p_user_id, :p_menu_group_id)');
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
-
+    
             if ($sql->execute()) {
                 while ($row = $sql->fetch()) {
                     $menu_item_id = $row['menu_item_id'];
@@ -1403,7 +1403,7 @@ class Api{
                     $menu_item_url = $row['menu_item_url'];
                     $parent_id = $row['parent_id'];
                     $menu_item_icon = $row['menu_item_icon'];
-
+    
                     $menu_item = array(
                         'MENU_ITEM_ID' => $menu_item_id,
                         'MENU_ITEM_NAME' => $menu_item_name,
@@ -1412,31 +1412,32 @@ class Api{
                         'MENU_ITEM_ICON' => $menu_item_icon,
                         'CHILDREN' => array()
                     );
-
-                    if (empty($parent_id)) {
-                        $menu_hierarchy[] = $menu_item;
-                    } else {
-                        foreach ($menu_hierarchy as &$parent) {
-                            if ($parent['MENU_ITEM_ID'] === $parent_id) {
-                                $parent['CHILDREN'][] = $menu_item;
-                                break;
-                            }
-                        }
+    
+                    $menu_items[$menu_item_id] = $menu_item;
+    
+                    if (!empty($parent_id) && isset($menu_items[$parent_id])) {
+                        $menu_items[$parent_id]['CHILDREN'][] = &$menu_items[$menu_item_id];
                     }
                 }
-
+    
+                $root_menu_items = array_filter($menu_items, function ($item) {
+                    return empty($item['PARENT_ID']);
+                });
+    
                 $html = '';
-                
-                foreach ($menu_hierarchy as $menu_item) {
-                    $html .= $this->build_menu_item_html($menu_item);
+    
+                foreach ($root_menu_items as $root_menu_item) {
+                    $html .= $this->build_menu_item_html($root_menu_item);
                 }
-
+    
                 return $html;
-            } else {
+            }
+            else {
                 return $sql->errorInfo()[2];
             }
         }
     }
+    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -1447,47 +1448,71 @@ class Api{
     # Returns    : String
     #
     # -------------------------------------------------------------
-    public function build_menu_item_html($p_menu_item){
+    public function build_menu_item_html($p_menu_item, $level = 1) {
         $html = '';
-
-        $menu_item_id = $p_menu_item['MENU_ITEM_ID'];
         $menu_item_name = $p_menu_item['MENU_ITEM_NAME'];
-        $menu_item_url = $p_menu_item['MENU_ITEM_URL'];
-        $parent_id = $p_menu_item['PARENT_ID'];
         $menu_item_icon = $p_menu_item['MENU_ITEM_ICON'];
+        $menu_item_url = $p_menu_item['MENU_ITEM_URL'];
         $children = $p_menu_item['CHILDREN'];
-
-        if (empty($children)) {
-            $html .= '<li class="pc-item">';
-            $html .= '<a href="'. $menu_item_url .'" class="pc-link">';
-            $html .= '<span class="pc-micon">';
-            $html .= '<i data-feather="'. $menu_item_icon .'"></i>';
-            $html .= '</span>';
-            $html .= '<span class="pc-mtext">'. $menu_item_name .'</span></a>';
-            $html .= '</li>';
-        } else {
-            $html .= '<li class="pc-item pc-hasmenu">';
-            $html .= '<a href="#!" class="pc-link">';
-            $html .= '<span class="pc-micon">';
-            $html .= '<svg class="pc-icon">';
-            $html .= '<use xlink:href="#custom-level"></use>';
-            $html .= '</svg>';
-            $html .= '</span>';
-            $html .= '<span class="pc-mtext">' . $menu_item_name . '</span>';
-            $html .= '<span class="pc-arrow"><i data-feather="chevron-right"></i></span>';
-            $html .= '</a>';
-            $html .= '<ul class="pc-submenu">';
     
-            foreach ($children as $child) {
-                $html .= $this->build_menu_item_html($child);
+        if ($level === 1) {
+            if (empty($children)) {
+                $html .= '<li class="pc-item">';
+                $html .= '<a href="' . $menu_item_url . '" class="pc-link">';
+                $html .= '<span class="pc-micon">';
+                $html .= '<i data-feather="'. $menu_item_icon .'"></i>';
+                $html .= '</span>';
+                $html .= '<span class="pc-mtext">' . $menu_item_name . '</span>';
+                $html .= '</a>';
+                $html .= '</li>';
+            } 
+            else {
+                $html .= '<li class="pc-item pc-hasmenu">';
+                $html .= '<a href="JavaScript:void(0);" class="pc-link">';
+                $html .= '<span class="pc-micon">';
+                $html .= ' <i data-feather="'. $menu_item_icon .'"></i>';
+                $html .= '</span>';
+                $html .= '<span class="pc-mtext">' . $menu_item_name . '</span>';
+                $html .= '<span class="pc-arrow"><i data-feather="chevron-right"></i></span>';
+                $html .= '</a>';
+                $html .= '<ul class="pc-submenu">';
+    
+                foreach ($children as $child) {
+                    $html .= $this->build_menu_item_html($child, $level + 1);
+                }
+    
+                $html .= '</ul>';
+                $html .= '</li>';
             }
-    
-            $html .= '</ul>';
-            $html .= '</li>';
         }
-
+        else {
+            if (empty($children)) {
+                $html .= '<li class="pc-item">';
+                $html .= '<a href="' . $menu_item_url . '" class="pc-link">';
+                $html .= '<span class="pc-mtext">' . $menu_item_name . '</span>';
+                $html .= '</a>';
+                $html .= '</li>';
+            } 
+            else {
+                $html .= '<li class="pc-item pc-hasmenu">';
+                $html .= '<a href="JavaScript:void(0);" class="pc-link">';
+                $html .= '<span class="pc-mtext">' . $menu_item_name . '</span>';
+                $html .= '<span class="pc-arrow"><i data-feather="chevron-right"></i></span>';
+                $html .= '</a>';
+                $html .= '<ul class="pc-submenu">';
+    
+                foreach ($children as $child) {
+                    $html .= $this->build_menu_item_html($child, $level + 1);
+                }
+    
+                $html .= '</ul>';
+                $html .= '</li>';
+            }
+        }
+    
         return $html;
     }
+    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -1502,6 +1527,7 @@ class Api{
     {
         if ($this->databaseConnection()) {
             $menu = '';
+            
             $menu_groups = $this->build_menu_group($p_email_address);
     
             foreach ($menu_groups as $menu_group) {
@@ -1920,6 +1946,41 @@ class Api{
                             '. $form_fields .'
                         </form>';
             break;
+            case 'file type form':
+                $file_type_create_access_right = $this->check_menu_access_rights($email, 6, 'create');
+                $file_type_write_access_right = $this->check_menu_access_rights($email, 6, 'write');
+
+                if(empty($reference_id) && $file_type_create_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">File Type <span class="text-danger">*</span></label>
+                                        <div class="col-lg-10">
+                                            <input type="text" class="form-control" id="file_type_name" name="file_type_name" maxlength="100" autocomplete="off">
+                                        </div>
+                                    </div>';
+                }
+                else if(!empty($reference_id) && $file_type_write_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">File Type <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-10">
+                                            <label class="col-form-label form-details fw-normal" id="file_type_name_label"></label>
+                                            <input type="text" class="form-control d-none form-edit" id="file_type_name" name="file_type_name" maxlength="100" autocomplete="off">
+                                        </div>
+                                    </div>';
+                }
+                else{
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">File Type</label>
+                                        <div class="col-lg-10">
+                                            <label class="col-form-label form-details fw-normal" id="file_type_name_label"></label>
+                                        </div>
+                                    </div>';
+                }
+                
+                $form .= '<form id="file-type-form" method="post" action="#">
+                            <input type="hidden" id="file_type_id" name="file_type_id" value="'. $reference_id .'">
+                            '. $form_fields .'
+                        </form>';
+            break;
         }
 
         return $form;
@@ -2023,6 +2084,15 @@ class Api{
                                         <tbody></tbody>
                                     </table>
                                 </div>
+                            </div>
+                        </form>';
+            break;
+            case 'file extension form':
+                $form .= '<form id="'. $form_id .'" method="post" action="#">
+                            <div class="form-group">
+                                <label class="form-label" for="file_extension_name">File Extension Name <span class="text-danger">*</span></label>
+                                <input type="hidden" id="file_extension_id" name="file_extension_id">
+                                <input type="text" class="form-control" id="file_extension_name" name="file_extension_name" maxlength="100" autocomplete="off">
                             </div>
                         </form>';
             break;

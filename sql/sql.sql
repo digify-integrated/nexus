@@ -877,3 +877,92 @@ BEGIN
     FROM role_users
     WHERE user_id = p_user_id AND role_id IN (SELECT role_id FROM system_action_access_rights where system_action_id = p_system_action_id);
 END //
+
+/* File types table */
+CREATE TABLE file_types (
+    file_type_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    file_type_name VARCHAR(100) NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX file_types_index_file_type_id ON file_types(file_type_id);
+
+CREATE TRIGGER file_types_trigger_update
+AFTER UPDATE ON file_types
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.file_type_name <> OLD.file_type_name THEN
+        SET audit_log = CONCAT(audit_log, "File Type Name: ", OLD.file_type_name, " -> ", NEW.file_type_name, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('file_types', NEW.file_type_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER file_types_trigger_insert
+AFTER INSERT ON file_types
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'File type created. <br/>';
+
+    IF NEW.file_type_name <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>File Type Name: ", NEW.file_type_name);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('file_types', NEW.file_type_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE PROCEDURE check_file_types_exist(IN p_file_type_id INT(10))
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM file_types
+    WHERE file_type_id = p_file_type_id;
+END //
+
+CREATE PROCEDURE insert_file_types(IN p_file_type_name VARCHAR(100), IN p_last_log_by INT(10), OUT p_file_type_id INT(10))
+BEGIN
+    INSERT INTO file_types (file_type_name, last_log_by) 
+	VALUES(p_file_type_name, p_last_log_by);
+	
+    SET p_file_type_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE duplicate_file_types(IN p_file_type_id INT(10), IN p_last_log_by INT(10), OUT p_new_file_type_id INT(10))
+BEGIN
+    DECLARE p_file_type_name VARCHAR(255);
+    
+    SELECT file_type_name 
+    INTO p_file_type_name 
+    FROM file_types 
+    WHERE file_type_id = p_file_type_id;
+    
+    INSERT INTO file_types (file_type_name, last_log_by) 
+    VALUES(p_file_type_name, p_last_log_by);
+    
+    SET p_new_file_type_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE update_file_types(IN p_file_type_id INT(10), IN p_file_type_name VARCHAR(100), IN p_last_log_by INT(10))
+BEGIN
+	UPDATE file_types
+        SET file_type_name = p_file_type_name,
+        last_log_by = p_last_log_by
+       	WHERE file_type_id = p_file_type_id;
+END //
+
+CREATE PROCEDURE delete_file_types(IN p_file_type_id INT(10))
+BEGIN
+    DELETE FROM file_types WHERE file_type_id = p_file_type_id;
+END //
+
+CREATE PROCEDURE get_file_types_details(IN p_file_type_id INT(10))
+BEGIN
+    SELECT file_type_name, last_log_by
+	FROM file_types 
+	WHERE file_type_id = p_file_type_id;
+END //

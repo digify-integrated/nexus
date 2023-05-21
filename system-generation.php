@@ -328,6 +328,50 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                 }
             }
         break;
+
+        # File types table
+        case 'file types table':
+            if ($api->databaseConnection()) {
+                $sql = $api->db_connection->prepare('SELECT file_type_id, file_type_name FROM file_types');
+    
+                if($sql->execute()){                    
+                    $menu_group_delete_access_right = $api->check_menu_access_rights($email_account, 2, 'delete');
+
+                    while($row = $sql->fetch()){
+                        $file_type_id = $row['file_type_id'];
+                        $file_type_name = $row['file_type_name'];
+    
+                        $file_type_id_encrypted = $api->encrypt_data($file_type_id);
+
+                        if($menu_group_delete_access_right > 0){
+                            $delete = '<button type="button" class="btn btn-icon btn-danger delete-file-type" data-menu-group-id="' . $file_type_id . '" title="Delete File Type">
+                                            <i class="ti ti-trash"></i>
+                                        </button>';
+                        }
+                        else{
+                            $delete = null;
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-delete="1" type="checkbox" value="'. $file_type_id .'">',
+                            'FILE_TYPE_ID' => $file_type_id,
+                            'FILE_TYPE_NAME' => $file_type_name,
+                            'ACTION' => '<div class="d-flex gap-2">
+                                            <a href="file-type-form.php?id='. $file_type_id_encrypted .'" class="btn btn-icon btn-primary" title="View File Type">
+                                                <i class="ti ti-eye"></i>
+                                            </a>
+                                            '. $delete .'
+                                        </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
+                }
+            }
+        break;
     }
 }
 

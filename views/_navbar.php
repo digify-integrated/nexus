@@ -52,23 +52,7 @@
                             <span class="pc-mtext">Dashboard</span>
                         </a>
                     </li>
-                    <li class="pc-item pc-caption">
-                        <label>Administration</label>
-                        <i class="ti ti-dashboard"></i>
-                    </li>
-                    <li class="pc-item pc-hasmenu">
-                        <a href="JavaScript:void(0);" class="pc-link">
-                            <span class="pc-micon">
-                                <i data-feather="sidebar"></i>
-                            </span>
-                            <span class="pc-mtext">User Interface</span>
-                            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-                        </a>
-                        <ul class="pc-submenu">
-                            <li class="pc-item"><a class="pc-link" href="menu-groups.php">Menu Groups</a></li>
-                            <li class="pc-item"><a class="pc-link" href="menu-items.php">Menu Items</a></li>
-                        </ul>
-                    </li>
+
                     <?php echo $api->build_menu($email); ?>
                 </ul>
             </div>
