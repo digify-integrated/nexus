@@ -483,6 +483,56 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : check_file_types_exist
+    # Purpose    : Checks if the file types exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_file_types_exist($p_file_type_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_file_types_exist(:p_file_type_id)');
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['total'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+    
+    # -------------------------------------------------------------
+    #
+    # Name       : check_file_extension_exist
+    # Purpose    : Checks if the file extension exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_file_extension_exist($p_file_extension_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_file_extension_exist(:p_file_extension_id)');
+            $sql->bindValue(':p_file_extension_id', $p_file_extension_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['total'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Update methods
     # -------------------------------------------------------------
     
@@ -673,6 +723,57 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : update_file_types
+    # Purpose    : Updates the file types.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function update_file_types($p_file_type_id, $p_file_type_name, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_file_types(:p_file_type_id, :p_file_type_name, :p_last_log_by)');
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+            $sql->bindValue(':p_file_type_name', $p_file_type_name);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_file_extension
+    # Purpose    : Updates the file extension.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function update_file_extension($p_file_extension_id, $p_file_extension_name, $p_file_type_id, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_file_extension(:p_file_extension_id, :p_file_extension_name, :p_file_type_id, :p_last_log_by)');
+            $sql->bindValue(':p_file_extension_id', $p_file_extension_id);
+            $sql->bindValue(':p_file_extension_name', $p_file_extension_name);
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Insert methods
     # -------------------------------------------------------------
 
@@ -785,7 +886,6 @@ class Api{
             return $response;
         }
     }
-    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -808,12 +908,12 @@ class Api{
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
     
             if($sql->execute()){
-                $result = $this->db_connection->query("SELECT @p_menu_item_id AS p_menu_item_id");
-                $p_menu_item_id = $result->fetch(PDO::FETCH_ASSOC)['p_menu_item_id'];
+                $result = $this->db_connection->query("SELECT @p_menu_item_id AS menu_item_id");
+                $menu_item_id = $result->fetch(PDO::FETCH_ASSOC)['menu_item_id'];
                 
                 $response[] = array(
                     'RESPONSE' => true,
-                    'MENU_ITEM_ID' => $this->encrypt_data($p_menu_item_id)
+                    'MENU_ITEM_ID' => $this->encrypt_data($menu_item_id)
                 );
             }
             else{
@@ -825,7 +925,6 @@ class Api{
             return $response;
         }
     }
-    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -848,6 +947,75 @@ class Api{
             else{
                 return $stmt->errorInfo()[2];
             }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_file_types
+    # Purpose    : Inserts the file types.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function insert_file_types($p_file_type_name, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_file_types(:p_file_type_name, :p_last_log_by, @p_file_type_id)');
+            $sql->bindValue(':p_file_type_name', $p_file_type_name);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_file_type_id AS file_type_id");
+                $file_type_id = $result->fetch(PDO::FETCH_ASSOC)['file_type_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'FILE_TYPE_ID' => $this->encrypt_data($file_type_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_file_extension
+    # Purpose    : Inserts the file extension.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function insert_file_extension($p_file_extension_name, $p_file_type_id, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_file_extension(:p_file_extension_name, :p_file_type_id, :p_last_log_by, @p_file_extension_id)');
+            $sql->bindValue(':p_file_extension_name', $p_file_extension_name);
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_file_extension_id AS file_extension_id");
+                $file_extension_id = $result->fetch(PDO::FETCH_ASSOC)['file_extension_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'FILE_EXTENSION_ID' => $this->encrypt_data($file_extension_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
         }
     }
     # -------------------------------------------------------------
@@ -877,7 +1045,6 @@ class Api{
             }
         }
     }
-    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -901,29 +1068,74 @@ class Api{
             }
         }
     }
-    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #   Get details methods
+    #
+    # Name       : delete_file_types
+    # Purpose    : Delete the file type.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_file_types($p_file_type_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_file_types(:p_file_type_id)');
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_file_extension
+    # Purpose    : Delete the file extension.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_file_extension($p_file_extension_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_file_extension(:p_file_extension_id)');
+            $sql->bindValue(':p_file_extension_id', $p_file_extension_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #   Duplicate methods
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #
     # Name       : duplicate_menu_groups
-    # Purpose    : Inserts the menu group.
+    # Purpose    : Duplicates the menu group.
     #
     # Returns    : Array
     #
     # -------------------------------------------------------------
     public function duplicate_menu_groups($menu_group_id, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL duplicate_menu_groups(:menu_group_id, :p_last_log_by, @p_menu_group_id)');
+            $sql = $this->db_connection->prepare('CALL duplicate_menu_groups(:menu_group_id, :p_last_log_by, @p_new_menu_group_id)');
             $sql->bindValue(':menu_group_id', $menu_group_id);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
     
             if($sql->execute()){
-                $result = $this->db_connection->query("SELECT @p_menu_group_id AS menu_group_id");
+                $result = $this->db_connection->query("SELECT @p_new_menu_group_id AS menu_group_id");
                 $menu_group_id = $result->fetch(PDO::FETCH_ASSOC)['menu_group_id'];
                 
                 $response[] = array(
@@ -940,25 +1152,24 @@ class Api{
             return $response;
         }
     }
-    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #
     # Name       : duplicate_menu_item
-    # Purpose    : Inserts the menu group.
+    # Purpose    : Duplicates the menu item.
     #
     # Returns    : Array
     #
     # -------------------------------------------------------------
     public function duplicate_menu_item($menu_item_id, $p_last_log_by){
         if ($this->databaseConnection()) {
-            $sql = $this->db_connection->prepare('CALL duplicate_menu_item(:menu_item_id, :p_last_log_by, @p_menu_item_id)');
+            $sql = $this->db_connection->prepare('CALL duplicate_menu_item(:menu_item_id, :p_last_log_by, @p_new_menu_item_id)');
             $sql->bindValue(':menu_item_id', $menu_item_id);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
     
             if($sql->execute()){
-                $result = $this->db_connection->query("SELECT @p_menu_item_id AS menu_item_id");
+                $result = $this->db_connection->query("SELECT @p_new_menu_item_id AS menu_item_id");
                 $menu_item_id = $result->fetch(PDO::FETCH_ASSOC)['menu_item_id'];
                 
                 $response[] = array(
@@ -975,7 +1186,74 @@ class Api{
             return $response;
         }
     }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : duplicate_file_types
+    # Purpose    : Duplicates the file types.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function duplicate_file_types($p_file_type_id, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL duplicate_file_types(:p_file_type_id, :p_last_log_by, @p_new_file_type_id)');
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
     
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_new_file_type_id AS file_type_id");
+                $file_type_id = $result->fetch(PDO::FETCH_ASSOC)['file_type_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'FILE_TYPE_ID' => $this->encrypt_data($file_type_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : duplicate_file_extension
+    # Purpose    : Inserts the file extension.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function duplicate_file_extension($p_file_extension_id, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL duplicate_file_extension(:p_file_extension_id, :p_last_log_by, @p_new_file_extension_id)');
+            $sql->bindValue(':p_file_extension_id', $p_file_extension_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_new_file_extension_id AS file_extension_id");
+                $file_extension_id = $result->fetch(PDO::FETCH_ASSOC)['file_extension_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'FILE_EXTENSION_ID' => $this->encrypt_data($file_extension_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -1236,6 +1514,71 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : get_file_types_details
+    # Purpose    : Gets the file type details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_file_types_details($p_file_type_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_file_types_details(:p_file_type_id)');
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'FILE_TYPE_NAME' => $row['file_type_name'],
+                        'LAST_LOG_BY' => $row['last_log_by']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_file_extension_details
+    # Purpose    : Gets the file extension details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_file_extension_details($p_file_extension_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_file_extension_details(:p_file_extension_id)');
+            $sql->bindValue(':p_file_extension_id', $p_file_extension_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'FILE_EXTENSION_NAME' => $row['file_extension_name'],
+                        'FILE_TYPE_ID' => $row['file_type_id'],
+                        'LAST_LOG_BY' => $row['last_log_by']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Get methods
     # -------------------------------------------------------------
 
@@ -1391,11 +1734,11 @@ class Api{
             $menu_items = array();
             $user_details = $this->get_user_details(null, $p_email_address);
             $p_user_id = $user_details[0]['USER_ID'];
-    
+
             $sql = $this->db_connection->prepare('CALL build_menu_item(:p_user_id, :p_menu_group_id)');
             $sql->bindValue(':p_user_id', $p_user_id);
             $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
-    
+
             if ($sql->execute()) {
                 while ($row = $sql->fetch()) {
                     $menu_item_id = $row['menu_item_id'];
@@ -1403,7 +1746,7 @@ class Api{
                     $menu_item_url = $row['menu_item_url'];
                     $parent_id = $row['parent_id'];
                     $menu_item_icon = $row['menu_item_icon'];
-    
+
                     $menu_item = array(
                         'MENU_ITEM_ID' => $menu_item_id,
                         'MENU_ITEM_NAME' => $menu_item_name,
@@ -1412,32 +1755,33 @@ class Api{
                         'MENU_ITEM_ICON' => $menu_item_icon,
                         'CHILDREN' => array()
                     );
-    
+
                     $menu_items[$menu_item_id] = $menu_item;
-    
-                    if (!empty($parent_id) && isset($menu_items[$parent_id])) {
-                        $menu_items[$parent_id]['CHILDREN'][] = &$menu_items[$menu_item_id];
+                }
+
+                foreach ($menu_items as $menu_item) {
+                    if (!empty($menu_item['PARENT_ID']) && isset($menu_items[$menu_item['PARENT_ID']])) {
+                        $menu_items[$menu_item['PARENT_ID']]['CHILDREN'][] = &$menu_items[$menu_item['MENU_ITEM_ID']];
                     }
                 }
-    
+
                 $root_menu_items = array_filter($menu_items, function ($item) {
                     return empty($item['PARENT_ID']);
                 });
-    
+
                 $html = '';
-    
+
                 foreach ($root_menu_items as $root_menu_item) {
                     $html .= $this->build_menu_item_html($root_menu_item);
                 }
-    
+
                 return $html;
-            }
+            } 
             else {
                 return $sql->errorInfo()[2];
             }
         }
     }
-    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -1512,7 +1856,6 @@ class Api{
     
         return $html;
     }
-    
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
@@ -1523,8 +1866,7 @@ class Api{
     # Returns    : Array
     #
     # -------------------------------------------------------------
-    public function build_menu($p_email_address)
-    {
+    public function build_menu($p_email_address){
         if ($this->databaseConnection()) {
             $menu = '';
             
@@ -1910,17 +2252,17 @@ class Api{
                 }
                 else{
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Item <span class="text-danger d-none form-edit">*</span></label>
+                                        <label class="col-lg-2 col-form-label">Menu Item</label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="menu_item_label"></label>
                                         </div>
-                                        <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
+                                        <label class="col-lg-2 col-form-label">Order Sequence</label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="order_sequence_label"></label>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
+                                        <label class="col-lg-2 col-form-label">Menu Group</label>
                                         <div class="col-lg-4">
                                             <div class="col-form-label form-details fw-normal" id="menu_group_id_label"></div>
                                         </div>
@@ -1978,6 +2320,62 @@ class Api{
                 
                 $form .= '<form id="file-type-form" method="post" action="#">
                             <input type="hidden" id="file_type_id" name="file_type_id" value="'. $reference_id .'">
+                            '. $form_fields .'
+                        </form>';
+            break;
+            case 'file extension form':
+                $file_extension_create_access_right = $this->check_menu_access_rights($email, 7, 'create');
+                $file_extension_write_access_right = $this->check_menu_access_rights($email, 7, 'write');
+
+                if(empty($reference_id) && $file_extension_create_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">File Extension <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <input type="text" class="form-control" id="file_extension_name" name="file_extension_name" maxlength="100" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">File Type <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <select class="form-control select2" name="file_type_id" id="file_type_id">
+                                                <option value="0">--</option>
+                                                '. $this->generate_file_type_options() .'
+                                            </select>
+                                        </div>
+                                    </div>';
+                }
+                else if(!empty($reference_id) && $file_extension_write_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">File Extension <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="file_extension_name_label"></label>
+                                            <input type="text" class="form-control d-none form-edit" id="file_extension_name" name="file_extension_name" maxlength="100" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">File Type <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <div class="col-form-label form-details fw-normal" id="file_type_id_label"></div>
+                                            <div class="d-none form-edit">
+                                                <select class="form-control select2" name="file_type_id" id="file_type_id">
+                                                    <option value="0">--</option>
+                                                    '. $this->generate_file_type_options() .'
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>';
+                }
+                else{
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">File Extension</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="file_extension_name_label"></label>
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">File Type</label>
+                                        <div class="col-lg-4">
+                                            <div class="col-form-label form-details fw-normal" id="file_type_id_label"></div>
+                                        </div>
+                                    </div>';
+                }
+                
+                $form .= '<form id="file-extension-form" method="post" action="#">
+                            <input type="hidden" id="file_extension_id" name="file_extension_id" value="'. $reference_id .'">
                             '. $form_fields .'
                         </form>';
             break;

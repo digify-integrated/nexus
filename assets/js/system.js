@@ -122,7 +122,7 @@ function displayDetails(transaction){
                 }
             });
             break;
-            case 'menu item details':
+        case 'menu item details':
                 var menu_item_id = $('#menu-item-id').text();
                 
                 $.ajax({
@@ -146,6 +146,57 @@ function displayDetails(transaction){
 
                         checkOptionExist('#menu_group_id', response[0].MENU_GROUP_ID, '');
                         checkOptionExist('#parent_id', response[0].PARENT_ID, '');
+                    }
+                });
+                break;
+        case 'file types details':
+            var file_type_id = $('#file-type-id').text();
+            
+            $.ajax({
+                url: 'controller.php',
+                method: 'POST',
+                dataType: 'JSON',
+                data: {file_type_id : file_type_id, transaction : transaction},
+                success: function(response) {
+                    $('#file_type_name').val(response[0].FILE_TYPE_NAME);
+                    
+                    $('#file_type_name_label').text(response[0].FILE_TYPE_NAME);
+                }
+            });
+            break;
+        case 'modal file extension details':
+            var file_extension_id = sessionStorage.getItem('file_extension_id');
+            
+            $.ajax({
+                url: 'controller.php',
+                method: 'POST',
+                dataType: 'JSON',
+                data: {file_extension_id : file_extension_id, transaction : transaction},
+                beforeSend: function() {
+                    resetModalForm('file-extension-form');
+                },
+                success: function(response) {
+                    $('#file_extension_id').val(file_extension_id);
+                    $('#file_extension_name').val(response[0].FILE_EXTENSION_NAME);
+                }
+            });
+            break;
+        case 'file extension details':
+                var file_extension_id = $('#file-extension-id').text();
+                
+                $.ajax({
+                    url: 'controller.php',
+                    method: 'POST',
+                    dataType: 'JSON',
+                    data: {file_extension_id : file_extension_id, transaction : transaction},
+                    success: function(response) {
+                        $('#file_extension_name').val(response[0].FILE_EXTENSION_NAME);
+                        
+                        $('#file_extension_name_label').text(response[0].FILE_EXTENSION_NAME);
+                        
+                        document.getElementById("file_type_id_label").innerHTML = response[0].FILE_TYPE_NAME;
+
+                        checkOptionExist('#file_type_id', response[0].FILE_TYPE_ID, '');
                     }
                 });
                 break;

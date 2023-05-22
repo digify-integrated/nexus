@@ -124,18 +124,18 @@
         });
 
         $(document).on('click','.assign-file-extension-role-access',function() {
-            const menu_item_id = $(this).data('file-extension-id');
+            const file_extension_id = $(this).data('file-extension-id');
 
-            sessionStorage.setItem('menu_item_id', menu_item_id);
+            sessionStorage.setItem('file_extension_id', file_extension_id);
 
             $('#assign-file-extension-role-access-modal').modal('show');
             initializeAssignFileExtensionRoleAccessTable('#assign-file-extension-role-access-table');
         });
 
         $(document).on('click','.update-file-extension',function() {
-            const menu_item_id = $(this).data('file-extension-id');
+            const file_extension_id = $(this).data('file-extension-id');
     
-            sessionStorage.setItem('menu_item_id', menu_item_id);
+            sessionStorage.setItem('file_extension_id', file_extension_id);
             
             displayDetails('modal file extension details');
     
@@ -144,7 +144,7 @@
 
         $(document).on('click','.delete-file-extension',function() {
             const email_account = $('#email_account').text();
-            const menu_item_id = $(this).data('file-extension-id');
+            const file_extension_id = $(this).data('file-extension-id');
             const transaction = 'delete file extension';
     
             Swal.fire({
@@ -162,7 +162,7 @@
                     $.ajax({
                         type: 'POST',
                         url: 'controller.php',
-                        data: {email_account : email_account, menu_item_id : menu_item_id, transaction : transaction},
+                        data: {email_account : email_account, file_extension_id : file_extension_id, transaction : transaction},
                         success: function (response) {
                             switch (response) {
                                 case 'Deleted':
@@ -205,7 +205,7 @@ function initializeFileExtensionTable(datatable_name, buttons = false, show_all 
     const column_definition = [
         { 'width': '10%', 'aTargets': 0 },
         { 'width': '75%', 'aTargets': 1 },
-        { 'width': '15%','bSortable': false, 'aTargets': 4 }
+        { 'width': '15%','bSortable': false, 'aTargets': 2 }
     ];
 
     const length_menu = show_all ? [[-1], ['All']] : [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']];
@@ -323,20 +323,14 @@ function initializeFileTypeForm(){
 function initializeFileExtensionForm(){
     $('#file-extension-form').validate({
         rules: {
-            menu_item_name: {
-                required: true
-            },
-            menu_item_order_sequence: {
+            file_extension_name: {
                 required: true
             }
         },
         messages: {
-            menu_item_name: {
+            file_extension_name: {
                 required: 'Please enter the file extension name'
             },
-            menu_item_order_sequence: {
-                required: 'Please enter the order sequence'
-            }
         },
         errorPlacement: function (error, element) {
             if (element.hasClass('select2')) {

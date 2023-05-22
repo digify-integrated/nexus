@@ -368,6 +368,139 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
+        # Submit file type
+        case 'submit file type':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_type_id']) && isset($_POST['file_type_name']) && !empty($_POST['file_type_name'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $user_details = $api->get_user_details(null, $email_account);
+                        $user_id = $user_details[0]['USER_ID'];
+
+                        $file_type_id = htmlspecialchars($_POST['file_type_id'], ENT_QUOTES, 'UTF-8');
+                        $file_type_name = htmlspecialchars($_POST['file_type_name'], ENT_QUOTES, 'UTF-8');
+
+                        $check_file_types_exist = $api->check_file_types_exist($file_type_id);
+        
+                        if($check_file_types_exist > 0){
+                            $update_file_types = $api->update_file_types($file_type_id, $file_type_name, $user_id);
+                
+                            if($update_file_types){
+                                $response[] = array(
+                                    'RESPONSE' => 'Updated'
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $update_file_types
+                                );
+                            }
+                        }
+                        else{
+                            $insert_file_types = $api->insert_file_types($file_type_name, $user_id);
+                
+                            if($insert_file_types[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Inserted',
+                                    'FILE_TYPE_ID' => $insert_file_types[0]['FILE_TYPE_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $insert_file_types
+                                );
+                            }
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Submit file extension
+        case 'submit file extension':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_type_id']) && !empty($_POST['file_type_id']) && isset($_POST['file_extension_id']) && isset($_POST['file_extension_name']) && !empty($_POST['file_extension_name'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $user_details = $api->get_user_details(null, $email_account);
+                        $user_id = $user_details[0]['USER_ID'];
+
+                        $file_extension_id = htmlspecialchars($_POST['file_extension_id'], ENT_QUOTES, 'UTF-8');
+                        $file_type_id = htmlspecialchars($_POST['file_type_id'], ENT_QUOTES, 'UTF-8');
+                        $file_extension_name = htmlspecialchars($_POST['file_extension_name'], ENT_QUOTES, 'UTF-8');
+
+                        $check_file_extension_exist = $api->check_file_extension_exist($file_extension_id);
+        
+                        if($check_file_extension_exist > 0){
+                            $update_file_extension = $api->update_file_extension($file_extension_id, $file_extension_name, $file_type_id, $user_id);
+                
+                            if($update_file_extension){
+                                $response[] = array(
+                                    'RESPONSE' => 'Updated'
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $update_file_extension
+                                );
+                            }
+                        }
+                        else{
+                            $insert_file_extension = $api->insert_file_extension($file_extension_name, $file_type_id, $user_id);
+                
+                            if($insert_file_extension[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Inserted',
+                                    'FILE_EXTENSION_ID' => $insert_file_extension[0]['FILE_EXTENSION_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $insert_file_extension
+                                );
+                            }
+                        }
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+        break;
+        # -------------------------------------------------------------
+
         # -------------------------------------------------------------
         #   Delete transactions
         # -------------------------------------------------------------
@@ -532,6 +665,166 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
+        # Delete file type
+        case 'delete file type':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_type_id']) && !empty($_POST['file_type_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $file_type_id = htmlspecialchars($_POST['file_type_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_file_types_exist = $api->check_file_types_exist($file_type_id);
+        
+                        if($check_file_types_exist > 0){
+                            $delete_file_types = $api->delete_file_types($file_type_id);
+                
+                            if($delete_file_types){
+                                echo 'Deleted';
+                            }
+                            else{
+                                echo $delete_file_types;
+                            }
+                        }
+                        else{
+                            echo 'Not Found';
+                        }       
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Delete multiple file type
+        case 'delete multiple file type':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_type_id']) && !empty($_POST['file_type_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $file_type_ids = $_POST['file_type_id'];
+
+                        foreach($file_type_ids as $file_type_id){
+                            $delete_file_types = $api->delete_file_types($file_type_id);
+                                                
+                            if(!$delete_file_types){
+                                $error = $delete_file_types;
+                                break;
+                            }
+                        }
+
+                        if(empty($error)){
+                            echo 'Deleted';
+                        }
+                        else{
+                            echo $error;
+                        }
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Delete file extension
+        case 'delete file extension':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_extension_id']) && !empty($_POST['file_extension_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $file_extension_id = htmlspecialchars($_POST['file_extension_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_file_extension_exist = $api->check_file_extension_exist($file_extension_id);
+        
+                        if($check_file_extension_exist > 0){
+                            $delete_file_extension = $api->delete_file_extension($file_extension_id);
+                
+                            if($delete_file_extension){
+                                echo 'Deleted';
+                            }
+                            else{
+                                echo $delete_file_extension;
+                            }
+                        }
+                        else{
+                            echo 'Not Found';
+                        }       
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Delete multiple file extension
+        case 'delete multiple file extension':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_extension_id']) && !empty($_POST['file_extension_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $file_extension_ids = $_POST['file_extension_id'];
+
+                        foreach($file_extension_ids as $file_extension_id){
+                            $delete_file_extension = $api->delete_file_extension($file_extension_id);
+                                                
+                            if(!$delete_file_extension){
+                                $error = $delete_file_extension;
+                                break;
+                            }
+                        }
+
+                        if(empty($error)){
+                            echo 'Deleted';
+                        }
+                        else{
+                            echo $error;
+                        }
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
         # -------------------------------------------------------------
         #   Duplicate transactions
         # -------------------------------------------------------------
@@ -622,6 +915,118 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             else{
                                 $response[] = array(
                                     'RESPONSE' => $duplicate_menu_item
+                                );
+                            }
+                        }
+                        else{
+                            $response[] = array(
+                                'RESPONSE' => 'Not Found'
+                            );
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Duplicate file type
+        case 'duplicate file type':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_type_id']) && !empty($_POST['file_type_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $user_details = $api->get_user_details(null, $email_account);
+                    $user_id = $user_details[0]['USER_ID'];
+
+                    $check_user_status = $api->check_user_status($user_id, $email_account);
+    
+                    if($check_user_status){
+                        $file_type_id = htmlspecialchars($_POST['file_type_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_file_types_exist = $api->check_file_types_exist($file_type_id);
+        
+                        if($check_file_types_exist > 0){
+                            $duplicate_file_types = $api->duplicate_file_types($file_type_id, $user_id);
+                
+                            if($duplicate_file_types[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Duplicated',
+                                    'FILE_TYPE_ID' => $duplicate_file_types[0]['FILE_TYPE_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $duplicate_file_types
+                                );
+                            }
+                        }
+                        else{
+                            $response[] = array(
+                                'RESPONSE' => 'Not Found'
+                            );
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Duplicate file extension
+        case 'duplicate file extension':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['file_extension_id']) && !empty($_POST['file_extension_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $user_details = $api->get_user_details(null, $email_account);
+                    $user_id = $user_details[0]['USER_ID'];
+
+                    $check_user_status = $api->check_user_status($user_id, $email_account);
+    
+                    if($check_user_status){
+                        $file_extension_id = htmlspecialchars($_POST['file_extension_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_file_extension_exist = $api->check_file_extension_exist($file_extension_id);
+        
+                        if($check_file_extension_exist > 0){
+                            $duplicate_file_extension = $api->duplicate_file_extension($file_extension_id, $user_id);
+                
+                            if($duplicate_file_extension[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Duplicated',
+                                    'FILE_EXTENSION_ID' => $duplicate_file_extension[0]['FILE_EXTENSION_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $duplicate_file_extension
                                 );
                             }
                         }
@@ -814,6 +1219,56 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     'PARENT_ID' => $parent_id,
                     'MENU_ITEM_ICON' => $menu_item_details[0]['MENU_ITEM_ICON'],
                     'ORDER_SEQUENCE' => $menu_item_details[0]['ORDER_SEQUENCE']
+                );
+    
+                echo json_encode($response);
+            }
+        break;
+
+        case 'file types details':
+            if(isset($_POST['file_type_id']) && !empty($_POST['file_type_id'])){
+                $file_type_id = htmlspecialchars($_POST['file_type_id'], ENT_QUOTES, 'UTF-8');
+
+                $get_file_types_details = $api->get_file_types_details($file_type_id);
+    
+                $response[] = array(
+                    'FILE_TYPE_NAME' => $get_file_types_details[0]['FILE_TYPE_NAME']
+                );
+    
+                echo json_encode($response);
+            }
+        break;
+
+        case 'modal file extension details':
+            if(isset($_POST['file_extension_id']) && !empty($_POST['file_extension_id'])){
+                $file_extension_id = htmlspecialchars($_POST['file_extension_id'], ENT_QUOTES, 'UTF-8');
+
+                $file_extension_details = $api->get_file_extension_details($file_extension_id);
+    
+                $response[] = array(
+                    'FILE_EXTENSION_NAME' => $file_extension_details[0]['FILE_EXTENSION_NAME']
+                );
+    
+                echo json_encode($response);
+            }
+        break;
+
+        case 'file extension details':
+            if(isset($_POST['file_extension_id']) && !empty($_POST['file_extension_id'])){
+                $file_extension_id = htmlspecialchars($_POST['file_extension_id'], ENT_QUOTES, 'UTF-8');
+
+                $file_extension_details = $api->get_file_extension_details($file_extension_id);
+                $file_type_id = $file_extension_details[0]['FILE_TYPE_ID'];
+
+                $file_type_id_encrypted = $api->encrypt_data($file_type_id);
+
+                $file_types_details = $api->get_file_types_details($file_type_id);
+                $file_type_name = $file_types_details[0]['FILE_TYPE_NAME'] ?? null;
+    
+                $response[] = array(
+                    'FILE_EXTENSION_NAME' => $file_extension_details[0]['MENU_ITEM_NAME'],
+                    'FILE_TYPE_ID' => $file_type_id,
+                    'FILE_TYPE_NAME' => '<a href="file-type-form.php?id='. $file_type_id_encrypted .'">'. $file_type_name .'</a>'
                 );
     
                 echo json_encode($response);

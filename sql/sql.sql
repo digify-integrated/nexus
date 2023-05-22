@@ -852,7 +852,7 @@ BEGIN
     WHERE menu_item_id = p_menu_item_id AND role_id = p_role_id;
 END //
 
-/* System action */
+/* System action table */
 
 CREATE TABLE system_action(
 	system_action_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -965,4 +965,107 @@ BEGIN
     SELECT file_type_name, last_log_by
 	FROM file_types 
 	WHERE file_type_id = p_file_type_id;
+END //
+
+/* File extension table */
+CREATE TABLE file_extension(
+	file_extension_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	file_extension_name VARCHAR(100) NOT NULL,
+	file_type_id INT(10) UNSIGNED NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX file_extension_index_file_extension_id ON file_extension(file_extension_id);
+
+ALTER TABLE file_extension
+ADD FOREIGN KEY (file_type_id) REFERENCES file_types(file_type_id);
+
+CREATE TRIGGER file_extension_trigger_update
+AFTER UPDATE ON file_extension
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.file_extension_name <> OLD.file_extension_name THEN
+        SET audit_log = CONCAT(audit_log, "File Extension Name: ", OLD.file_extension_name, " -> ", NEW.file_extension_name, "<br/>");
+    END IF;
+
+    IF NEW.file_type_id <> OLD.file_type_id THEN
+        SET audit_log = CONCAT(audit_log, "File Type ID: ", OLD.file_type_id, " -> ", NEW.file_type_id, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('file_extension', NEW.file_extension_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER file_extension_trigger_insert
+AFTER INSERT ON file_extension
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'File extension created. <br/>';
+
+    IF NEW.file_extension_name <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>File Extension Name: ", NEW.file_extension_name);
+    END IF;
+
+    IF NEW.file_type_id <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>File Type ID: ", NEW.file_type_id);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('file_extension', NEW.file_extension_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE PROCEDURE check_file_extension_exist(IN p_file_extension_id INT(10))
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM file_extension
+    WHERE file_extension_id = p_file_extension_id;
+END //
+
+CREATE PROCEDURE insert_file_extension(IN p_file_extension_name VARCHAR(100), IN p_file_type_id INT(10), IN p_last_log_by INT(10), OUT p_file_extension_id INT(10))
+BEGIN
+    INSERT INTO file_extension (file_extension_name, file_type_id, last_log_by) 
+	VALUES(p_file_extension_name, p_file_type_id, p_last_log_by);
+	
+    SET p_file_extension_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE duplicate_file_extension(IN p_file_extension_id INT(10), IN p_last_log_by INT(10), OUT p_new_file_extension_id INT(10))
+BEGIN
+    DECLARE p_file_extension_name VARCHAR(255);
+    DECLARE p_file_type_id INT(10);
+    
+    SELECT file_extension_name, file_type_id 
+    INTO p_file_extension_name, p_file_type_id 
+    FROM file_extension 
+    WHERE file_extension_id = p_file_extension_id;
+    
+    INSERT INTO file_extension (file_extension_name, file_type_id, last_log_by) 
+    VALUES(p_file_extension_name, p_file_type_id, p_last_log_by);
+    
+    SET p_new_file_extension_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE update_file_extension(IN p_file_extension_id INT(10), IN p_file_extension_name VARCHAR(100), IN p_file_type_id INT(10), IN p_last_log_by INT(10))
+BEGIN
+	UPDATE file_extension
+        SET file_extension_name = p_file_extension_name,
+        file_type_id = p_file_type_id,
+        last_log_by = p_last_log_by
+       	WHERE file_extension_id = p_file_extension_id;
+END //
+
+CREATE PROCEDURE delete_file_extension(IN p_file_extension_id INT(10))
+BEGIN
+    DELETE FROM file_extension WHERE file_extension_id = p_file_extension_id;
+END //
+
+CREATE PROCEDURE get_file_extension_details(IN p_file_extension_id INT(10))
+BEGIN
+    SELECT file_extension_name, file_type_id, last_log_by
+	FROM file_extension 
+	WHERE file_extension_id = p_file_extension_id;
 END //

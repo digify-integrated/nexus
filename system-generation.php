@@ -61,11 +61,12 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
             }
         break;
 
-        # Menu item table
+        # Menu group menu item table
         case 'menu group menu item table':
             if(isset($_POST['menu_group_id']) && !empty($_POST['menu_group_id'])){
                 if ($api->databaseConnection()) {
-                    $menu_group_id = $_POST['menu_group_id'];
+                    $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
+
                     $menu_group_write_access_right = $api->check_menu_access_rights($email_account, 2, 'write');
                     $menu_item_write_access_right = $api->check_menu_access_rights($email_account, 3, 'write');
                     $menu_item_delete_access_right = $api->check_menu_access_rights($email_account, 3, 'delete');
@@ -140,10 +141,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
             if(isset($_POST['filter_menu_group_id']) && isset($_POST['filter_parent_id'])){
                 if ($api->databaseConnection()) {
                     $filter = [];
-                    $filter_menu_group_id = $_POST['filter_menu_group_id'];
-                    $filter_parent_id = $_POST['filter_parent_id'];
 
-                    $menu_group_write_access_right = $api->check_menu_access_rights($email_account, 2, 'write');
+                    $filter_menu_group_id = htmlspecialchars($_POST['filter_menu_group_id'], ENT_QUOTES, 'UTF-8');
+                    $filter_parent_id = htmlspecialchars($_POST['filter_parent_id'], ENT_QUOTES, 'UTF-8');
+
                     $menu_item_write_access_right = $api->check_menu_access_rights($email_account, 3, 'write');
                     $menu_item_delete_access_right = $api->check_menu_access_rights($email_account, 3, 'delete');
                     $assign_menu_item_role_access = $api->check_system_action_access_rights($email_account, 1);
@@ -188,7 +189,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                             $parent_menu_item_details = $api->get_menu_item_details($parent_id);
                             $parent_menu_item_name = $parent_menu_item_details[0]['MENU_ITEM_NAME'] ?? null;
     
-                            if($menu_item_delete_access_right > 0 && $menu_group_write_access_right > 0){
+                            if($menu_item_delete_access_right > 0){
                                 $delete = '<button type="button" class="btn btn-icon btn-danger delete-menu-item" data-menu-item-id="'. $menu_item_id .'" title="Delete Menu Item">
                                                 <i class="ti ti-trash"></i>
                                             </button>';
@@ -302,7 +303,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
         case 'submenu item table':
             if(isset($_POST['menu_item_id']) && !empty($_POST['menu_item_id'])){
                 if ($api->databaseConnection()) {
-                    $menu_item_id = $_POST['menu_item_id'];
+                    $menu_item_id = htmlspecialchars($_POST['menu_item_id'], ENT_QUOTES, 'UTF-8');
 
                     $sql = $api->db_connection->prepare('SELECT menu_item_id, menu_item_name FROM menu_item WHERE parent_id = :menu_item_id');
                     $sql->bindValue(':menu_item_id', $menu_item_id);
@@ -369,6 +370,133 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                 }
                 else{
                     echo $sql->errorInfo()[2];
+                }
+            }
+        break;
+
+        # File type file extension table
+        case 'file type file extension table':
+            if(isset($_POST['file_type_id']) && !empty($_POST['file_type_id'])){
+                if ($api->databaseConnection()) {
+                    $file_type_id = htmlspecialchars($_POST['file_type_id'], ENT_QUOTES, 'UTF-8');
+
+                    $file_type_write_access_right = $api->check_menu_access_rights($email_account, 6, 'write');
+                    $file_extension_write_access_right = $api->check_menu_access_rights($email_account, 7, 'write');
+                    $file_extension_delete_access_right = $api->check_menu_access_rights($email_account, 7, 'delete');
+
+                    $sql = $api->db_connection->prepare('SELECT file_extension_id, file_extension_name FROM file_extension WHERE file_type_id = :file_type_id');
+                    $sql->bindValue(':file_type_id', $file_type_id);
+        
+                    if($sql->execute()){
+                        while($row = $sql->fetch()){
+                            $file_extension_id = $row['file_extension_id'];
+                            $file_extension_name = $row['file_extension_name'];
+
+                            $file_extension_id_encrypted = $api->encrypt_data($file_extension_id); 
+
+                            if($file_extension_write_access_right > 0 && $file_type_write_access_right > 0){
+                                $update = '<button type="button" class="btn btn-icon btn-info update-file-extension" data-file-extension-id="'. $file_extension_id .'" title="Edit File Extension">
+                                                <i class="ti ti-pencil"></i>
+                                            </button>';
+                            }
+                            else{
+                                $update = null;
+                            }
+    
+                            if($file_extension_delete_access_right > 0 && $file_type_write_access_right > 0){
+                                $delete = '<button type="button" class="btn btn-icon btn-danger delete-file-extension" data-file-extension-id="'. $file_extension_id .'" title="Delete File Extension">
+                                                <i class="ti ti-trash"></i>
+                                            </button>';
+                            }
+                            else{
+                                $delete = null;
+                            }
+        
+                            $response[] = array(
+                                'FILE_EXTENSION_ID' => $file_extension_id,
+                                'FILE_EXTENSION_NAME' => '<a href="file-extension-form.php?id='. $file_extension_id_encrypted .'">'. $file_extension_name . '</a>',
+                                'ACTION' => '<div class="d-flex gap-2">
+                                            '. $update .'
+                                            '. $delete .'
+                                        </div>'
+                            );
+                        }
+        
+                        echo json_encode($response);
+                    }
+                    else{
+                        echo $sql->errorInfo()[2];
+                    }
+                }
+            }
+        break;
+
+        # Menu item table
+        case 'menu item table':
+            if(isset($_POST['filter_file_type_id'])){
+                if ($api->databaseConnection()) {
+                    $filter = [];
+
+                    $filter_file_type_id = htmlspecialchars($_POST['filter_file_type_id'], ENT_QUOTES, 'UTF-8');
+
+                    $file_extension_write_access_right = $api->check_menu_access_rights($email_account, 7, 'write');
+                    $file_extension_delete_access_right = $api->check_menu_access_rights($email_account, 7, 'delete');
+
+                    $query = 'SELECT file_extension_id, file_extension_name, menu_group_id, parent_id, order_sequence FROM file_extension';
+
+                    if(!empty($filter_file_type_id)){
+                        $filter[] = 'filter_file_type_id = :filter_file_type_id';
+                    }
+
+                    if(!empty($filter)) {
+                        $query .= ' WHERE ' . implode(' AND ', $filter);
+                    }
+    
+                    $sql = $api->db_connection->prepare($query);
+
+                    if(!empty($filter_file_type_id)){
+                        $sql->bindValue(':filter_file_type_id', $filter_file_type_id);
+                    }
+
+                    if($sql->execute()){
+                        while($row = $sql->fetch()){
+                            $file_extension_id = $row['file_extension_id'];
+                            $file_extension_name = $row['file_extension_name'];
+                            $file_type_id = $row['file_type_id'];
+        
+                            $file_extension_id_encrypted = $api->encrypt_data($file_extension_id);
+    
+                            $file_types_details = $api->get_file_types_details($file_type_id);
+                            $file_type_name = $file_types_details[0]['FILE_TYPE_NAME'] ?? null;
+    
+                            if($file_extension_delete_access_right > 0){
+                                $delete = '<button type="button" class="btn btn-icon btn-danger delete-file-extension" data-file-extension-id="'. $file_extension_id .'" title="Delete File Extension">
+                                                <i class="ti ti-trash"></i>
+                                            </button>';
+                            }
+                            else{
+                                $delete = null;
+                            }
+        
+                            $response[] = array(
+                                'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-delete="1" type="checkbox" value="'. $file_extension_id .'">',
+                                'FILE_EXTENSION_ID' => $file_extension_id,
+                                'FILE_EXTENSION_NAME' => $file_extension_name,
+                                'FILE_TYPE_NAME' => $file_type_name,
+                                'ACTION' => '<div class="d-flex gap-2">
+                                                <a href="file-extension-form.php?id='. $file_extension_id_encrypted .'" class="btn btn-icon btn-primary" title="View File Extension">
+                                                    <i class="ti ti-eye"></i>
+                                                </a>
+                                            '. $delete .'
+                                        </div>'
+                            );
+                        }
+        
+                        echo json_encode($response);
+                    }
+                    else{
+                        echo $sql->errorInfo()[2];
+                    }
                 }
             }
         break;
