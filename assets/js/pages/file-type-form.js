@@ -96,7 +96,7 @@
                             switch (response[0]['RESPONSE']) {
                                 case 'Duplicated':
                                     setNotification('Duplicate File Type Success', 'The file type has been duplicated successfully.', 'success');
-                                    window.location = 'file-type-form.php?id=' + response[0]['MENU_GROUP_ID'];
+                                    window.location = 'file-type-form.php?id=' + response[0]['FILE_TYPE_ID'];
                                     break;
                                 case 'Not Found':
                                     setNotification('Duplicate File Type Error', 'The source file type does not exist.', 'danger');
@@ -148,7 +148,7 @@
             const transaction = 'delete file extension';
     
             Swal.fire({
-                title: 'Confirm Menu Item Deletion',
+                title: 'Confirm Form Extension Deletion',
                 text: 'Are you sure you want to delete this file extension?',
                 icon: 'warning',
                 showCancelButton: !0,
@@ -166,11 +166,11 @@
                         success: function (response) {
                             switch (response) {
                                 case 'Deleted':
-                                    showNotification('Delete Menu Item Success', 'The file extension has been deleted successfully.', 'success');
+                                    showNotification('Delete Form Extension Success', 'The file extension has been deleted successfully.', 'success');
                                     reloadDatatable('#file-extension-table');
                                     break;
                                 case 'Not Found':
-                                    showNotification('Delete Menu Item Error', 'The file extension does not exist or has already been deleted.', 'warning');
+                                    showNotification('Delete Form Extension Error', 'The file extension does not exist or has already been deleted.', 'warning');
                                     reloadDatatable('#file-extension-table');
                                     break;
                                 case 'User Not Found':
@@ -178,7 +178,7 @@
                                     window.location = '404.php';
                                     break;
                                 default:
-                                    showNotification('Menu Item Deletion Error', response, 'danger');
+                                    showNotification('Form Extension Deletion Error', response, 'danger');
                                     break;
                             }
                         }
@@ -249,7 +249,7 @@ function initializeFileTypeForm(){
         },
         messages: {
             file_type_name: {
-                required: 'Please enter the file type'
+                required: 'Please enter the file type name'
             }
         },
         errorPlacement: function (error, element) {
@@ -370,15 +370,15 @@ function initializeFileExtensionForm(){
                 data: $(form).serialize() + '&email_account=' + email_account + '&file_type_id=' + file_type_id + '&transaction=' + transaction,
                 dataType: 'JSON',
                 beforeSend: function() {
-                    disableFormSubmitButton('submit-data');
+                    disableFormSubmitButton('submit-form');
                 },
                 success: function (response) {
                     switch (response[0]['RESPONSE']) {
                         case 'Inserted':
-                            showNotification('Insert Menu Item Success', 'The file extension has been inserted successfully.', 'success');
+                            showNotification('Insert Form Extension Success', 'The file extension has been inserted successfully.', 'success');
                             break;
                         case 'Updated':
-                            showNotification('Update Menu Item Success', 'The file extension has been updated successfully.', 'success');
+                            showNotification('Update Form Extension Success', 'The file extension has been updated successfully.', 'success');
                             break;
                         case 'User Not Found':
                         case 'Inactive User':

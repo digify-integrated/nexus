@@ -314,7 +314,7 @@ function initializeMenuGroupForm(){
         },
         messages: {
             menu_group: {
-                required: 'Please enter the menu group'
+                required: 'Please enter the menu group name'
             },
             menu_group_order_sequence: {
                 required: 'Please enter the order sequence'
@@ -444,7 +444,7 @@ function initializeMenuItemForm(){
                 data: $(form).serialize() + '&email_account=' + email_account + '&menu_group_id=' + menu_group_id + '&transaction=' + transaction,
                 dataType: 'JSON',
                 beforeSend: function() {
-                    disableFormSubmitButton('submit-data');
+                    disableFormSubmitButton('submit-form');
                 },
                 success: function (response) {
                     switch (response[0]['RESPONSE']) {

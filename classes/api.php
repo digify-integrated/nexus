@@ -1049,6 +1049,29 @@ class Api{
 
     # -------------------------------------------------------------
     #
+    # Name       : delete_all_menu_item
+    # Purpose    : Delete the all menu item based on menu group.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_menu_item($p_menu_group_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_menu_item(:p_menu_group_id)');
+            $sql->bindValue(':p_menu_group_id', $p_menu_group_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
     # Name       : delete_menu_item
     # Purpose    : Delete the menu item.
     #
@@ -1081,6 +1104,29 @@ class Api{
     public function delete_file_types($p_file_type_id){
         if ($this->databaseConnection()) {
             $sql = $this->db_connection->prepare('CALL delete_file_types(:p_file_type_id)');
+            $sql->bindValue(':p_file_type_id', $p_file_type_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_file_extension
+    # Purpose    : Delete the all of file extension based on file type.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_file_extension($p_file_type_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_file_extension(:p_file_type_id)');
             $sql->bindValue(':p_file_type_id', $p_file_type_id);
     
             if($sql->execute()){
@@ -1665,25 +1711,6 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    #
-    # Name       : get_modal_content
-    # Purpose    : returns the size of the modal.
-    #
-    # Returns    : String
-    #
-    # -------------------------------------------------------------
-    public function get_modal_content($generation_type){
-        switch ($generation_type){
-            case 'menu item form':
-                
-            break;
-        }
-
-        return null;
-    }
-    # -------------------------------------------------------------
-
-    # -------------------------------------------------------------
     #   Build methods
     # -------------------------------------------------------------
 
@@ -2118,9 +2145,9 @@ class Api{
 
                 if(empty($reference_id) && $menu_group_create_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger">*</span></label>
+                                        <label class="col-lg-2 col-form-label">Menu Group Name <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
-                                            <input type="text" class="form-control" id="menu_group" name="menu_group" maxlength="100" autocomplete="off">
+                                            <input type="text" class="form-control" id="menu_group_name" name="menu_group_name" maxlength="100" autocomplete="off">
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
@@ -2130,10 +2157,10 @@ class Api{
                 }
                 else if(!empty($reference_id) && $menu_group_write_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger d-none form-edit">*</span></label>
+                                        <label class="col-lg-2 col-form-label">Menu Group Name <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
-                                            <label class="col-form-label form-details fw-normal" id="menu_group_label"></label>
-                                            <input type="text" class="form-control d-none form-edit" id="menu_group" name="menu_group" maxlength="100" autocomplete="off">
+                                            <label class="col-form-label form-details fw-normal" id="menu_group_name_label"></label>
+                                            <input type="text" class="form-control d-none form-edit" id="menu_group_name" name="menu_group_name" maxlength="100" autocomplete="off">
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
@@ -2144,9 +2171,9 @@ class Api{
                 }
                 else{
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Group</label>
+                                        <label class="col-lg-2 col-form-label">Menu Group Name</label>
                                         <div class="col-lg-4">
-                                            <label class="col-form-label form-details fw-normal" id="menu_group_label"></label>
+                                            <label class="col-form-label form-details fw-normal" id="menu_group_name_label"></label>
                                         </div>
                                         <label class="col-lg-2 col-form-label">Order Sequence</label>
                                         <div class="col-lg-4">
@@ -2179,7 +2206,7 @@ class Api{
                                         <label class="col-lg-2 col-form-label">Menu Group <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
                                             <select class="form-control select2" name="menu_group_id" id="menu_group_id">
-                                                <option value="0">--</option>
+                                                <option value="">--</option>
                                                 '. $this->generate_menu_group_options() .'
                                             </select>
                                         </div>
@@ -2196,7 +2223,7 @@ class Api{
                                         <label class="col-lg-2 col-form-label">Parent Menu Item</label>
                                         <div class="col-lg-4">
                                             <select class="form-control select2" name="parent_id" id="parent_id">
-                                                <option value="0">--</option>
+                                                <option value="">--</option>
                                                 '. $this->generate_menu_item_options() .'
                                             </select>
                                         </div>
@@ -2294,7 +2321,7 @@ class Api{
 
                 if(empty($reference_id) && $file_type_create_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">File Type <span class="text-danger">*</span></label>
+                                        <label class="col-lg-2 col-form-label">File Type Name <span class="text-danger">*</span></label>
                                         <div class="col-lg-10">
                                             <input type="text" class="form-control" id="file_type_name" name="file_type_name" maxlength="100" autocomplete="off">
                                         </div>
@@ -2302,7 +2329,7 @@ class Api{
                 }
                 else if(!empty($reference_id) && $file_type_write_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">File Type <span class="text-danger d-none form-edit">*</span></label>
+                                        <label class="col-lg-2 col-form-label">File Type Name <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-10">
                                             <label class="col-form-label form-details fw-normal" id="file_type_name_label"></label>
                                             <input type="text" class="form-control d-none form-edit" id="file_type_name" name="file_type_name" maxlength="100" autocomplete="off">
@@ -2311,7 +2338,7 @@ class Api{
                 }
                 else{
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">File Type</label>
+                                        <label class="col-lg-2 col-form-label">File Type Name</label>
                                         <div class="col-lg-10">
                                             <label class="col-form-label form-details fw-normal" id="file_type_name_label"></label>
                                         </div>
@@ -2336,7 +2363,7 @@ class Api{
                                         <label class="col-lg-2 col-form-label">File Type <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
                                             <select class="form-control select2" name="file_type_id" id="file_type_id">
-                                                <option value="0">--</option>
+                                                <option value="">--</option>
                                                 '. $this->generate_file_type_options() .'
                                             </select>
                                         </div>
@@ -2354,7 +2381,7 @@ class Api{
                                             <div class="col-form-label form-details fw-normal" id="file_type_id_label"></div>
                                             <div class="d-none form-edit">
                                                 <select class="form-control select2" name="file_type_id" id="file_type_id">
-                                                    <option value="0">--</option>
+                                                    <option value="">--</option>
                                                     '. $this->generate_file_type_options() .'
                                                 </select>
                                             </div>
@@ -2459,7 +2486,7 @@ class Api{
                             <div class="form-group">
                                 <label class="form-label">Parent Menu Item</label>
                                 <select class="form-control modal-select2" name="parent_id" id="parent_id">
-                                    <option value="0">--</option>
+                                    <option value="">--</option>
                                     '. $this->generate_menu_item_options() .'
                                 </select>
                             </div>
@@ -2562,6 +2589,41 @@ class Api{
                         $menu_group_name = $row['menu_group_name'];
     
                         $option .= "<option value='". htmlspecialchars($menu_group_id, ENT_QUOTES) ."'>". htmlspecialchars($menu_group_name, ENT_QUOTES) ."</option>";
+                    }
+    
+                    return $option;
+                }
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : generate_file_type_options
+    # Purpose    : Generates file types options of dropdown.
+    #
+    # Returns    : String
+    #
+    # -------------------------------------------------------------
+    public function generate_file_type_options(){
+        if ($this->databaseConnection()) {
+            $option = '';
+            
+            $sql = $this->db_connection->prepare('SELECT file_type_id, file_type_name FROM file_types ORDER BY file_type_name');
+
+            if($sql->execute()){
+                $count = $sql->rowCount();
+        
+                if($count > 0){
+                    while($row = $sql->fetch()){
+                        $file_type_id = $row['file_type_id'];
+                        $file_type_name = $row['file_type_name'];
+    
+                        $option .= "<option value='". htmlspecialchars($file_type_id, ENT_QUOTES) ."'>". htmlspecialchars($file_type_name, ENT_QUOTES) ."</option>";
                     }
     
                     return $option;

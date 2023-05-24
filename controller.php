@@ -167,7 +167,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
 
         # Submit menu group
         case 'submit menu group':
-            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && isset($_POST['menu_group']) && !empty($_POST['menu_group']) && isset($_POST['menu_group_order_sequence'])){
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['menu_group_id']) && isset($_POST['menu_group_name']) && !empty($_POST['menu_group_name']) && isset($_POST['menu_group_order_sequence'])){
                 $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
 
                 $check_user_exist = $api->check_user_exist(null, $email_account);
@@ -180,13 +180,13 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $user_id = $user_details[0]['USER_ID'];
 
                         $menu_group_id = htmlspecialchars($_POST['menu_group_id'], ENT_QUOTES, 'UTF-8');
-                        $menu_group = htmlspecialchars($_POST['menu_group'], ENT_QUOTES, 'UTF-8');
+                        $menu_group_name = htmlspecialchars($_POST['menu_group_name'], ENT_QUOTES, 'UTF-8');
                         $order_sequence = htmlspecialchars($_POST['menu_group_order_sequence'], ENT_QUOTES, 'UTF-8');
 
                         $check_menu_groups_exist = $api->check_menu_groups_exist($menu_group_id);
         
                         if($check_menu_groups_exist > 0){
-                            $update_menu_groups = $api->update_menu_groups($menu_group_id, $menu_group, $order_sequence, $user_id);
+                            $update_menu_groups = $api->update_menu_groups($menu_group_id, $menu_group_name, $order_sequence, $user_id);
                 
                             if($update_menu_groups){
                                 $response[] = array(
@@ -200,7 +200,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             }
                         }
                         else{
-                            $insert_menu_groups = $api->insert_menu_groups($menu_group, $order_sequence, $user_id);
+                            $insert_menu_groups = $api->insert_menu_groups($menu_group_name, $order_sequence, $user_id);
                 
                             if($insert_menu_groups[0]['RESPONSE']){
                                 $response[] = array(
@@ -521,13 +521,20 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $check_menu_groups_exist = $api->check_menu_groups_exist($menu_group_id);
         
                         if($check_menu_groups_exist > 0){
-                            $delete_menu_groups = $api->delete_menu_groups($menu_group_id);
+                            $delete_all_menu_item = $api->delete_all_menu_item($menu_group_id);
                 
-                            if($delete_menu_groups){
-                                echo 'Deleted';
+                            if($delete_all_menu_item){
+                                $delete_menu_groups = $api->delete_menu_groups($menu_group_id);
+                
+                                if($delete_menu_groups){
+                                    echo 'Deleted';
+                                }
+                                else{
+                                    echo $delete_menu_groups;
+                                }
                             }
                             else{
-                                echo $delete_menu_groups;
+                                echo $delete_all_menu_item;
                             }
                         }
                         else{
@@ -559,10 +566,18 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $menu_group_ids = $_POST['menu_group_id'];
 
                         foreach($menu_group_ids as $menu_group_id){
-                            $delete_menu_groups = $api->delete_menu_groups($menu_group_id);
+                            $delete_all_menu_item = $api->delete_all_menu_item($menu_group_id);
                                                 
-                            if(!$delete_menu_groups){
-                                $error = $delete_menu_groups;
+                            if($delete_all_menu_item){
+                                $delete_menu_groups = $api->delete_menu_groups($menu_group_id);
+                                                
+                                if(!$delete_menu_groups){
+                                    $error = $delete_menu_groups;
+                                    break;
+                                }
+                            }
+                            else{
+                                $error = $delete_all_menu_item;
                                 break;
                             }
                         }
@@ -681,13 +696,20 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $check_file_types_exist = $api->check_file_types_exist($file_type_id);
         
                         if($check_file_types_exist > 0){
-                            $delete_file_types = $api->delete_file_types($file_type_id);
+                            $delete_all_file_extension = $api->delete_all_file_extension($file_type_id);
+
+                            if($delete_all_file_extension){
+                                $delete_file_types = $api->delete_file_types($file_type_id);
                 
-                            if($delete_file_types){
-                                echo 'Deleted';
+                                if($delete_file_types){
+                                    echo 'Deleted';
+                                }
+                                else{
+                                    echo $delete_file_types;
+                                }
                             }
                             else{
-                                echo $delete_file_types;
+                                echo $delete_all_file_extension;
                             }
                         }
                         else{
@@ -719,10 +741,18 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                         $file_type_ids = $_POST['file_type_id'];
 
                         foreach($file_type_ids as $file_type_id){
-                            $delete_file_types = $api->delete_file_types($file_type_id);
+                            $delete_all_file_extension = $api->delete_all_file_extension($file_type_id);
+
+                            if($delete_all_file_extension){
+                                $delete_file_types = $api->delete_file_types($file_type_id);
                                                 
-                            if(!$delete_file_types){
-                                $error = $delete_file_types;
+                                if(!$delete_file_types){
+                                    $error = $delete_file_types;
+                                    break;
+                                }
+                            }
+                            else{
+                                $error = $delete_all_file_extension;
                                 break;
                             }
                         }
@@ -1266,7 +1296,7 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                 $file_type_name = $file_types_details[0]['FILE_TYPE_NAME'] ?? null;
     
                 $response[] = array(
-                    'FILE_EXTENSION_NAME' => $file_extension_details[0]['MENU_ITEM_NAME'],
+                    'FILE_EXTENSION_NAME' => $file_extension_details[0]['FILE_EXTENSION_NAME'],
                     'FILE_TYPE_ID' => $file_type_id,
                     'FILE_TYPE_NAME' => '<a href="file-type-form.php?id='. $file_type_id_encrypted .'">'. $file_type_name .'</a>'
                 );

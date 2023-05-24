@@ -569,6 +569,11 @@ BEGIN
     ORDER BY mi.order_sequence;
 END //
 
+CREATE PROCEDURE delete_all_menu_item(IN p_menu_group_id INT(10))
+BEGIN
+    DELETE FROM menu_item WHERE menu_group_id = p_menu_group_id;
+END //
+
 /* Menu table */
 CREATE TABLE menu_item(
 	menu_item_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -960,6 +965,11 @@ BEGIN
     DELETE FROM file_types WHERE file_type_id = p_file_type_id;
 END //
 
+CREATE PROCEDURE delete_all_file_extension(IN p_file_type_id INT(10))
+BEGIN
+    DELETE FROM file_extension WHERE file_type_id = p_file_type_id;
+END //
+
 CREATE PROCEDURE get_file_types_details(IN p_file_type_id INT(10))
 BEGIN
     SELECT file_type_name, last_log_by
@@ -1068,4 +1078,140 @@ BEGIN
     SELECT file_extension_name, file_type_id, last_log_by
 	FROM file_extension 
 	WHERE file_extension_id = p_file_extension_id;
+END //
+
+/* Upload settings table */
+CREATE TABLE upload_settings (
+    upload_setting_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    upload_setting_name VARCHAR(100) NOT NULL,
+    upload_setting_description VARCHAR(200) NOT NULL,
+    max_upload_size DOUBLE NOT NULL,
+    last_log_by INT(10) NOT NULL
+);
+
+CREATE INDEX upload_settings_index_upload_setting_id ON upload_settings(upload_setting_id);
+
+CREATE TRIGGER upload_settings_trigger_update
+AFTER UPDATE ON upload_settings
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT '';
+
+    IF NEW.upload_setting_name <> OLD.upload_setting_name THEN
+        SET audit_log = CONCAT(audit_log, "Upload Setting Name: ", OLD.upload_setting_name, " -> ", NEW.upload_setting_name, "<br/>");
+    END IF;
+
+    IF NEW.upload_setting_description <> OLD.upload_setting_description THEN
+        SET audit_log = CONCAT(audit_log, "Upload Setting Description: ", OLD.upload_setting_description, " -> ", NEW.upload_setting_description, "<br/>");
+    END IF;
+
+    IF NEW.max_upload_size <> OLD.max_upload_size THEN
+        SET audit_log = CONCAT(audit_log, "Max Upload Size: ", OLD.max_upload_size, " -> ", NEW.max_upload_size, "<br/>");
+    END IF;
+    
+    IF LENGTH(audit_log) > 0 THEN
+        INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+        VALUES ('upload_settings', NEW.upload_setting_id, audit_log, NEW.last_log_by, NOW());
+    END IF;
+END //
+
+CREATE TRIGGER upload_settings_trigger_insert
+AFTER INSERT ON upload_settings
+FOR EACH ROW
+BEGIN
+    DECLARE audit_log TEXT DEFAULT 'Upload setting created. <br/>';
+
+    IF NEW.upload_setting_name <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Upload Setting Name: ", NEW.upload_setting_name);
+    END IF;
+
+    IF NEW.upload_setting_description <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Upload Setting Description: ", NEW.upload_setting_description);
+    END IF;
+
+    IF NEW.max_upload_size <> '' THEN
+        SET audit_log = CONCAT(audit_log, "<br/>Max Upload Size: ", NEW.max_upload_size);
+    END IF;
+
+    INSERT INTO audit_log (table_name, reference_id, log, changed_by, changed_at) 
+    VALUES ('upload_settings', NEW.upload_setting_id, audit_log, NEW.last_log_by, NOW());
+END //
+
+CREATE PROCEDURE check_upload_settings_exist(IN p_upload_setting_id INT(10))
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM upload_settings
+    WHERE upload_setting_id = p_upload_setting_id;
+END //
+
+CREATE PROCEDURE insert_upload_settings(IN p_upload_setting_name VARCHAR(100), IN p_upload_setting_description VARCHAR(200), IN p_max_upload_size DOUBLE, IN p_last_log_by INT(10), OUT p_upload_setting_id INT(10))
+BEGIN
+    INSERT INTO upload_settings (upload_setting_name, upload_setting_description, max_upload_size, last_log_by) 
+	VALUES(p_upload_setting_name, p_upload_setting_description, p_max_upload_size, p_last_log_by);
+	
+    SET p_upload_setting_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE duplicate_upload_settings(IN p_upload_setting_id INT(10), IN p_last_log_by INT(10), OUT p_new_upload_setting_id INT(10))
+BEGIN
+    DECLARE p_upload_setting_name VARCHAR(100);
+    DECLARE p_upload_setting_description VARCHAR(200);
+    DECLARE p_max_upload_size DOUBLE;
+    
+    SELECT upload_setting_name, upload_setting_description, max_upload_size
+    INTO p_upload_setting_name, p_upload_setting_description, p_max_upload_size
+    FROM upload_settings 
+    WHERE upload_setting_id = p_upload_setting_id;
+    
+    INSERT INTO upload_settings (upload_setting_name, upload_setting_description, max_upload_size, last_log_by) 
+    VALUES(p_upload_setting_name, p_upload_setting_description, p_max_upload_size, p_last_log_by);
+    
+    SET p_new_upload_setting_id = LAST_INSERT_ID();
+END //
+
+CREATE PROCEDURE update_upload_settings(IN p_upload_setting_id INT(10), IN p_upload_setting_name VARCHAR(100), IN p_upload_setting_description VARCHAR(200), IN p_max_upload_size DOUBLE, IN p_last_log_by INT(10))
+BEGIN
+	UPDATE upload_settings
+        SET upload_setting_name = p_upload_setting_name,
+        upload_setting_description = p_upload_setting_description,
+        max_upload_size = p_max_upload_size,
+        last_log_by = p_last_log_by
+       	WHERE upload_setting_id = p_upload_setting_id;
+END //
+
+CREATE PROCEDURE delete_upload_settings(IN p_upload_setting_id INT(10))
+BEGIN
+    DELETE FROM upload_settings WHERE upload_setting_id = p_upload_setting_id;
+END //
+
+CREATE PROCEDURE delete_all_upload_setting_file_extension(IN p_upload_setting_id INT(10))
+BEGIN
+    DELETE FROM upload_settings_file_extension WHERE upload_setting_id = p_upload_setting_id;
+END //
+
+CREATE PROCEDURE get_upload_settings_details(IN p_upload_setting_id INT(10))
+BEGIN
+    SELECT upload_setting_name, upload_setting_description, max_upload_size, last_log_by
+	FROM upload_settings 
+	WHERE upload_setting_id = p_upload_setting_id;
+END //
+
+/* Upload settings file extension table */
+CREATE TABLE upload_settings_file_extension(
+	upload_setting_id INT(10) NOT NULL,
+	file_extension_id INT(10) NOT NULL
+);
+
+CREATE INDEX upload_settings_file_extension_index_upload_setting_id ON upload_settings_file_extension(upload_setting_id);
+CREATE INDEX upload_settings_file_extension_index_file_extension_id ON upload_settings_file_extension(file_extension_id);
+
+CREATE PROCEDURE insert_upload_settings_file_extension(IN p_upload_setting_id INT(10), IN p_file_extension_id INT(10))
+BEGIN
+    INSERT INTO upload_settings_file_extension (upload_setting_id, file_extension_id) 
+	VALUES(p_upload_setting_id, p_file_extension_id);
+END //
+
+CREATE PROCEDURE delete_upload_settings(IN p_upload_setting_id INT(10), IN p_file_extension_id INT(10))
+BEGIN
+    DELETE FROM upload_settings WHERE upload_setting_id = p_upload_setting_id AND file_extension_id = p_file_extension_id;
 END //

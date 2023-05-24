@@ -345,7 +345,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                         $file_type_id_encrypted = $api->encrypt_data($file_type_id);
 
                         if($menu_group_delete_access_right > 0){
-                            $delete = '<button type="button" class="btn btn-icon btn-danger delete-file-type" data-menu-group-id="' . $file_type_id . '" title="Delete File Type">
+                            $delete = '<button type="button" class="btn btn-icon btn-danger delete-file-type" data-file-type-id="' . $file_type_id . '" title="Delete File Type">
                                             <i class="ti ti-trash"></i>
                                         </button>';
                         }
@@ -431,8 +431,8 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
             }
         break;
 
-        # Menu item table
-        case 'menu item table':
+        # File extension table
+        case 'file extension table':
             if(isset($_POST['filter_file_type_id'])){
                 if ($api->databaseConnection()) {
                     $filter = [];
@@ -442,10 +442,10 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                     $file_extension_write_access_right = $api->check_menu_access_rights($email_account, 7, 'write');
                     $file_extension_delete_access_right = $api->check_menu_access_rights($email_account, 7, 'delete');
 
-                    $query = 'SELECT file_extension_id, file_extension_name, menu_group_id, parent_id, order_sequence FROM file_extension';
+                    $query = 'SELECT file_extension_id, file_extension_name, file_type_id FROM file_extension';
 
                     if(!empty($filter_file_type_id)){
-                        $filter[] = 'filter_file_type_id = :filter_file_type_id';
+                        $filter[] = 'file_type_id = :filter_file_type_id';
                     }
 
                     if(!empty($filter)) {

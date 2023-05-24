@@ -4,20 +4,19 @@ require('config/config.php');
 require('classes/api.php');
 
 $api = new Api;
-$page_title = 'Menu Items';
+$page_title = 'File Extensions';
 
 $check_user_status = $api->check_user_status(null, $email);
     
 if($check_user_status){    
-  $menu_read_access_right = $api->check_menu_access_rights($email, 2, 'read');
+  $menu_read_access_right = $api->check_menu_access_rights($email, 7, 'read');
           
   if($menu_read_access_right > 0){            
     require('views/_interface_settings.php');
     require('views/_user_account_details.php');
 
-    $menu_item_create_access_right = $api->check_menu_access_rights($email, 3, 'create');
-    $menu_item_delete_access_right = $api->check_menu_access_rights($email, 3, 'delete');
-    $assign_menu_item_role_access = $api->check_system_action_access_rights($email, 1);
+    $file_extension_create_access_right = $api->check_menu_access_rights($email, 7, 'create');
+    $file_extension_delete_access_right = $api->check_menu_access_rights($email, 7, 'delete');
   }
   else{
     header('location: 404.php');
@@ -52,13 +51,13 @@ else{
               <div class="col-md-12">
                 <ul class="breadcrumb">
                   <li class="breadcrumb-item"><a href="dashboard.php">Home</a></li>
-                  <li class="breadcrumb-item"><a href="javascript: void(0)">User Interface</a></li>
-                  <li class="breadcrumb-item" aria-current="page">Menu Items</li>
+                  <li class="breadcrumb-item"><a href="javascript: void(0)">Configurations</a></li>
+                  <li class="breadcrumb-item" aria-current="page">File Extensions</li>
                 </ul>
               </div>
               <div class="col-md-12">
                 <div class="page-header-title">
-                  <h2 class="mb-0">Menu Items</h2>
+                  <h2 class="mb-0">File Extensions</h2>
                 </div>
               </div>
             </div>
@@ -72,26 +71,26 @@ else{
                 <div class="card-header">
                   <div class="row align-items-center">
                     <div class="col-sm-6">
-                      <h5>Menu Items List</h5>
+                      <h5>File Extensions List</h5>
                     </div>
                     <?php
-                      if($menu_item_create_access_right > 0 || $menu_item_delete_access_right > 0){
+                      if($file_extension_create_access_right > 0 || $file_extension_delete_access_right > 0){
                         $action = ' <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">';
                         
-                          if($menu_item_delete_access_right > 0){
-                            $action .= '<div class="btn-group m-r-5">
-                                          <button type="button" class="btn btn-outline-secondary dropdown-toggle d-none action-dropdown" data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                          if($file_extension_delete_access_right > 0){
+                            $action .= '<div class="btn-group m-r-5 d-none action-dropdown">
+                                          <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Action</button>
                                           <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><button class="dropdown-item" type="button" id="delete-menu-item">Delete Menu Item</button></li>
+                                            <li><button class="dropdown-item" type="button" id="delete-file-extension">Delete File Extension</button></li>
                                           </ul>
                                           </div>';
                           }
 
-                          if($menu_item_create_access_right > 0){
-                            $action .= '<a href="menu-item-form.php" class="btn btn-success m-r-5">Create</a>';
+                          if($file_extension_create_access_right > 0){
+                            $action .= '<a href="file-extension-form.php" class="btn btn-success m-r-5">Create</a>';
                           }
 
-                          $action .= '<button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#filter-canvas" aria-controls="offcanvasRight">Filter</button></div>';
+                        $action .= '<button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#filter-canvas" aria-controls="offcanvasRight">Filter</button></div>';
                           
                         echo $action;
                       }
@@ -101,7 +100,7 @@ else{
               </div>
               <div class="card-body">
                 <div class="table-responsive dt-responsive">
-                  <table id="menu-items-table" class="table table-striped table-hover table-bordered nowrap w-100">
+                  <table id="file-extensions-table" class="table table-striped table-hover table-bordered nowrap w-100">
                     <thead>
                       <tr>
                         <th class="all">
@@ -110,10 +109,8 @@ else{
                           </div>
                         </th>
                         <th>#</th>
-                        <th>Menu Item</th>
-                        <th>Menu Group</th>
-                        <th>Parent Menu Item</th>
-                        <th>Order Sequence</th>
+                        <th>File Extension</th>
+                        <th>File Type</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -123,29 +120,17 @@ else{
               </div>
             </div>
           </div>
-          <?php
-            if($assign_menu_item_role_access > 0){
-              echo $api->generate_modal('assign menu item role access form', 'assign-menu-item-role-access-form', 'assign-menu-item-role-access-modal', 'Assign Menu Item Role Access', 'LG');
-            }
-          ?>
           <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-canvas" aria-labelledby="offcanvasRightLabel">
             <div class="offcanvas-header">
-              <h5 id="offcanvasRightLabel">Filter Menu Item</h5>
+              <h5 id="offcanvasRightLabel">Filter File Type</h5>
               <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
               <div class="form-group">
-                <label class="form-label" for="filter_menu_group_id">Menu Group</label>
-                <select class="form-control filter-select2" name="filter_menu_group_id" id="filter_menu_group_id">
+                <label class="form-label" for="filter_file_type_id">File Type</label>
+                <select class="form-control filter-select2" name="filter_file_type_id" id="filter_file_type_id">
                   <option value="">--</option>
-                  <?php echo $api->generate_menu_group_options(); ?>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="filter_parent_id">Parent Menu Item</label>
-                <select class="form-control filter-select2" name="filter_parent_id" id="filter_parent_id">
-                  <option value="">--</option>
-                  <?php echo $api->generate_menu_item_options(); ?>
+                  <?php echo $api->generate_file_type_options(); ?>
                 </select>
               </div>
               <div class="text-end mt-4">
@@ -167,7 +152,7 @@ else{
     <script src="./assets/js/plugins/select2.min.js?v=<?php echo rand(); ?>"></script>
     <script src="./assets/js/plugins/jquery.dataTables.min.js"></script>
     <script src="./assets/js/plugins/dataTables.bootstrap5.min.js"></script>
-    <script src="./assets/js/pages/menu-items.js?v=<?php echo rand(); ?>"></script>
+    <script src="./assets/js/pages/file-extensions.js?v=<?php echo rand(); ?>"></script>
 </body>
 
 </html>

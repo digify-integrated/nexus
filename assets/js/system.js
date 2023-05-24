@@ -92,10 +92,10 @@ function displayDetails(transaction){
                 dataType: 'JSON',
                 data: {menu_group_id : menu_group_id, transaction : transaction},
                 success: function(response) {
-                    $('#menu_group').val(response[0].MENU_GROUP_NAME);
+                    $('#menu_group_name').val(response[0].MENU_GROUP_NAME);
                     $('#menu_group_order_sequence').val(response[0].ORDER_SEQUENCE);
                     
-                    $('#menu_group_label').text(response[0].MENU_GROUP_NAME);
+                    $('#menu_group_name_label').text(response[0].MENU_GROUP_NAME);
                     $('#order_sequence_label').text(response[0].ORDER_SEQUENCE);
                 }
             });
