@@ -531,6 +531,31 @@ class Api{
         }
     }
     # -------------------------------------------------------------
+    
+    # -------------------------------------------------------------
+    #
+    # Name       : check_upload_settings_exist
+    # Purpose    : Checks if the upload setting exists.
+    #
+    # Returns    : Number
+    #
+    # -------------------------------------------------------------
+    public function check_upload_settings_exist($p_upload_setting_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL check_upload_settings_exist(:p_upload_setting_id)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+
+            if($sql->execute()){
+                $row = $sql->fetch();
+
+                return (int) $row['total'];
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
     #   Update methods
@@ -761,6 +786,33 @@ class Api{
             $sql->bindValue(':p_file_extension_id', $p_file_extension_id);
             $sql->bindValue(':p_file_extension_name', $p_file_extension_name);
             $sql->bindValue(':p_file_type_id', $p_file_type_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : update_upload_settings
+    # Purpose    : Updates the upload settings.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function update_upload_settings($p_upload_setting_id, $p_upload_setting_name, $p_upload_setting_description, $p_max_upload_size, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL update_upload_settings(:p_upload_setting_id, :p_upload_setting_name, :p_upload_setting_description, :p_max_upload_size, :p_last_log_by)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+            $sql->bindValue(':p_upload_setting_name', $p_upload_setting_name);
+            $sql->bindValue(':p_upload_setting_description', $p_upload_setting_description);
+            $sql->bindValue(':p_max_upload_size', $p_max_upload_size);
             $sql->bindValue(':p_last_log_by', $p_last_log_by);
 
             if($sql->execute()){
@@ -1019,6 +1071,42 @@ class Api{
         }
     }
     # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : insert_upload_settings
+    # Purpose    : Inserts the upload settings.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function insert_upload_settings($p_upload_setting_name, $p_upload_setting_description, $p_max_upload_size, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL insert_upload_settings(:p_upload_setting_name, :p_upload_setting_description, :p_max_upload_size, :p_last_log_by, @p_upload_setting_id)');
+            $sql->bindValue(':p_upload_setting_name', $p_upload_setting_name);
+            $sql->bindValue(':p_upload_setting_description', $p_upload_setting_description);
+            $sql->bindValue(':p_max_upload_size', $p_max_upload_size);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_upload_setting_id AS upload_setting_id");
+                $upload_setting_id = $result->fetch(PDO::FETCH_ASSOC)['upload_setting_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'UPLOAD_SETTING_ID' => $this->encrypt_data($upload_setting_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    # -------------------------------------------------------------
     
     # -------------------------------------------------------------
     #   Delete methods
@@ -1163,6 +1251,76 @@ class Api{
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
+    #
+    # Name       : delete_upload_settings
+    # Purpose    : Delete the upload settings.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_upload_settings($p_upload_setting_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_upload_settings(:p_upload_setting_id)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_all_upload_setting_file_extension
+    # Purpose    : Delete the all of file extension based on upload setting.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_all_upload_setting_file_extension($p_upload_setting_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_all_upload_setting_file_extension(:p_upload_setting_id)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : delete_upload_settings_file_extension
+    # Purpose    : Delete the upload settings file extension.
+    #
+    # Returns    : Bool/String
+    #
+    # -------------------------------------------------------------
+    public function delete_upload_settings_file_extension($p_upload_setting_id, $p_file_extension_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL delete_upload_settings_file_extension(:p_upload_setting_id, :p_file_extension_id)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+            $sql->bindValue(':p_file_extension_id', $p_file_extension_id);
+    
+            if($sql->execute()){
+                return true;
+            }
+            else{
+                return $sql->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
     #   Duplicate methods
     # -------------------------------------------------------------
 
@@ -1271,7 +1429,7 @@ class Api{
     # -------------------------------------------------------------
     #
     # Name       : duplicate_file_extension
-    # Purpose    : Inserts the file extension.
+    # Purpose    : Duplicates the file extension.
     #
     # Returns    : Array
     #
@@ -1289,6 +1447,72 @@ class Api{
                 $response[] = array(
                     'RESPONSE' => true,
                     'FILE_EXTENSION_ID' => $this->encrypt_data($file_extension_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : duplicate_upload_settings
+    # Purpose    : Duplicates the upload settings.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function duplicate_upload_settings($p_upload_setting_id, $p_last_log_by){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL duplicate_upload_settings(:p_upload_setting_id, :p_last_log_by, @p_new_upload_setting_id)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+            $sql->bindValue(':p_last_log_by', $p_last_log_by);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_new_upload_setting_id AS upload_setting_id");
+                $upload_setting_id = $result->fetch(PDO::FETCH_ASSOC)['upload_setting_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true,
+                    'UPLOAD_SETTING_ID' => $this->encrypt_data($upload_setting_id)
+                );
+            }
+            else{
+                $response[] = array(
+                    'RESPONSE' => $sql->errorInfo()[2]
+                );
+            }
+
+            return $response;
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : duplicate_upload_settings_file_extension
+    # Purpose    : Duplicates the upload settings file extension.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function duplicate_upload_settings_file_extension($p_upload_setting_id){
+        if ($this->databaseConnection()) {
+            $sql = $this->db_connection->prepare('CALL duplicate_upload_settings_file_extension(:p_upload_setting_id)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+    
+            if($sql->execute()){
+                $result = $this->db_connection->query("SELECT @p_new_upload_setting_id AS upload_setting_id");
+                $upload_setting_id = $result->fetch(PDO::FETCH_ASSOC)['upload_setting_id'];
+                
+                $response[] = array(
+                    'RESPONSE' => true
                 );
             }
             else{
@@ -1611,6 +1835,40 @@ class Api{
                     $response[] = array(
                         'FILE_EXTENSION_NAME' => $row['file_extension_name'],
                         'FILE_TYPE_ID' => $row['file_type_id'],
+                        'LAST_LOG_BY' => $row['last_log_by']
+                    );
+                }
+
+                return $response;
+            }
+            else{
+                return $stmt->errorInfo()[2];
+            }
+        }
+    }
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    #
+    # Name       : get_upload_settings_details
+    # Purpose    : Gets the upload settings details.
+    #
+    # Returns    : Array
+    #
+    # -------------------------------------------------------------
+    public function get_upload_settings_details($p_upload_setting_id){
+        if ($this->databaseConnection()) {
+            $response = array();
+
+            $sql = $this->db_connection->prepare('CALL get_upload_settings_details(:p_upload_setting_id)');
+            $sql->bindValue(':p_upload_setting_id', $p_upload_setting_id);
+
+            if($sql->execute()){
+                while($row = $sql->fetch()){
+                    $response[] = array(
+                        'UPLOAD_SETTING_NAME' => $row['upload_setting_name'],
+                        'UPLOAD_SETTING_DESCRIPTION' => $row['upload_setting_description'],
+                        'MAX_UPLOAD_SIZE' => $row['max_upload_size'],
                         'LAST_LOG_BY' => $row['last_log_by']
                     );
                 }
@@ -2193,7 +2451,7 @@ class Api{
 
                 if(empty($reference_id) && $menu_item_create_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Item <span class="text-danger">*</span></label>
+                                        <label class="col-lg-2 col-form-label">Menu Item Name <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
                                             <input type="text" class="form-control" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off">
                                         </div>
@@ -2231,7 +2489,7 @@ class Api{
                 }
                 else if(!empty($reference_id) && $menu_item_write_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Item <span class="text-danger d-none form-edit">*</span></label>
+                                        <label class="col-lg-2 col-form-label">Menu Item Name <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="menu_item_name_label"></label>
                                             <input type="text" class="form-control d-none form-edit" id="menu_item_name" name="menu_item_name" maxlength="100" autocomplete="off">
@@ -2279,7 +2537,7 @@ class Api{
                 }
                 else{
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">Menu Item</label>
+                                        <label class="col-lg-2 col-form-label">Menu Item Name</label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="menu_item_label"></label>
                                         </div>
@@ -2356,7 +2614,7 @@ class Api{
 
                 if(empty($reference_id) && $file_extension_create_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">File Extension <span class="text-danger">*</span></label>
+                                        <label class="col-lg-2 col-form-label">File Extension Name <span class="text-danger">*</span></label>
                                         <div class="col-lg-4">
                                             <input type="text" class="form-control" id="file_extension_name" name="file_extension_name" maxlength="100" autocomplete="off">
                                         </div>
@@ -2371,7 +2629,7 @@ class Api{
                 }
                 else if(!empty($reference_id) && $file_extension_write_access_right > 0){
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">File Extension <span class="text-danger d-none form-edit">*</span></label>
+                                        <label class="col-lg-2 col-form-label">File Extension Name <span class="text-danger d-none form-edit">*</span></label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="file_extension_name_label"></label>
                                             <input type="text" class="form-control d-none form-edit" id="file_extension_name" name="file_extension_name" maxlength="100" autocomplete="off">
@@ -2390,7 +2648,7 @@ class Api{
                 }
                 else{
                     $form_fields = '<div class="form-group row">
-                                        <label class="col-lg-2 col-form-label">File Extension</label>
+                                        <label class="col-lg-2 col-form-label">File Extension Name</label>
                                         <div class="col-lg-4">
                                             <label class="col-form-label form-details fw-normal" id="file_extension_name_label"></label>
                                         </div>
@@ -2403,6 +2661,79 @@ class Api{
                 
                 $form .= '<form id="file-extension-form" method="post" action="#">
                             <input type="hidden" id="file_extension_id" name="file_extension_id" value="'. $reference_id .'">
+                            '. $form_fields .'
+                        </form>';
+            break;
+            case 'upload settings form':
+                $upload_setting_create_access_right = $this->check_menu_access_rights($email, 5, 'create');
+                $upload_setting_write_access_right = $this->check_menu_access_rights($email, 5, 'write');
+
+                if(empty($reference_id) && $upload_setting_create_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Upload Setting Name <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <input type="text" class="form-control" id="upload_setting_name" name="upload_setting_name" maxlength="100" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Max Upload Size <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <div class="col-lg-4 input-group">
+                                                <input type="number" class="form-control" id="max_upload_size" name="max_upload_size" min="0">
+                                                <span class="input-group-text">mb</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Upload Setting Description <span class="text-danger">*</span></label>
+                                        <div class="col-lg-4">
+                                            <input type="text" class="form-control" id="upload_setting_description" name="upload_setting_description" maxlength="200" autocomplete="off">
+                                        </div>
+                                    </div>';
+                }
+                else if(!empty($reference_id) && $upload_setting_write_access_right > 0){
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Upload Setting Name <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="upload_setting_name_label"></label>
+                                            <input type="text" class="form-control d-none form-edit" id="upload_setting_name" name="upload_setting_name" maxlength="100" autocomplete="off">
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Max Upload Size <span class="text-danger d-none form-edit">*</span></label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="max_upload_size_label"></label>
+                                            <div class="col-lg-4 input-group d-none form-edit">
+                                                <input type="number" class="form-control" id="max_upload_size" name="max_upload_size" min="0">
+                                                <span class="input-group-text">mb</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Upload Setting Description</label>
+                                        <div class="col-lg-4">
+                                            <div class="col-form-label form-details fw-normal" id="upload_setting_description_label"></div>
+                                            <input type="text" class="form-control d-none form-edit" id="upload_setting_description" name="upload_setting_description" maxlength="200" autocomplete="off">
+                                        </div>
+                                    </div>';
+                }
+                else{
+                    $form_fields = '<div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Upload Setting Name</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="upload_setting_name_label"></label>
+                                        </div>
+                                        <label class="col-lg-2 col-form-label">Max Upload Size</label>
+                                        <div class="col-lg-4">
+                                            <label class="col-form-label form-details fw-normal" id="max_upload_size_label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-lg-2 col-form-label">Upload Setting Description</label>
+                                        <div class="col-lg-4">
+                                            <div class="col-form-label form-details fw-normal" id="upload_setting_description_label"></div>
+                                        </div>
+                                    </div>';
+                }
+                
+                $form .= '<form id="upload-setting-form" method="post" action="#">
+                            <input type="hidden" id="upload_setting_id" name="upload_setting_id" value="'. $reference_id .'">
                             '. $form_fields .'
                         </form>';
             break;

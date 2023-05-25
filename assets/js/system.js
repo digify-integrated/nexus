@@ -200,6 +200,25 @@ function displayDetails(transaction){
                     }
                 });
                 break;
+            case 'upload settings details':
+                var upload_setting_id = $('#upload-setting-id').text();
+                    
+                $.ajax({
+                    url: 'controller.php',
+                    method: 'POST',
+                    dataType: 'JSON',
+                    data: {upload_setting_id : upload_setting_id, transaction : transaction},
+                    success: function(response) {
+                        $('#upload_setting_name').val(response[0].UPLOAD_SETTING_NAME);
+                        $('#upload_setting_description').val(response[0].UPLOAD_SETTING_DESCRIPTION);
+                        $('#max_upload_size').val(response[0].MAX_UPLOAD_SIZE);
+                            
+                        $('#upload_setting_name_label').text(response[0].UPLOAD_SETTING_NAME);
+                        $('#upload_setting_description_label').text(response[0].UPLOAD_SETTING_DESCRIPTION);
+                        $('#max_upload_size_label').text(response[0].MAX_UPLOAD_SIZE);
+                    }
+                });
+                break;
     }
 }
 

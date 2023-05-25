@@ -123,17 +123,15 @@ function initialized_upload_settings_table(datatable_name, buttons = false, show
         { 'data' : 'UPLOAD_SETTING_ID' },
         { 'data' : 'UPLOAD_SETTING_NAME' },
         { 'data' : 'MAX_UPLOAD_SIZE' },
-        { 'data' : 'ALLOWED_FILE_EXTENSION' },
         { 'data' : 'ACTION' }
     ];
 
     const column_definition = [
         { 'width': '1%','bSortable': false, 'aTargets': 0 },
         { 'width': '10%', 'aTargets': 1 },
-        { 'width': '49%', 'aTargets': 2 },
-        { 'width': '10%', 'aTargets': 3 },
-        { 'width': '20%', 'aTargets': 4 },
-        { 'width': '10%','bSortable': false, 'aTargets': 5 }
+        { 'width': '59%', 'aTargets': 2 },
+        { 'width': '20%', 'aTargets': 3 },
+        { 'width': '10%','bSortable': false, 'aTargets': 4 }
     ];
 
     const length_menu = show_all ? [[-1], ['All']] : [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']];

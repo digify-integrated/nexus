@@ -109,7 +109,7 @@ else{
                         </th>
                         <th>#</th>
                         <th>Upload Setting</th>
-                        <th>Allowed File Extensions</th>
+                        <th>Max Upload Size</th>
                         <th>Action</th>
                       </tr>
                     </thead>

@@ -336,7 +336,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                 $sql = $api->db_connection->prepare('SELECT file_type_id, file_type_name FROM file_types');
     
                 if($sql->execute()){                    
-                    $menu_group_delete_access_right = $api->check_menu_access_rights($email_account, 2, 'delete');
+                    $file_type_delete_access_right = $api->check_menu_access_rights($email_account, 6, 'delete');
 
                     while($row = $sql->fetch()){
                         $file_type_id = $row['file_type_id'];
@@ -344,7 +344,7 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
     
                         $file_type_id_encrypted = $api->encrypt_data($file_type_id);
 
-                        if($menu_group_delete_access_right > 0){
+                        if($file_type_delete_access_right > 0){
                             $delete = '<button type="button" class="btn btn-icon btn-danger delete-file-type" data-file-type-id="' . $file_type_id . '" title="Delete File Type">
                                             <i class="ti ti-trash"></i>
                                         </button>';
@@ -497,6 +497,53 @@ if(isset($_POST['type']) && !empty($_POST['type']) && isset($_POST['email_accoun
                     else{
                         echo $sql->errorInfo()[2];
                     }
+                }
+            }
+        break;
+
+        # Upload settings table
+        case 'upload settings table':
+            if ($api->databaseConnection()) {
+                $sql = $api->db_connection->prepare('SELECT upload_setting_id, upload_setting_name, upload_setting_description, max_upload_size FROM upload_settings');
+    
+                if($sql->execute()){                    
+                    $upload_setting_delete_access_right = $api->check_menu_access_rights($email_account, 5, 'delete');
+
+                    while($row = $sql->fetch()){
+                        $upload_setting_id = $row['upload_setting_id'];
+                        $upload_setting_name = $row['upload_setting_name'];
+                        $upload_setting_description = $row['upload_setting_description'];
+                        $max_upload_size = $row['max_upload_size'];
+    
+                        $upload_setting_id_encrypted = $api->encrypt_data($upload_setting_id);
+
+                        if($upload_setting_delete_access_right > 0){
+                            $delete = '<button type="button" class="btn btn-icon btn-danger delete-upload-setting" data-upload-setting-id="' . $upload_setting_id . '" title="Delete Upload Setting">
+                                            <i class="ti ti-trash"></i>
+                                        </button>';
+                        }
+                        else{
+                            $delete = null;
+                        }
+    
+                        $response[] = array(
+                            'CHECK_BOX' => '<input class="form-check-input datatable-checkbox-children" data-delete="1" type="checkbox" value="'. $upload_setting_id .'">',
+                            'UPLOAD_SETTING_ID' => $upload_setting_id,
+                            'UPLOAD_SETTING_NAME' => $upload_setting_name,
+                            'MAX_UPLOAD_SIZE' => $max_upload_size . ' mb',
+                            'ACTION' => '<div class="d-flex gap-2">
+                                            <a href="upload-setting-form.php?id='. $upload_setting_id_encrypted .'" class="btn btn-icon btn-primary" title="View Delete Upload Setting">
+                                                <i class="ti ti-eye"></i>
+                                            </a>
+                                            '. $delete .'
+                                        </div>'
+                        );
+                    }
+    
+                    echo json_encode($response);
+                }
+                else{
+                    echo $sql->errorInfo()[2];
                 }
             }
         break;

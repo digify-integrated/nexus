@@ -1198,10 +1198,12 @@ END //
 
 /* Upload settings file extension table */
 CREATE TABLE upload_settings_file_extension(
-	upload_setting_id INT(10) NOT NULL,
-	file_extension_id INT(10) NOT NULL
+	upload_setting_file_extension_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	upload_setting_id INT(10) UNSIGNED NOT NULL,
+	file_extension_id INT(10) UNSIGNED NOT NULL
 );
 
+CREATE INDEX upload_settings_file_extension_index_id ON upload_settings_file_extension(upload_setting_file_extension_id);
 CREATE INDEX upload_settings_file_extension_index_upload_setting_id ON upload_settings_file_extension(upload_setting_id);
 CREATE INDEX upload_settings_file_extension_index_file_extension_id ON upload_settings_file_extension(file_extension_id);
 
@@ -1211,7 +1213,20 @@ BEGIN
 	VALUES(p_upload_setting_id, p_file_extension_id);
 END //
 
-CREATE PROCEDURE delete_upload_settings(IN p_upload_setting_id INT(10), IN p_file_extension_id INT(10))
+CREATE PROCEDURE delete_upload_settings_file_extension(IN p_upload_setting_id INT(10), IN p_file_extension_id INT(10))
 BEGIN
     DELETE FROM upload_settings WHERE upload_setting_id = p_upload_setting_id AND file_extension_id = p_file_extension_id;
+END //
+
+CREATE PROCEDURE duplicate_upload_settings_file_extension(IN p_upload_setting_id INT(10))
+BEGIN
+    DECLARE p_file_extension_id INT(10);
+    
+    SELECT file_extension_id
+    INTO p_file_extension_id
+    FROM upload_settings_file_extension 
+    WHERE upload_setting_id = p_upload_setting_id;
+    
+    INSERT INTO upload_settings_file_extension (upload_setting_id, file_extension_id) 
+    VALUES(p_upload_setting_id, p_file_extension_id);
 END //

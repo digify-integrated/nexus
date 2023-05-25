@@ -501,6 +501,74 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
+        # Submit upload setting
+        case 'submit upload setting':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['upload_setting_id']) && isset($_POST['upload_setting_name']) && !empty($_POST['upload_setting_name']) && isset($_POST['upload_setting_description']) && !empty($_POST['upload_setting_description']) && isset($_POST['max_upload_size']) && !empty($_POST['max_upload_size'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $user_details = $api->get_user_details(null, $email_account);
+                        $user_id = $user_details[0]['USER_ID'];
+
+                        $upload_setting_id = htmlspecialchars($_POST['upload_setting_id'], ENT_QUOTES, 'UTF-8');
+                        $upload_setting_name = htmlspecialchars($_POST['upload_setting_name'], ENT_QUOTES, 'UTF-8');
+                        $upload_setting_description = htmlspecialchars($_POST['upload_setting_description'], ENT_QUOTES, 'UTF-8');
+                        $max_upload_size = htmlspecialchars($_POST['max_upload_size'], ENT_QUOTES, 'UTF-8');
+
+                        $check_upload_settings_exist = $api->check_upload_settings_exist($upload_setting_id);
+        
+                        if($check_upload_settings_exist > 0){
+                            $update_upload_settings = $api->update_upload_settings($upload_setting_id, $upload_setting_name, $upload_setting_description, $max_upload_size, $user_id);
+                
+                            if($update_upload_settings){
+                                $response[] = array(
+                                    'RESPONSE' => 'Updated'
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $update_upload_settings
+                                );
+                            }
+                        }
+                        else{
+                            $insert_upload_settings = $api->insert_upload_settings($upload_setting_name, $upload_setting_description, $max_upload_size, $user_id);
+                
+                            if($insert_upload_settings[0]['RESPONSE']){
+                                $response[] = array(
+                                    'RESPONSE' => 'Inserted',
+                                    'UPLOAD_SETTING_ID' => $insert_upload_settings[0]['UPLOAD_SETTING_ID']
+                                );
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $insert_upload_settings
+                                );
+                            }
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+        break;
+        # -------------------------------------------------------------
+
         # -------------------------------------------------------------
         #   Delete transactions
         # -------------------------------------------------------------
@@ -855,6 +923,101 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
         break;
         # -------------------------------------------------------------
 
+        # Delete upload setting
+        case 'delete upload setting':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['upload_setting_id']) && !empty($_POST['upload_setting_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $upload_setting_id = htmlspecialchars($_POST['upload_setting_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_upload_settings_exist = $api->check_upload_settings_exist($upload_setting_id);
+        
+                        if($check_upload_settings_exist > 0){
+                            $delete_all_upload_setting_file_extension = $api->delete_all_upload_setting_file_extension($upload_setting_id);
+
+                            if($delete_all_upload_setting_file_extension){
+                                $delete_upload_settings = $api->delete_upload_settings($upload_setting_id);
+                
+                                if($delete_upload_settings){
+                                    echo 'Deleted';
+                                }
+                                else{
+                                    echo $delete_upload_settings;
+                                }
+                            }
+                            else{
+                                echo $delete_all_upload_setting_file_extension;
+                            }
+                        }
+                        else{
+                            echo 'Not Found';
+                        }       
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Delete multiple upload setting
+        case 'delete multiple upload setting':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['upload_setting_id']) && !empty($_POST['upload_setting_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $check_user_status = $api->check_user_status(null, $email_account);
+    
+                    if($check_user_status){
+                        $upload_setting_ids = $_POST['upload_setting_id'];
+
+                        foreach($upload_setting_ids as $upload_setting_id){
+                            $delete_all_upload_setting_file_extension = $api->delete_all_upload_setting_file_extension($upload_setting_id);
+
+                            if($delete_all_upload_setting_file_extension){
+                                $delete_upload_settings = $api->delete_upload_settings($upload_setting_id);
+                                                
+                                if(!$delete_upload_settings){
+                                    $error = $delete_upload_settings;
+                                    break;
+                                }
+                            }
+                            else{
+                                $error = $delete_all_upload_setting_file_extension;
+                                break;
+                            }
+                        }
+
+                        if(empty($error)){
+                            echo 'Deleted';
+                        }
+                        else{
+                            echo $error;
+                        }
+                    }
+                    else{
+                        echo 'Inactive User';
+                    }
+                }
+                else{
+                    echo 'User Not Found';
+                }
+            }
+        break;
+        # -------------------------------------------------------------
+
         # -------------------------------------------------------------
         #   Duplicate transactions
         # -------------------------------------------------------------
@@ -1057,6 +1220,71 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                             else{
                                 $response[] = array(
                                     'RESPONSE' => $duplicate_file_extension
+                                );
+                            }
+                        }
+                        else{
+                            $response[] = array(
+                                'RESPONSE' => 'Not Found'
+                            );
+                        }       
+                    }
+                    else{
+                        $response[] = array(
+                            'RESPONSE' => 'Inactive User'
+                        );
+                    }
+                }
+                else{
+                    $response[] = array(
+                        'RESPONSE' => 'User Not Found'
+                    );
+                }
+
+                echo json_encode($response);
+            }
+        break;
+        # -------------------------------------------------------------
+
+        # Duplicate upload setting
+        case 'duplicate upload setting':
+            if(isset($_POST['email_account']) && !empty($_POST['email_account']) && isset($_POST['upload_setting_id']) && !empty($_POST['upload_setting_id'])){
+                $email_account = htmlspecialchars($_POST['email_account'], ENT_QUOTES, 'UTF-8');
+
+                $check_user_exist = $api->check_user_exist(null, $email_account);
+     
+                if($check_user_exist === 1){
+                    $user_details = $api->get_user_details(null, $email_account);
+                    $user_id = $user_details[0]['USER_ID'];
+
+                    $check_user_status = $api->check_user_status($user_id, $email_account);
+    
+                    if($check_user_status){
+                        $upload_setting_id = htmlspecialchars($_POST['upload_setting_id'], ENT_QUOTES, 'UTF-8');
+
+                        $check_upload_settings_exist = $api->check_upload_settings_exist($upload_setting_id);
+        
+                        if($check_upload_settings_exist > 0){
+                            $duplicate_upload_settings_file_extension = $api->duplicate_upload_settings_file_extension($upload_setting_id);
+                
+                            if($duplicate_upload_settings_file_extension){
+                                $duplicate_upload_settings = $api->duplicate_upload_settings($upload_setting_id);
+                
+                                if($duplicate_upload_settings[0]['RESPONSE']){
+                                    $response[] = array(
+                                        'RESPONSE' => 'Duplicated',
+                                        'UPLOAD_SETTING_ID' => $duplicate_upload_settings[0]['UPLOAD_SETTING_ID']
+                                    );
+                                }
+                                else{
+                                    $response[] = array(
+                                        'RESPONSE' => $duplicate_upload_settings
+                                    );
+                                }
+                            }
+                            else{
+                                $response[] = array(
+                                    'RESPONSE' => $duplicate_upload_settings_file_extension
                                 );
                             }
                         }
@@ -1299,6 +1527,22 @@ if(isset($_POST['transaction']) && !empty($_POST['transaction'])){
                     'FILE_EXTENSION_NAME' => $file_extension_details[0]['FILE_EXTENSION_NAME'],
                     'FILE_TYPE_ID' => $file_type_id,
                     'FILE_TYPE_NAME' => '<a href="file-type-form.php?id='. $file_type_id_encrypted .'">'. $file_type_name .'</a>'
+                );
+    
+                echo json_encode($response);
+            }
+        break;
+
+        case 'upload settings details':
+            if(isset($_POST['upload_setting_id']) && !empty($_POST['upload_setting_id'])){
+                $upload_setting_id = htmlspecialchars($_POST['upload_setting_id'], ENT_QUOTES, 'UTF-8');
+
+                $get_upload_settings_details = $api->get_upload_settings_details($upload_setting_id);
+    
+                $response[] = array(
+                    'UPLOAD_SETTING_NAME' => $get_upload_settings_details[0]['UPLOAD_SETTING_NAME'],
+                    'UPLOAD_SETTING_DESCRIPTION' => $get_upload_settings_details[0]['UPLOAD_SETTING_DESCRIPTION'],
+                    'MAX_UPLOAD_SIZE' => $get_upload_settings_details[0]['MAX_UPLOAD_SIZE']
                 );
     
                 echo json_encode($response);
